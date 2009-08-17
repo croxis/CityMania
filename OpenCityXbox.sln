@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameStateManagementXbox", "GameStateManagement\GameStateManagementXbox.csproj", "{B70A941B-EB79-44FD-ACCA-0651C2E9578D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Xbox 360 = Debug|Xbox 360
+		Release|Xbox 360 = Release|Xbox 360
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B70A941B-EB79-44FD-ACCA-0651C2E9578D}.Debug|Xbox 360.ActiveCfg = Debug|Xbox 360
+		{B70A941B-EB79-44FD-ACCA-0651C2E9578D}.Debug|Xbox 360.Build.0 = Debug|Xbox 360
+		{B70A941B-EB79-44FD-ACCA-0651C2E9578D}.Debug|Xbox 360.Deploy.0 = Debug|Xbox 360
+		{B70A941B-EB79-44FD-ACCA-0651C2E9578D}.Release|Xbox 360.ActiveCfg = Release|Xbox 360
+		{B70A941B-EB79-44FD-ACCA-0651C2E9578D}.Release|Xbox 360.Build.0 = Release|Xbox 360
+		{B70A941B-EB79-44FD-ACCA-0651C2E9578D}.Release|Xbox 360.Deploy.0 = Release|Xbox 360
+		{3B1153C5-E30C-42B2-829E-90B58D3A6EFE}.Debug|Xbox 360.ActiveCfg = Debug|Xbox 360
+		{3B1153C5-E30C-42B2-829E-90B58D3A6EFE}.Debug|Xbox 360.Build.0 = Debug|Xbox 360
+		{3B1153C5-E30C-42B2-829E-90B58D3A6EFE}.Release|Xbox 360.ActiveCfg = Release|Xbox 360
+		{3B1153C5-E30C-42B2-829E-90B58D3A6EFE}.Release|Xbox 360.Build.0 = Release|Xbox 360
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
