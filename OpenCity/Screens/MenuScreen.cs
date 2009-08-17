@@ -29,6 +29,7 @@ namespace OpenCity
         int selectedEntry = 0;
         string menuTitle;
         Texture2D TopBarBgTexture;
+        bool drawTopBar = false;
 
         #endregion
 
@@ -147,7 +148,7 @@ namespace OpenCity
 
         #region Update and Draw
 
-        bool drawTopBar;
+
         /// <summary>
         /// Updates the menu.
         /// </summary>
