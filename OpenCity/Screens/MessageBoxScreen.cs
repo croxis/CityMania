@@ -83,8 +83,8 @@ namespace OpenCity
 
             this.message = "Dialog Title";
 
-            TransitionOnTime = TimeSpan.FromSeconds(0.2);
-            TransitionOffTime = TimeSpan.FromSeconds(0.2);
+            //TransitionOnTime = TimeSpan.FromSeconds(0.2);
+            //TransitionOffTime = TimeSpan.FromSeconds(0.2);
         }
 
 
@@ -235,7 +235,7 @@ namespace OpenCity
             Console.WriteLine(dialogRectangle.Width);
 
             // Fade the popup alpha during transitions.
-            Color color = new Color(255, 255, 255, TransitionAlpha);
+            Color color = new Color(255, 255, 255);
 
             spriteBatch.Begin();
 
@@ -250,10 +250,10 @@ namespace OpenCity
 
             spriteBatch.Draw(bgLeftTexture, bgLeftRectangle, color);
             spriteBatch.Draw(bgRightTexture, bgRightRectangle, color);
-            spriteBatch.Draw(blankTexture, bgMiddleRectangle, new Color(156, 178, 194, TransitionAlpha));            
+            spriteBatch.Draw(blankTexture, bgMiddleRectangle, new Color(156, 178, 194));            
 
             // Draw the Dialog Title.
-            spriteBatch.DrawString(font, message, textPosition, new Color(54, 59, 76, TransitionAlpha));
+            spriteBatch.DrawString(font, message, textPosition, new Color(54, 59, 76));
 
             spriteBatch.End();
         }
