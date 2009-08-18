@@ -229,8 +229,8 @@ namespace OpenCity
             // Draw the menu title.
             Vector2 titlePosition = new Vector2(ScreenManager.GraphicsDevice.Viewport.Width / 2, 15);
             Vector2 titleOrigin = font.MeasureString(menuTitle) / 2;
-            Color titleColor = new Color(132, 203, 255, TransitionAlpha);
-            float titleScale = 0.8f;
+            Color titleColor = new Color(54, 59, 76, TransitionAlpha);
+            float titleScale = 0.9f;
 
             titlePosition.Y -= transitionOffset * 100;
 

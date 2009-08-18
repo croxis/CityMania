@@ -118,7 +118,7 @@ namespace OpenCity
                                  bool isSelected, GameTime gameTime)
         {
             // Draw the selected entry in yellow, otherwise white.
-            Color color = isSelected ? new Color(48, 150, 255) : Color.White;
+            Color color = isSelected ? new Color(0, 0, 0) : new Color(54, 59, 76);
             
             // Pulsate the size of the selected menu entry.
             double time = gameTime.TotalGameTime.TotalSeconds;
