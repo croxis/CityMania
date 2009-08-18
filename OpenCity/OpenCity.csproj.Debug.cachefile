@@ -4,3 +4,14 @@ Content\background.xnb
 Content\gamefont.xnb
 Content\menufont.xnb
 Content\Images\GUI\RegionScreen\TopBarBg.xnb
+Content\Images\GUI\Dialogs\Normal\bgTopLeft.xnb
+Content\Images\GUI\Dialogs\Normal\bgBottom.xnb
+Content\Images\GUI\Dialogs\Normal\bgBottomLeft.xnb
+Content\Images\GUI\Dialogs\Normal\bgBottomRight.xnb
+Content\Images\GUI\Dialogs\Normal\bgLeft.xnb
+Content\Images\GUI\Dialogs\Normal\bgRight.xnb
+Content\Images\GUI\Dialogs\Normal\bgTop.xnb
+Content\Images\GUI\Dialogs\Normal\bgTopRight.xnb
+Content\Images\blank.xnb
+Content\Fonts\dialogtitle.xnb
+Content\Images\fakeBG.xnb

@@ -26,6 +26,23 @@ namespace OpenCity
 
         string message;
         Texture2D gradientTexture;
+        Texture2D blankTexture;
+        
+        // Dialog Content
+        Rectangle dialogContent = new Rectangle(0, 0, 500, 80);
+
+        // Dialog Textures
+        Texture2D bgTopTexture;
+        Texture2D bgBottomTexture;
+        Texture2D bgLeftTexture;
+        Texture2D bgRightTexture;
+
+        Texture2D bgTopLeftTexture;
+        Texture2D bgTopRightTexture;
+        Texture2D bgBottomLeftTexture;
+        Texture2D bgBottomRightTexture;
+
+        
 
         #endregion
 
@@ -64,6 +81,8 @@ namespace OpenCity
 
             IsPopup = true;
 
+            this.message = "Dialog Title";
+
             TransitionOnTime = TimeSpan.FromSeconds(0.2);
             TransitionOffTime = TimeSpan.FromSeconds(0.2);
         }
@@ -79,7 +98,17 @@ namespace OpenCity
         {
             ContentManager content = ScreenManager.Game.Content;
 
-            gradientTexture = content.Load<Texture2D>("gradient");
+            bgTopTexture = content.Load<Texture2D>(@"Images\GUI\Dialogs\Normal\bgTop");
+            bgBottomTexture = content.Load<Texture2D>(@"Images\GUI\Dialogs\Normal\bgBottom");
+            bgLeftTexture = content.Load<Texture2D>(@"Images\GUI\Dialogs\Normal\bgLeft");
+            bgRightTexture = content.Load<Texture2D>(@"Images\GUI\Dialogs\Normal\bgRight");
+
+            bgTopLeftTexture = content.Load<Texture2D>(@"Images\GUI\Dialogs\Normal\bgTopLeft");
+            bgTopRightTexture = content.Load<Texture2D>(@"Images\GUI\Dialogs\Normal\bgTopRight");
+            bgBottomLeftTexture = content.Load<Texture2D>(@"Images\GUI\Dialogs\Normal\bgBottomLeft");
+            bgBottomRightTexture = content.Load<Texture2D>(@"Images\GUI\Dialogs\Normal\bgBottomRight");
+
+            blankTexture = content.Load<Texture2D>(@"blank");
         }
 
 
@@ -133,33 +162,98 @@ namespace OpenCity
             SpriteFont font = ScreenManager.Font;
 
             // Darken down any other screens that were drawn beneath the popup.
-            ScreenManager.FadeBackBufferToBlack(TransitionAlpha * 2 / 3);
+            //ScreenManager.FadeBackBufferToBlack(TransitionAlpha * 2 / 3);
 
             // Center the message text in the viewport.
             Viewport viewport = ScreenManager.GraphicsDevice.Viewport;
             Vector2 viewportSize = new Vector2(viewport.Width, viewport.Height);
             Vector2 textSize = font.MeasureString(message);
-            Vector2 textPosition = (viewportSize - textSize) / 2;
+            Vector2 contentSize = new Vector2(dialogContent.Width,dialogContent.Height);
+            
+            Vector2 dialogPosition = (viewportSize - contentSize) / 2;
+            Vector2 textPosition = dialogPosition;
 
-            // The background includes a border somewhat larger than the text itself.
-            const int hPad = 32;
-            const int vPad = 16;
 
-            Rectangle backgroundRectangle = new Rectangle((int)textPosition.X - hPad,
-                                                          (int)textPosition.Y - vPad,
-                                                          (int)textSize.X + hPad * 2,
-                                                          (int)textSize.Y + vPad * 2);
+            // Padding.
+            const int hPad = 11;
+            const int vPad = 5;
+
+            Rectangle dialogRectangle = new Rectangle((int)dialogPosition.X - hPad,
+                                                        (int)dialogPosition.Y - vPad,
+                                                        (int)dialogContent.Width + hPad * 2,
+                                                        (int)dialogContent.Height + vPad * 2);
+
+            // Top
+            Rectangle bgTopLeftRectangle = new Rectangle((int)dialogRectangle.X,
+                                                        (int)dialogRectangle.Y,
+                                                        (int)bgTopLeftTexture.Width,
+                                                        (int)bgTopLeftTexture.Height);
+
+            Rectangle bgTopRightRectangle = new Rectangle((int)dialogRectangle.X + (dialogRectangle.Width) - bgTopRightTexture.Width,
+                                                        (int)dialogRectangle.Y,
+                                                        (int)bgTopRightTexture.Width,
+                                                        (int)bgTopRightTexture.Height);
+
+            Rectangle bgTopRectangle = new Rectangle((int)dialogRectangle.X + bgTopLeftTexture.Width,
+                                                        (int)dialogRectangle.Y,
+                                                        (int)dialogRectangle.Width - bgTopLeftTexture.Width - bgTopRightTexture.Width,
+                                                        (int)bgTopTexture.Height);
+
+            // Bottom
+            Rectangle bgBottomLeftRectangle = new Rectangle((int)dialogRectangle.X,
+                                                        (int)dialogRectangle.Y + dialogRectangle.Height - bgBottomLeftTexture.Height,
+                                                        (int)bgBottomLeftTexture.Width,
+                                                        (int)bgBottomLeftTexture.Height);
+
+            Rectangle bgBottomRightRectangle = new Rectangle((int)dialogRectangle.X + (dialogRectangle.Width) - bgBottomRightTexture.Width,
+                                                        (int)bgBottomLeftRectangle.Y,
+                                                        (int)bgBottomRightTexture.Width,
+                                                        (int)bgBottomRightTexture.Height);
+
+            Rectangle bgBottomRectangle = new Rectangle((int)dialogRectangle.X + bgBottomLeftTexture.Width,
+                                                        (int)bgBottomLeftRectangle.Y,
+                                                        (int)dialogRectangle.Width - bgBottomLeftTexture.Width - bgBottomRightTexture.Width,
+                                                        (int)bgBottomTexture.Height);
+
+            // Middle
+            Rectangle bgLeftRectangle = new Rectangle((int)dialogRectangle.X,
+                                                        (int)dialogRectangle.Y + bgTopRectangle.Height,
+                                                        (int)bgLeftTexture.Width,
+                                                        (int)dialogRectangle.Height - bgTopTexture.Height - bgBottomTexture.Height);
+
+            Rectangle bgRightRectangle = new Rectangle((int)dialogRectangle.X + (dialogRectangle.Width) - bgRightTexture.Width,
+                                                        (int)bgLeftRectangle.Y,
+                                                        (int)bgRightTexture.Width,
+                                                        (int)bgLeftRectangle.Height);
+
+            Rectangle bgMiddleRectangle = new Rectangle((int)dialogRectangle.X + bgLeftRectangle.Width,
+                                                        (int)bgLeftRectangle.Y,
+                                                        (int)dialogRectangle.Width - bgLeftRectangle.Width - bgRightRectangle.Width,
+                                                        (int)dialogRectangle.Height - bgTopRectangle.Height - bgBottomRectangle.Height);
+
+
+            Console.WriteLine(dialogRectangle.Width);
 
             // Fade the popup alpha during transitions.
             Color color = new Color(255, 255, 255, TransitionAlpha);
 
             spriteBatch.Begin();
 
-            // Draw the background rectangle.
-            spriteBatch.Draw(gradientTexture, backgroundRectangle, color);
+            // Draw the Dialog
+            spriteBatch.Draw(bgTopLeftTexture, bgTopLeftRectangle, color);
+            spriteBatch.Draw(bgTopRightTexture, bgTopRightRectangle, color);
+            spriteBatch.Draw(bgTopTexture, bgTopRectangle, color);
 
-            // Draw the message box text.
-            spriteBatch.DrawString(font, message, textPosition, color);
+            spriteBatch.Draw(bgBottomLeftTexture, bgBottomLeftRectangle, color);
+            spriteBatch.Draw(bgBottomRightTexture, bgBottomRightRectangle, color);
+            spriteBatch.Draw(bgBottomTexture, bgBottomRectangle, color);
+
+            spriteBatch.Draw(bgLeftTexture, bgLeftRectangle, color);
+            spriteBatch.Draw(bgRightTexture, bgRightRectangle, color);
+            spriteBatch.Draw(blankTexture, bgMiddleRectangle, new Color(156, 178, 194, TransitionAlpha));            
+
+            // Draw the Dialog Title.
+            spriteBatch.DrawString(font, message, textPosition, new Color(54, 59, 76, TransitionAlpha));
 
             spriteBatch.End();
         }
