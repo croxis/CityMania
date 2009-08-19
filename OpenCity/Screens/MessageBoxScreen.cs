@@ -1,17 +1,13 @@
-#region File Description
-//-----------------------------------------------------------------------------
-// MessageBoxScreen.cs
-//
-// Microsoft XNA Community Game Platform
-// Copyright (C) Microsoft Corporation. All rights reserved.
-//-----------------------------------------------------------------------------
-#endregion
-
 #region Using Statements
+
+// System
 using System;
+
+// XNA
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+
 #endregion
 
 namespace OpenCity
@@ -25,11 +21,10 @@ namespace OpenCity
         #region Fields
 
         string message;
-        Texture2D gradientTexture;
         Texture2D blankTexture;
         
         // Dialog Content
-        Rectangle dialogContent = new Rectangle(0, 0, 500, 80);
+        Rectangle dialogContentRectangle = new Rectangle(0, 0, 200, 80);
 
         // Dialog Textures
         Texture2D bgTopTexture;
@@ -41,8 +36,6 @@ namespace OpenCity
         Texture2D bgTopRightTexture;
         Texture2D bgBottomLeftTexture;
         Texture2D bgBottomRightTexture;
-
-        
 
         #endregion
 
@@ -98,6 +91,7 @@ namespace OpenCity
         {
             ContentManager content = ScreenManager.Game.Content;
 
+            // Default Dialog
             bgTopTexture = content.Load<Texture2D>(@"Images\GUI\Dialogs\Normal\bgTop");
             bgBottomTexture = content.Load<Texture2D>(@"Images\GUI\Dialogs\Normal\bgBottom");
             bgLeftTexture = content.Load<Texture2D>(@"Images\GUI\Dialogs\Normal\bgLeft");
@@ -168,7 +162,7 @@ namespace OpenCity
             Viewport viewport = ScreenManager.GraphicsDevice.Viewport;
             Vector2 viewportSize = new Vector2(viewport.Width, viewport.Height);
             Vector2 textSize = font.MeasureString(message);
-            Vector2 contentSize = new Vector2(dialogContent.Width,dialogContent.Height);
+            Vector2 contentSize = new Vector2(dialogContentRectangle.Width,dialogContentRectangle.Height);
             
             Vector2 dialogPosition = (viewportSize - contentSize) / 2;
             Vector2 textPosition = dialogPosition;
@@ -180,8 +174,8 @@ namespace OpenCity
 
             Rectangle dialogRectangle = new Rectangle((int)dialogPosition.X - hPad,
                                                         (int)dialogPosition.Y - vPad,
-                                                        (int)dialogContent.Width + hPad * 2,
-                                                        (int)dialogContent.Height + vPad * 2);
+                                                        (int)dialogContentRectangle.Width + hPad * 2,
+                                                        (int)dialogContentRectangle.Height + vPad * 2);
 
             // Top
             Rectangle bgTopLeftRectangle = new Rectangle((int)dialogRectangle.X,
@@ -230,9 +224,6 @@ namespace OpenCity
                                                         (int)bgLeftRectangle.Y,
                                                         (int)dialogRectangle.Width - bgLeftRectangle.Width - bgRightRectangle.Width,
                                                         (int)dialogRectangle.Height - bgTopRectangle.Height - bgBottomRectangle.Height);
-
-
-            Console.WriteLine(dialogRectangle.Width);
 
             // Fade the popup alpha during transitions.
             Color color = new Color(255, 255, 255);

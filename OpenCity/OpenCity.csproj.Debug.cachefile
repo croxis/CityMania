@@ -15,3 +15,12 @@ Content\Images\GUI\Dialogs\Normal\bgTopRight.xnb
 Content\Images\blank.xnb
 Content\Fonts\dialogtitle.xnb
 Content\Images\fakeBG.xnb
+Content\Images\GUI\Elements\Buttons\Default\Clicked\bgLeft.xnb
+Content\Images\GUI\Elements\Buttons\Default\Clicked\bgMiddle.xnb
+Content\Images\GUI\Elements\Buttons\Default\Clicked\bgRight.xnb
+Content\Images\GUI\Elements\Buttons\Default\Default\bgLeft.xnb
+Content\Images\GUI\Elements\Buttons\Default\Default\bgMiddle.xnb
+Content\Images\GUI\Elements\Buttons\Default\Default\bgRight.xnb
+Content\Images\GUI\Elements\Buttons\Default\Hovered\bgLeft.xnb
+Content\Images\GUI\Elements\Buttons\Default\Hovered\bgMiddle.xnb
+Content\Images\GUI\Elements\Buttons\Default\Hovered\bgRight.xnb

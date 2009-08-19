@@ -53,14 +53,14 @@ namespace OpenCity
             }
             else
             {
-                graphics.PreferredBackBufferWidth = 1024;
-                graphics.PreferredBackBufferHeight = 768;                
+                graphics.PreferredBackBufferWidth = 800;
+                graphics.PreferredBackBufferHeight = 600;                
             }
 
             graphics.IsFullScreen = fullscreenMode;
 
 
-            Thread.CurrentThread.CurrentUICulture = Thread.CurrentThread.CurrentCulture;
+            //Thread.CurrentThread.CurrentUICulture = Thread.CurrentThread.CurrentCulture;
             DateTime MyDate = System.DateTime.Now;
 
             // Create the screen manager components.

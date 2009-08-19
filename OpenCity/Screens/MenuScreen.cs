@@ -29,7 +29,7 @@ namespace OpenCity
         int selectedEntry = 0;
         string menuTitle;
         Texture2D TopBarBgTexture;
-        bool drawTopBar = false;
+        bool drawTopBar;
 
         #endregion
 
@@ -57,6 +57,7 @@ namespace OpenCity
         public MenuScreen(string menuTitle)
         {
             this.menuTitle = menuTitle;
+            this.drawTopBar = false;
 
             TransitionOnTime = TimeSpan.FromSeconds(0.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
@@ -165,9 +166,9 @@ namespace OpenCity
             }
 
             if (menuTitle == "Region")
-                drawTopBar = true;
+                this.drawTopBar = true;
             else
-                drawTopBar = false;
+                this.drawTopBar = false;
 
         }
 
@@ -228,9 +229,10 @@ namespace OpenCity
 
             // Draw the menu title.
             Vector2 titlePosition = new Vector2(ScreenManager.GraphicsDevice.Viewport.Width / 2, 15);
-            Vector2 titleOrigin = font.MeasureString(menuTitle) / 2;
+            Vector2 titleOrigin = new Vector2((int)font.MeasureString(menuTitle).X / 2, (int)font.MeasureString(menuTitle).Y);
+
             Color titleColor = new Color(54, 59, 76, TransitionAlpha);
-            float titleScale = 0.9f;
+            float titleScale = 1f;
 
             titlePosition.Y -= transitionOffset * 100;
 

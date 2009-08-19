@@ -42,8 +42,8 @@ namespace OpenCity
             exitMenuEntry.Selected += OnCancel;
 
             // Add entries to the menu.
-            MenuEntries.Add(playGameMenuEntry);
-            MenuEntries.Add(optionsMenuEntry);
+            //MenuEntries.Add(playGameMenuEntry);
+            //MenuEntries.Add(optionsMenuEntry);
             MenuEntries.Add(exitMenuEntry);
         }
 
@@ -85,10 +85,13 @@ namespace OpenCity
             const string message = "Are you sure you want to exit the game?";
 
             MessageBoxScreen confirmExitMessageBox = new MessageBoxScreen(message);
-
+            
             confirmExitMessageBox.Accepted += ConfirmExitMessageBoxAccepted;
-
+                                    
             ScreenManager.AddScreen(confirmExitMessageBox, playerIndex);
+
+            Button button = new Button("Test Button", new Vector2(0, 30));
+            ScreenManager.AddScreen(button, playerIndex);
         }
 
 
