@@ -5,7 +5,8 @@ version: You have to start somewhere right?
 """
 
 # TODO: These values should be in seperate config file
-PORT = 2003
+HOST = ""
+PORT = 52003
 
 # TODO: Seperate files dude!
 
@@ -17,99 +18,189 @@ class Entity(object):
         pass
     
     def accept(self, event, method, extraArgs=[]):
-        return messenger.accept(event, self, method, extraArgs)
+        return messenger.accept(event, method, extraArgs, self)         
 
 
-class Event(object):
-    """
-    Base event. Used as empty tick for internal communication (maybe?).  Independent of game tick
-    """
-    def __init__ (self):
-        self.name = "event"
 
-class EventManager(object):
+class EventManager(Entity):
     def __init__ (self):
         """
         self.listeners: {event: {object1: [method, [arguments]], object2: [method2, [arguments]]}, event2... }
+        self.eventQueueLock:  If the simulation is busy it locks the eventQueue??
+        I *think* this is thread safe as is as thread's arn't directly writing to it.
+        We'll find out :P
         """
         self.listeners = {}
+        self.eventQueue = []
+        self.eventQueueLock = False
+        self.running = False
         
-    def accept(self, event, object, method, extraArgs):
+        self.accept("lockEventQueue", self.lock, [], self)
+        self.accept("unlockEventQueue", self.unlock, [], self)  
+        
+    def accept(self, event, method, extraArgs, object):
         """
         Adds a new listener into the database.  This is stored by event to reduce chattyness
+        Overides Entity.accept(), not best design
         """
         if event not in self.listeners:
             self.listeners[event] = {}
         self.listeners[event][object] = [method, extraArgs]
-            
-    def send(self, event, extraArgs=[]):
+    
+    def post(self, event, extraArgs=[]):
         """
-        Notify all listening object of an event
-        TODO: Add error checking
+        Events are posted into self.eventQueue
         """
-        objects = self.listeners[event]
-        for object in objects:
-            method, extraArgs = objects[object]
-            method(extraArgs)
-
-# We initialize the CityMania engine
-messenger = EventManager()
-import time
-
-class Spinner(Entity):
-    """
-    Master game loop spinner thing
-    May wish to consider intigrating a task manager
-    Speeds are normal, medium, and fast speeds in Hz
-    Regulates simulation speed
-    Pause is set to high number to prevent divide by 0 errors
-    TODO: Develop system for Hz to be adjuststed based on slower clients
-    """
-    PAUSE = 999999999999999999.0
-    SLOW = 1.0
-    MEDIUM = 2.0
-    FAST = 3.0
-    def __init__(self):
-        self.running = False
-        self.speed = SLOW
+        self.eventQueue.append((event, extraArgs))
     
     def start(self):
         self.running = True
         while self.running:
             try:
-                # Possible problems: we might run into wierd dependency issues
-                # Also, this blank event is the time keeper tick, do we want this 
-                # inherient for all Entities, or just those worried about keeping
-                # track of the time?
                 self.step()
-                time.sleep(1/self.speed)
             except KeyboardInterrupt:
+                messenger.post("exit")
                 self.stop()
-    
+                
     def stop(self):
         self.running = False
-    
+        
     def step(self):
-        messenger.send(Event())
-    
-    def setSpeed(self, speed):
+        self.send()
+            
+    def send(self):
         """
-        sets speed of simulation
-        speed = 0, 1, 2, 3
+        Notify all listening object of an event
+        We also pump tick events here
+        TODO: Add error checking
         """
-        if speed is 0:
-            self.speed = PAUSE
-        elif speed is 1:
-            self.speed = SLOW
-        elif speed is 2:
-            self.speed = MEDIUM
-        elif speed is 3:
-            self.speed = FAST
+        if not self.eventQueueLock and self.eventQueue:
+            event, extraArgs = self.eventQueue.pop()
+            objects = self.listeners[event]
+            for object in objects:
+                method, args = objects[object]
+                method(extraArgs)
+        objects = self.listeners["tick"]
+        for object in objects:
+            method, args = objects[object]
+            method()
+                
+    def lock(self):
+        """
+        Lock self.eventQueue
+        """
+        self.eventQueueLock = True
     
-spinner = Spinner()
+    def unlock(self):
+        """
+        Unlock self.eventQueue
+        """
+        self.eventQueueLock = False
 
-main():
-    pass
+
+# Networking
+import threading, socket
+
+class Client(Entity, threading.Thread):
+    """
+    Connection to client
+    """
+    def __init__(self, clientsock):
+        """
+        Overide to threading for client socket
+        """
+        self.s = clientsock
+        self.peer = self.s.getpeername()
+        print "Connection created with:", self.peer
+        self.accept("exit", self.exit)
+        threading.Thread.__init__(self)
+        
+    def run(self):
+        self.running = True
+        while self.running:
+            print "Pulse"
+            try:
+                data = clientsock.recv(4096)
+            except socket.timeout:
+                continue
+            except socket.error:
+                # caused by main thread doing a socket.close on this socket
+                # It is a race condition if this exception is raised or not.
+                return
+            except:  # some error or connection reset by peer
+                break
+            if not len(data): # a disconnect (socket.close() by client)
+                break
+            self.processData(data)               
+    
+    def processData(self, data):
+        """
+        Processes network communication into engine events
+        """
+        print "Recieved Data:", data
+        print "From:", self.peer
+    
+    def send(self, data):
+        """
+        sends data to client
+        """
+        self.s.send(data)
+    
+    def exit(self):
+        self.s.close()
+        self.running = False
+
+
+class Network(Entity):
+    """
+    Network interface
+    """
+    def __init__(self):
+        global chatQueue
+        self.accept("tick", self.listen)
+        self.accept("exit", self.exit)
+        self.accept("broadcastData", self.broadcast)
+        self.clients = []
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.s.bind((HOST, PORT))
+        self.s.listen(3)
+    
+    def listen(self):
+        """
+        Listens for new connection and spawn processes
+        """
+        try:
+            clientsock, clientaddr = self.s.accept()
+            clientsock.settimeout(1)
+            t = Client(clientsock)
+            self.clients.append(t)
+            t.run()
+        except:
+            pass
+    
+    def broadcast(self, data):
+        """
+        Broadcasts data to all clients 
+        """
+        # I have a feelling this wont work
+        for client in self.clients:
+            client.send(data)
+        
+    
+    def exit(self):
+        """
+        Server is shutting down, so let us tidy up
+        """
+        self.s.close()
+    
+
+# We initialize the CityMania engine
+messenger = EventManager()
+
+def main():
+    network = Network()
+    messenger.start()
 
 if __name__ == "__main__":
     main()
