@@ -18,7 +18,16 @@ class Entity(object):
         pass
     
     def accept(self, event, method, extraArgs=[]):
-        return messenger.accept(event, method, extraArgs, self)         
+        """
+        Add object to event system
+        """
+        return messenger.accept(event, method, extraArgs, self)    
+        
+    def ignore(self):
+        """
+        Removes object from event system
+        """
+        return messenger.ignore(event, self) 
 
 
 class EventManager(Entity):
@@ -32,9 +41,6 @@ class EventManager(Entity):
         self.eventQueue = []
         self.running = False
         
-        self.accept("lockEventQueue", self.lock, [], self)
-        self.accept("unlockEventQueue", self.unlock, [], self)  
-        
     def accept(self, event, method, extraArgs, object):
         """
         Adds a new listener into the database.  This is stored by event to reduce chattyness
@@ -43,6 +49,17 @@ class EventManager(Entity):
         if event not in self.listeners:
             self.listeners[event] = {}
         self.listeners[event][object] = [method, extraArgs]
+    
+    def ignore(self, event, object):
+        """
+        Removes listening object from database
+        Removes event if that event databse is empty
+        """
+        if event in self.listeners:
+            if object in self.listeners[event]:
+                del self.listeners[event][object]
+            if not self.listeners[event]:
+                del self.listeners[event]
     
     def post(self, event, extraArgs=[]):
         """
@@ -56,11 +73,13 @@ class EventManager(Entity):
             try:
                 self.step()
             except KeyboardInterrupt:
+                print "Interupt!"
                 messenger.post("exit")
                 self.stop()
                 
     def stop(self):
         self.running = False
+        print "Stopping"
         
     def step(self):
         self.send()
@@ -71,34 +90,36 @@ class EventManager(Entity):
         We also pump tick events here
         TODO: Add error checking
         """
-        if not self.eventQueueLock and self.eventQueue:
+        objects = self.listeners["tick"]
+        for object in objects:
+            method, args = objects[object]
+            method()
+        if self.eventQueue:
             event, extraArgs = self.eventQueue.pop()
             objects = self.listeners[event]
             for object in objects:
                 method, args = objects[object]
                 method(extraArgs)
-        objects = self.listeners["tick"]
-        for object in objects:
-            method, args = objects[object]
-            method()
+                
                 
 class CommandProcessor(Entity):
     """
     This converts incomming communication into the server message system
     Locking system provided so the server can halt the queue mid operation
+    TODO: Add more refined locking for a per city basis (so one city update wont block the others)
     """
     def __init__(self):
-        self.accept("lockCommandQueue", self.lock)
-        self.accept("unlockCommandQueue", self.unlock)
+        self.accept("lockCommandQueue", self.lockQueue)
+        self.accept("unlockCommandQueue", self.unlockQueue)
         self.accept("gotData", self.queue)
         self.accept("tick", self.step)
         self.commandQueue = []
         self.lock = False
     
-    def self.lock(self):
+    def lockQueue(self):
         self.lock = True
     
-    def self.unlock(self):
+    def unlockQueue(self):
         self.lock = False
     
     def queue(self, data):
@@ -110,8 +131,9 @@ class CommandProcessor(Entity):
     
     def processData(self, data):
         """
-        processes event object into internal message system
+        processes serialized network event object into internal message system
         """
+        #protocolObject.ParseFromString(data)
         #messenger.send(stuffs!)
 
 
@@ -165,7 +187,10 @@ class Client(Entity, threading.Thread):
         sends data to client
         data needs to be a Protocol Buffer object
         """
-        self.s.send(data)
+        try:
+            self.s.send(data.SerializeToString())
+        except:
+            print "Object is not a protocol buffer object"
     
     def exit(self):
         self.s.close()
@@ -195,10 +220,11 @@ class Network(Entity):
             clientsock, clientaddr = self.s.accept()
             clientsock.settimeout(1) 
             t = Client(clientsock)
+            self.clients.append(t)
+            t.daemon = True
+            
         except:
-            pass
-        self.clients.append(t)
-        t.daemon = True
+            print "Main socket error"
         t.start()
     
     def broadcast(self, data):
@@ -208,12 +234,12 @@ class Network(Entity):
         # I have a feelling this wont work
         for client in self.clients:
             client.send(data)
-        
     
     def exit(self):
         """
         Server is shutting down, so let us tidy up
         """
+        self.ignore("tick")
         self.s.close()
     
 
