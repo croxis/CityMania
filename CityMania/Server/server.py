@@ -21,18 +21,15 @@ class Entity(object):
         return messenger.accept(event, method, extraArgs, self)         
 
 
-
 class EventManager(Entity):
     def __init__ (self):
         """
         self.listeners: {event: {object1: [method, [arguments]], object2: [method2, [arguments]]}, event2... }
-        self.eventQueueLock:  If the simulation is busy it locks the eventQueue??
         I *think* this is thread safe as is as thread's arn't directly writing to it.
         We'll find out :P
         """
         self.listeners = {}
         self.eventQueue = []
-        self.eventQueueLock = False
         self.running = False
         
         self.accept("lockEventQueue", self.lock, [], self)
@@ -85,17 +82,37 @@ class EventManager(Entity):
             method, args = objects[object]
             method()
                 
-    def lock(self):
-        """
-        Lock self.eventQueue
-        """
-        self.eventQueueLock = True
+class CommandProcessor(Entity):
+    """
+    This converts incomming communication into the server message system
+    Locking system provided so the server can halt the queue mid operation
+    """
+    def __init__(self):
+        self.accept("lockCommandQueue", self.lock)
+        self.accept("unlockCommandQueue", self.unlock)
+        self.accept("gotData", self.queue)
+        self.accept("tick", self.step)
+        self.commandQueue = []
+        self.lock = False
     
-    def unlock(self):
+    def self.lock(self):
+        self.lock = True
+    
+    def self.unlock(self):
+        self.lock = False
+    
+    def queue(self, data):
+        self.commandQueue(data)
+    
+    def step(self):
+        if not self.lock and self.commandQueue:
+            self.processData(self.commandQueue.pop())
+    
+    def processData(self, data):
         """
-        Unlock self.eventQueue
+        processes event object into internal message system
         """
-        self.eventQueueLock = False
+        #messenger.send(stuffs!)
 
 
 # Networking
@@ -118,9 +135,9 @@ class Client(Entity, threading.Thread):
     def run(self):
         self.running = True
         while self.running:
-            print "Pulse"
+            print "Thread Pulse", self.peer
             try:
-                data = clientsock.recv(4096)
+                data = self.s.recv(4096)
             except socket.timeout:
                 continue
             except socket.error:
@@ -131,11 +148,14 @@ class Client(Entity, threading.Thread):
                 break
             if not len(data): # a disconnect (socket.close() by client)
                 break
-            self.processData(data)               
+            #self.processData(data)
+            print "Recieved Data:", data
+            print "From:", self.peer
+            messenger.send("gotData", data)
     
     def processData(self, data):
         """
-        Processes network communication into engine events
+        Processes network communication into engine event
         """
         print "Recieved Data:", data
         print "From:", self.peer
@@ -143,6 +163,7 @@ class Client(Entity, threading.Thread):
     def send(self, data):
         """
         sends data to client
+        data needs to be a Protocol Buffer object
         """
         self.s.send(data)
     
@@ -172,12 +193,13 @@ class Network(Entity):
         """
         try:
             clientsock, clientaddr = self.s.accept()
-            clientsock.settimeout(1)
+            clientsock.settimeout(1) 
             t = Client(clientsock)
-            self.clients.append(t)
-            t.run()
         except:
             pass
+        self.clients.append(t)
+        t.daemon = True
+        t.start()
     
     def broadcast(self, data):
         """
@@ -197,6 +219,7 @@ class Network(Entity):
 
 # We initialize the CityMania engine
 messenger = EventManager()
+commandProcessor = CommandProcessor()
 
 def main():
     network = Network()
