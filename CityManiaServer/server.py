@@ -3,106 +3,17 @@
 City Mania
 version: You have to start somewhere right?
 """
+import engine
+import region
+import protocol_pb2 as proto
 
 # TODO: These values should be in seperate config file
 HOST = ""
 PORT = 52003
 
-# TODO: Seperate files dude!
-
-class Entity(object):
-    """
-    Basic Entity which almost everything should inherint from.  Currently provides integration to the event engine.
-    """
-    def __init__(self):
-        pass
-    
-    def accept(self, event, method, extraArgs=[]):
-        """
-        Add object to event system
-        """
-        return messenger.accept(event, method, extraArgs, self)    
-        
-    def ignore(self):
-        """
-        Removes object from event system
-        """
-        return messenger.ignore(event, self) 
-
-
-class EventManager(Entity):
-    def __init__ (self):
-        """
-        self.listeners: {event: {object1: [method, [arguments]], object2: [method2, [arguments]]}, event2... }
-        I *think* this is thread safe as is as thread's arn't directly writing to it.
-        We'll find out :P
-        """
-        self.listeners = {}
-        self.eventQueue = []
-        self.running = False
-        
-    def accept(self, event, method, extraArgs, object):
-        """
-        Adds a new listener into the database.  This is stored by event to reduce chattyness
-        Overides Entity.accept(), not best design
-        """
-        if event not in self.listeners:
-            self.listeners[event] = {}
-        self.listeners[event][object] = [method, extraArgs]
-    
-    def ignore(self, event, object):
-        """
-        Removes listening object from database
-        Removes event if that event databse is empty
-        """
-        if event in self.listeners:
-            if object in self.listeners[event]:
-                del self.listeners[event][object]
-            if not self.listeners[event]:
-                del self.listeners[event]
-    
-    def post(self, event, extraArgs=[]):
-        """
-        Events are posted into self.eventQueue
-        """
-        self.eventQueue.append((event, extraArgs))
-    
-    def start(self):
-        self.running = True
-        while self.running:
-            try:
-                self.step()
-            except KeyboardInterrupt:
-                print "Interupt!"
-                messenger.post("exit")
-                self.stop()
+# TODO: Seperate files dude!       
                 
-    def stop(self):
-        self.running = False
-        print "Stopping"
-        
-    def step(self):
-        self.send()
-            
-    def send(self):
-        """
-        Notify all listening object of an event
-        We also pump tick events here
-        TODO: Add error checking
-        """
-        objects = self.listeners["tick"]
-        for object in objects:
-            method, args = objects[object]
-            method()
-        if self.eventQueue:
-            event, extraArgs = self.eventQueue.pop()
-            objects = self.listeners[event]
-            for object in objects:
-                method, args = objects[object]
-                method(extraArgs)
-                
-                
-class CommandProcessor(Entity):
+class CommandProcessor(engine.Entity):
     """
     This converts incomming communication into the server message system
     Locking system provided so the server can halt the queue mid operation
@@ -126,21 +37,29 @@ class CommandProcessor(Entity):
         self.commandQueue(data)
     
     def step(self):
+        print "Step1"
         if not self.lock and self.commandQueue:
+            print "Step2"
             self.processData(self.commandQueue.pop())
     
     def processData(self, data):
         """
         processes serialized network event object into internal message system
         """
-        #protocolObject.ParseFromString(data)
+        container = proto.Container()
+        container.ParseFromString(data)
+        print "Data:", container
+        # Parsing chain!
+        if container.HasField("login"):
+            print "Login Request"
+            messenger.send("loginRequest", container.login)
         #messenger.send(stuffs!)
 
 
 # Networking
 import threading, socket
 
-class Client(Entity, threading.Thread):
+class ClientSocket(engine.Entity, threading.Thread):
     """
     Connection to client
     """
@@ -171,16 +90,9 @@ class Client(Entity, threading.Thread):
             if not len(data): # a disconnect (socket.close() by client)
                 break
             #self.processData(data)
-            print "Recieved Data:", data
-            print "From:", self.peer
-            messenger.send("gotData", data)
+            print "Recieved Data from:", self.peer
+            messenger.post("gotData", data)
     
-    def processData(self, data):
-        """
-        Processes network communication into engine event
-        """
-        print "Recieved Data:", data
-        print "From:", self.peer
     
     def send(self, data):
         """
@@ -197,7 +109,7 @@ class Client(Entity, threading.Thread):
         self.running = False
 
 
-class Network(Entity):
+class Network(engine.Entity):
     """
     Network interface
     """
@@ -219,13 +131,14 @@ class Network(Entity):
         try:
             clientsock, clientaddr = self.s.accept()
             clientsock.settimeout(1) 
-            t = Client(clientsock)
+            t = ClientSocket(clientsock)
             self.clients.append(t)
-            t.daemon = True
-            
+            t.daemon = True    
+            t.start()
         except:
             print "Main socket error"
-        t.start()
+        
+        
     
     def broadcast(self, data):
         """
@@ -244,12 +157,14 @@ class Network(Entity):
     
 
 # We initialize the CityMania engine
-messenger = EventManager()
+import __builtin__
+#__builtin__.messenger = engine.EventManager()
 commandProcessor = CommandProcessor()
 
 def main():
     network = Network()
     messenger.start()
+    region = region.Region()
 
 if __name__ == "__main__":
     main()

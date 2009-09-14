@@ -6,6 +6,8 @@ Class for region, esentially the master model
 from server import Entity
 class Region(Entity):
     def __init__(self):
+        self.accept("loginRequest", self.login)
+
         self.name = "Region"
         self.cities = []
         self.password = ""
@@ -34,20 +36,22 @@ class Region(Entity):
         """
         self.cities(cityKey).login(playerName, password="")
     
-    def login(self, password, playerName, playerPassword):
+    #def login(self, password, playerName, playerPassword):
+    def login(self, login):
         """
         Logs in a player to a region
         """
-        if password != self.password:
+        if login.regionPassword != self.password:
             #Send wrong password message
             return
-        if playerName not in self.players:
-            self.addPlayer(playerName, playerPassword)
-        if self.players[playerName] != playerPassword:
+        if login.name not in self.players:
+            self.addPlayer(login.name, login.password)
+        if self.players[login.name] != login.password:
             # Send player password missmatch
             return
-        self.playersLoggedIn.append(playerName)
+        self.playersLoggedIn.append(login.name)
         # Send logged in message
+        print "Player logged in"
     
     def syncCities(self):
         """
