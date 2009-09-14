@@ -56,6 +56,7 @@ class ServerSocket(engine.Entity, threading.Thread):
         data needs to be a Protocol Buffer object
         """
         try:
+            print "Sending Data"
             self.s.send(data.SerializeToString())
         except:
             print "Object is not a protocol buffer object or is missing a parameter."

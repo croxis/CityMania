@@ -46,9 +46,9 @@ class EventManager(object):
         self.running = True
         while self.running:
             try:
-                print "Tickstep"
+                #print "Tickstep"
                 self.step()
-                print "End tick"
+                #print "End tick"
             except KeyboardInterrupt:
                 print "Interupt!"
                 messenger.post("exit")
@@ -60,7 +60,7 @@ class EventManager(object):
         
     def step(self):
         self.send()
-        print "End Send"
+        #print "End Send"
             
     def send(self):
         """
@@ -68,19 +68,20 @@ class EventManager(object):
         We also pump tick events here
         TODO: Add error checking
         """
-        print "Send"
+        #print "Send"
         objects = self.listeners["tick"]
         for object in objects:
             method, args = objects[object]
-            print object, method, args
+            #print object, method, args
             method()
-        print "Send2"
+        #print "Send2"
         if self.eventQueue:
             event, extraArgs = self.eventQueue.pop()
-            objects = self.listeners[event]
-            for object in objects:
-                method, args = objects[object]
-                method(extraArgs)
+            if event in self.listeners:
+                objects = self.listeners[event]
+                for object in objects:
+                    method, args = objects[object]
+                    method(extraArgs)
 import __builtin__
 __builtin__.messenger = EventManager()
 

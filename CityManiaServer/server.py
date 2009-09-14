@@ -34,12 +34,12 @@ class CommandProcessor(engine.Entity):
         self.lock = False
     
     def queue(self, data):
-        self.commandQueue(data)
+        self.commandQueue.append(data)
     
     def step(self):
-        print "Step1"
+        #print "Step1"
         if not self.lock and self.commandQueue:
-            print "Step2"
+            #print "Step2"
             self.processData(self.commandQueue.pop())
     
     def processData(self, data):
@@ -52,7 +52,7 @@ class CommandProcessor(engine.Entity):
         # Parsing chain!
         if container.HasField("login"):
             print "Login Request"
-            messenger.send("loginRequest", container.login)
+            messenger.post("loginRequest", container.login)
         #messenger.send(stuffs!)
 
 
@@ -76,7 +76,7 @@ class ClientSocket(engine.Entity, threading.Thread):
     def run(self):
         self.running = True
         while self.running:
-            print "Thread Pulse", self.peer
+            #print "Thread Pulse", self.peer
             try:
                 data = self.s.recv(4096)
             except socket.timeout:
@@ -109,13 +109,14 @@ class ClientSocket(engine.Entity, threading.Thread):
         self.running = False
 
 
-class Network(engine.Entity):
+class Network(engine.Entity, threading.Thread):
     """
     Network interface
     """
     def __init__(self):
         global chatQueue
-        self.accept("tick", self.listen)
+        #self.accept("tick", self.listen)
+        self.running = True
         self.accept("exit", self.exit)
         self.accept("broadcastData", self.broadcast)
         self.clients = []
@@ -123,21 +124,32 @@ class Network(engine.Entity):
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((HOST, PORT))
         self.s.listen(3)
+        threading.Thread.__init__(self)
+        self.daemon = True
+        self.start()
+    
+    def run(self):
+        while self.running:
+            self.listen()
     
     def listen(self):
         """
         Listens for new connection and spawn processes
         """
         try:
+            #print "listen1"
             clientsock, clientaddr = self.s.accept()
+            #print "listen1.5"
             clientsock.settimeout(1) 
+            #print "listen2"
             t = ClientSocket(clientsock)
             self.clients.append(t)
-            t.daemon = True    
+            t.daemon = True
+            #print "listen3"
             t.start()
         except:
             print "Main socket error"
-        
+        #print "listenend"      
         
     
     def broadcast(self, data):
@@ -152,7 +164,8 @@ class Network(engine.Entity):
         """
         Server is shutting down, so let us tidy up
         """
-        self.ignore("tick")
+        #self.ignore("tick")
+        self.running = False
         self.s.close()
     
 
