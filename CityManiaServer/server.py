@@ -33,16 +33,16 @@ class CommandProcessor(engine.Entity):
     def unlockQueue(self):
         self.lock = False
     
-    def queue(self, data):
-        self.commandQueue.append(data)
+    def queue(self, peer, data):
+        self.commandQueue.append((peer, data))
     
     def step(self):
         #print "Step1"
         if not self.lock and self.commandQueue:
-            #print "Step2"
-            self.processData(self.commandQueue.pop())
+            peer, data = self.commandQueue.pop()
+            self.processData(peer, data)
     
-    def processData(self, data):
+    def processData(self, peer, data):
         """
         processes serialized network event object into internal message system
         """
@@ -52,7 +52,7 @@ class CommandProcessor(engine.Entity):
         # Parsing chain!
         if container.HasField("login"):
             print "Login Request"
-            messenger.post("loginRequest", container.login)
+            messenger.post("loginRequest", [peer, container.login])
         #messenger.send(stuffs!)
 
 
@@ -91,7 +91,7 @@ class ClientSocket(engine.Entity, threading.Thread):
                 break
             #self.processData(data)
             print "Recieved Data from:", self.peer
-            messenger.post("gotData", data)
+            messenger.post("gotData", [self.peer, data])
     
     
     def send(self, data):
@@ -119,7 +119,8 @@ class Network(engine.Entity, threading.Thread):
         self.running = True
         self.accept("exit", self.exit)
         self.accept("broadcastData", self.broadcast)
-        self.clients = []
+        self.accept("sendData", self.send)
+        self.clients = {}
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((HOST, PORT))
@@ -143,7 +144,7 @@ class Network(engine.Entity, threading.Thread):
             clientsock.settimeout(1) 
             #print "listen2"
             t = ClientSocket(clientsock)
-            self.clients.append(t)
+            self.clients[t.peer] = t
             t.daemon = True
             #print "listen3"
             t.start()
@@ -157,8 +158,14 @@ class Network(engine.Entity, threading.Thread):
         Broadcasts data to all clients 
         """
         # I have a feelling this wont work
-        for client in self.clients:
-            client.send(data)
+        for peer in self.clients:
+            self.send(peer, data)
+    
+    def send(self, peer, data):
+        """
+        Sends data to a specific client
+        """
+        self.clients[peer].send(data)
     
     def exit(self):
         """
@@ -176,8 +183,8 @@ commandProcessor = CommandProcessor()
 
 def main():
     network = Network()
+    reg = region.Region()
     messenger.start()
-    region = region.Region()
 
 if __name__ == "__main__":
     main()

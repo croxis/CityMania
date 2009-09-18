@@ -81,7 +81,8 @@ class EventManager(object):
                 objects = self.listeners[event]
                 for object in objects:
                     method, args = objects[object]
-                    method(extraArgs)
+                    
+                    method(*extraArgs)
 import __builtin__
 __builtin__.messenger = EventManager()
 

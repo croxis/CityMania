@@ -41,7 +41,7 @@ class ServerSocket(engine.Entity, threading.Thread):
             #self.processData(data)
             print "Recieved Data:", data
             print "From:", self.peer
-            messenger.send("gotData", data)
+            messenger.post("gotData", data)
     
     def processData(self, data):
         """
@@ -75,3 +75,5 @@ container.login.name = "croxis"
 container.login.password = ""
 container.login.regionPassword = ""
 connection.send(container)
+while 1:
+    pass
