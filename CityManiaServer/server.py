@@ -6,6 +6,7 @@ version: You have to start somewhere right?
 import engine
 import region
 import protocol_pb2 as proto
+import chat
 
 # TODO: These values should be in seperate config file
 HOST = ""
@@ -50,10 +51,13 @@ class CommandProcessor(engine.Entity):
         container.ParseFromString(data)
         print "Data:", container
         # Parsing chain!
+        # Great care will need to be taken on when to use if, else, and elif
+        # If the profile for this process takes too long
         if container.HasField("login"):
             print "Login Request"
             messenger.post("loginRequest", [peer, container.login])
-        #messenger.send(stuffs!)
+        if container.HasField("chat"):
+            messenger.post("chat", [peer, container.chat])
 
 
 # Networking
@@ -109,6 +113,40 @@ class ClientSocket(engine.Entity, threading.Thread):
         self.running = False
 
 
+class IRCClientSocket(ClientSocket):
+    """
+    Connection to an IRC client
+    """        
+    def run(self):
+        self.running = True
+        while self.running:
+            #print "Thread Pulse", self.peer
+            try:
+                data = self.s.recv(4096)
+            except socket.timeout:
+                continue
+            except socket.error:
+                # caused by main thread doing a socket.close on this socket
+                # It is a race condition if this exception is raised or not.
+                return
+            except:  # some error or connection reset by peer
+                break
+            if not len(data): # a disconnect (socket.close() by client)
+                break
+                #self.processData(data)
+            print "Recieved Data from:", self.peer
+            messenger.post("gotIRCData", [self.peer, data])
+         
+        def send(self, data):
+            """
+            sends data to client
+            """
+            try:
+                self.s.send(data)
+            except:
+                print "Oops"
+
+
 class Network(engine.Entity, threading.Thread):
     """
     Network interface
@@ -124,7 +162,8 @@ class Network(engine.Entity, threading.Thread):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((HOST, PORT))
-        self.s.listen(3)
+        self.s.listen(3) 
+        
         threading.Thread.__init__(self)
         self.daemon = True
         self.start()
@@ -138,19 +177,14 @@ class Network(engine.Entity, threading.Thread):
         Listens for new connection and spawn processes
         """
         try:
-            #print "listen1"
             clientsock, clientaddr = self.s.accept()
-            #print "listen1.5"
             clientsock.settimeout(1) 
-            #print "listen2"
             t = ClientSocket(clientsock)
             self.clients[t.peer] = t
             t.daemon = True
-            #print "listen3"
             t.start()
         except:
-            print "Main socket error"
-        #print "listenend"      
+            print "Main socket error"    
         
     
     def broadcast(self, data):
@@ -184,6 +218,7 @@ commandProcessor = CommandProcessor()
 def main():
     network = Network()
     reg = region.Region()
+    reg.generate()
     messenger.start()
 
 if __name__ == "__main__":

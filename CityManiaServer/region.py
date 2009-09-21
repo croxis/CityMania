@@ -6,6 +6,7 @@ Class for region, esentially the master model
 import engine
 import protocol_pb2 as proto
 import city
+import Image
 
 class Region(engine.Entity):
     def __init__(self):
@@ -18,10 +19,10 @@ class Region(engine.Entity):
         self.terrainTextureDB = {}
         self.playersLoggedIn = {}
 
-    def generate(self, hightMap=None, colorMap=None, cityMap=None, terrainTextureDB=None):
+    def generate(self, hightMapPath=None, colorMapPath=None, cityMapPath=None, terrainTextureDB=None):
         """
         Generates region
-        heightmap is a grayscale bitmap for heigh
+        heightmap is a filepath for grayscale bitmap for heigh
         colormap is color bitmap for terrain texture
         terrainTextureDB is data on texture to use for color map
         Creates an unfounded city
@@ -34,15 +35,21 @@ class Region(engine.Entity):
         defaultCityMap = [[(1,0,0),(1,0,0),(0,0,1),(0,0,1),(0,0,1),(0,0,1)],
             [(0,1,0),(0,1,0),(0,0,1),(0,0,1),(0,0,1),(0,0,1)],
             [(0,1,0),(0,1,0),(0,0,1),(0,0,1),(0,0,1),(0,0,1)],
-            [(1,0,0),(1,0,0),(0,0,1),(0,0,1),(0,0,1),(0,0,1)]]
-        
+            [(1,0,0),(1,0,0),(0,0,1),(0,0,1),(0,0,1),(0,0,1)]]        
         
         # Default Heighmap
         # Default Colormap
             
         # Convert Bitmap to test list
         # If failure resort to default
-        cityMap = defaultCityMap
+        if cityMapPath:
+            cityMapImage = Image.open(cityMapPath)
+            
+        if not cityMapPath:
+            cityMap = defaultCityMap
+        else:
+            
+            
         cityCounter = 1
         
         # Skip contians the pixles to skip over for the non small city sizes
