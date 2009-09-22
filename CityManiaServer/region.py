@@ -32,24 +32,29 @@ class Region(engine.Entity):
         # one medium
         # two small
         x, y = 0, 0
-        defaultCityMap = [[(1,0,0),(1,0,0),(0,0,1),(0,0,1),(0,0,1),(0,0,1)],
-            [(0,1,0),(0,1,0),(0,0,1),(0,0,1),(0,0,1),(0,0,1)],
-            [(0,1,0),(0,1,0),(0,0,1),(0,0,1),(0,0,1),(0,0,1)],
-            [(1,0,0),(1,0,0),(0,0,1),(0,0,1),(0,0,1),(0,0,1)]]        
+        defaultCityMap = [[(255,0,0),(255,0,0),(0,0,255),(0,0,255),(0,0,255),(0,0,255)],
+            [(0,255,0),(0,255,0),(0,0,255),(0,0,255),(0,0,255),(0,0,255)],
+            [(0,255,0),(0,255,0),(0,0,255),(0,0,255),(0,0,255),(0,0,255)],
+            [(255,0,0),(255,0,0),(0,0,255),(0,0,255),(0,0,255),(0,0,255)]]        
         
         # Default Heighmap
         # Default Colormap
             
         # Convert Bitmap to test list
         # If failure resort to default
+        # TODO: Add error checking
+        cityMap = []
         if cityMapPath:
             cityMapImage = Image.open(cityMapPath)
-            
-        if not cityMapPath:
-            cityMap = defaultCityMap
+            imgX, imgY = cityMapImage.size
+            for iX in range(imgX):
+                row = []
+                for iY in range(imgY):
+                    row.append(cityMapImage.getpixel(iX, iY))
+                cityMap.append(row)
         else:
-            
-            
+            cityMap = defaultCityMap
+        
         cityCounter = 1
         
         # Skip contians the pixles to skip over for the non small city sizes
@@ -58,15 +63,15 @@ class Region(engine.Entity):
             for pixel in row:
                 if (x,y) not in skip:
                     name = "City " + str(cityCounter)
-                    if pixel[0] is 1:
+                    if pixel[0] is 255:
                         #print "Small"
                         c = city.City(name=name, size=1)
-                    elif pixel[1] is 1:
+                    elif pixel[1] is 255:
                         #print "Medium"
                         c = city.City(name=name, size=2)
                         skip += [(x+1,y),
                             (x,y+1),(x+1,y+1)]
-                    elif pixel[2] is 1:
+                    elif pixel[2] is 255:
                         #print "Large"
                         c = city.City(name=name, size=4)
                         skip += [(x+1,y),(x+2,y),(x+3,y),
