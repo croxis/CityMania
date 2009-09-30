@@ -10,14 +10,11 @@ import Image
 
 class Region(engine.Entity):
     def __init__(self):
-        self.accept("loginRequest", self.login)
+        #self.accept("loginRequest", self.login)
 
         self.name = "Region"
         self.cities = []
-        self.password = ""
-        self.players = {}
         self.terrainTextureDB = {}
-        self.playersLoggedIn = {}
 
     def generate(self, hightMapPath=None, colorMapPath=None, cityMapPath=None, terrainTextureDB=None):
         """
@@ -89,11 +86,7 @@ class Region(engine.Entity):
         print "Cities:", self.cities
         print "Total Cities:", len(self.cities)
     
-    def addPlayer(self, playerName, password):
-        """
-        Adds player to region
-        """
-        self.players[playerName] = password
+    
     
     def loadCity(self, cityKey, playerName, password=""):
         """
@@ -102,24 +95,7 @@ class Region(engine.Entity):
         self.cities(cityKey).login(playerName, password="")
     
     #def login(self, password, playerName, playerPassword):
-    def login(self, peer, login):
-        """
-        Logs in a player to a region
-        """
-        container = proto.Container()
-        container.loginResponse.type = 1
-        if login.regionPassword != self.password:
-            container.loginResponse.type = 0
-            #container.loginResponse.message = "Region password incorrect"
-        if login.name not in self.players:
-            # If new player
-            self.addPlayer(login.name, login.password)
-        if self.players[login.name] != login.password:
-            container.loginResponse.type = 0
-            #container.loginResponse.message = "Player password incorrect"
-            
-        self.playersLoggedIn[peer] = login.name        
-        messenger.post("sendData", [peer, container])
+    
     
     def syncCities(self):
         """

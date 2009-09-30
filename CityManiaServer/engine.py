@@ -21,6 +21,8 @@ class EventManager(object):
         Adds a new listener into the database.  This is stored by event to reduce chattyness
         Overides Entity.accept(), not best design
         """
+        #print "Accepting event:", event
+        #print "For object:", object
         if event not in self.listeners:
             self.listeners[event] = {}
         self.listeners[event][object] = [method, extraArgs]
@@ -77,13 +79,18 @@ class EventManager(object):
         #print "Send2"
         if self.eventQueue:
             event, extraArgs = self.eventQueue.pop()
+            #print "Event:", event, extraArgs
+            #print self.listeners
             if event in self.listeners:
                 objects = self.listeners[event]
+                #print "Objects:", objects
                 for object in objects:
                     method, args = objects[object]
-                    
+                    #print "method:", method
                     method(*extraArgs)
+                    
 import __builtin__
+# Messenger is the event communication system
 __builtin__.messenger = EventManager()
 
 

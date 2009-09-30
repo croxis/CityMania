@@ -5,14 +5,14 @@ message Container {
     optional Login login = 2;
     optional LoginResponse loginResponse =3;
     optional SelectCity selectCity = 4;
-    optional SelectCityResponse = 5;
+    optional SelectCityResponse selectCityResponse = 5;
 }
 
 message Chat {
     //Chat message
     required string message = 1;
-    required string from = 2;
-    optional string to = 3;
+    optional string to = 2;
+    optional string sender = 3; //Added by server
 }
 
 message Login {
@@ -26,11 +26,12 @@ message LoginResponse {
         FAILURE = 0;
         SUCCESS = 1;
     }
-    required Type type = 0;
+    required Type type = 1;
+    optional string message = 2 [default=""];
 }
 
 message SelectCity {
-    required int32 cityID;
+    required int32 cityID = 1;
 }
 
 message SelectCityResponse {
@@ -38,5 +39,5 @@ message SelectCityResponse {
         FAILURE = 0;
         SUCCESS = 1;
     }
-    required Type type = 0;
+    required Type type = 1;
 }
