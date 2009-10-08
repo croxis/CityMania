@@ -1,0 +1,94 @@
+\hypertarget{classCityMania_1_1Button}{
+\section{CityMania::Button Class Reference}
+\label{classCityMania_1_1Button}\index{CityMania::Button@{CityMania::Button}}
+}
+
+
+A popup message box screen, used to display \char`\"{}are you sure?\char`\"{} confirmation messages.  
+Inheritance diagram for CityMania::Button::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classCityMania_1_1Button}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classCityMania_1_1Button_a7f87e6ba947642e4eb464f2175e425ad}{Button} (string label, Vector2 buttonPosition)
+\begin{DoxyCompactList}\small\item\em Constructor automatically sets the disabled function to false. \item\end{DoxyCompactList}\item 
+\hyperlink{classCityMania_1_1Button_a9e15249818478f7500f4620ac81149e9}{Button} (string label, Vector2 buttonPosition, int hPadding, bool disabled)
+\begin{DoxyCompactList}\small\item\em Constructor lets the caller specify whether to disable the button or not. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1Button_a6b056904b50808d69f7699dcde88415d}{LoadContent} ()
+\begin{DoxyCompactList}\small\item\em Loads graphics content for the buttons. This uses the shared ContentManager provided by the Game class. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1Button_a7ffb254c3a65d1357d6f3c6dee74c4ab}{HandleInput} (\hyperlink{classCityMania_1_1InputState}{InputState} input)
+\begin{DoxyCompactList}\small\item\em Responds to user input, accepting or cancelling the message box. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1Button_a48ed467fa9522c528d4369dc27fd1418}{Draw} (GameTime gameTime)
+\begin{DoxyCompactList}\small\item\em Draws the message box. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Events}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classCityMania_1_1Button_a441df6a5f1bc349c3a41149bd3e42e7b}{
+EventHandler$<$ \hyperlink{classCityMania_1_1PlayerIndexEventArgs}{PlayerIndexEventArgs} $>$ {\bfseries Accepted}}
+\label{classCityMania_1_1Button_a441df6a5f1bc349c3a41149bd3e42e7b}
+
+\item 
+\hypertarget{classCityMania_1_1Button_ab9f75f34fdfb91c3d03aa95a7741e0ad}{
+EventHandler$<$ \hyperlink{classCityMania_1_1PlayerIndexEventArgs}{PlayerIndexEventArgs} $>$ {\bfseries Cancelled}}
+\label{classCityMania_1_1Button_ab9f75f34fdfb91c3d03aa95a7741e0ad}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A popup message box screen, used to display \char`\"{}are you sure?\char`\"{} confirmation messages. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classCityMania_1_1Button_a7f87e6ba947642e4eb464f2175e425ad}{
+\index{CityMania::Button@{CityMania::Button}!Button@{Button}}
+\index{Button@{Button}!CityMania::Button@{CityMania::Button}}
+\subsubsection[{Button}]{\setlength{\rightskip}{0pt plus 5cm}CityMania::Button::Button (string {\em label}, \/  Vector2 {\em buttonPosition})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1Button_a7f87e6ba947642e4eb464f2175e425ad}
+
+
+Constructor automatically sets the disabled function to false. \hypertarget{classCityMania_1_1Button_a9e15249818478f7500f4620ac81149e9}{
+\index{CityMania::Button@{CityMania::Button}!Button@{Button}}
+\index{Button@{Button}!CityMania::Button@{CityMania::Button}}
+\subsubsection[{Button}]{\setlength{\rightskip}{0pt plus 5cm}CityMania::Button::Button (string {\em label}, \/  Vector2 {\em buttonPosition}, \/  int {\em hPadding}, \/  bool {\em disabled})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1Button_a9e15249818478f7500f4620ac81149e9}
+
+
+Constructor lets the caller specify whether to disable the button or not. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classCityMania_1_1Button_a48ed467fa9522c528d4369dc27fd1418}{
+\index{CityMania::Button@{CityMania::Button}!Draw@{Draw}}
+\index{Draw@{Draw}!CityMania::Button@{CityMania::Button}}
+\subsubsection[{Draw}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::Button::Draw (GameTime {\em gameTime})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1Button_a48ed467fa9522c528d4369dc27fd1418}
+
+
+Draws the message box. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a28fbcdba21da5e606d32d87b18bcdf29}{CityMania::GameScreen}.\hypertarget{classCityMania_1_1Button_a7ffb254c3a65d1357d6f3c6dee74c4ab}{
+\index{CityMania::Button@{CityMania::Button}!HandleInput@{HandleInput}}
+\index{HandleInput@{HandleInput}!CityMania::Button@{CityMania::Button}}
+\subsubsection[{HandleInput}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::Button::HandleInput ({\bf InputState} {\em input})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1Button_a7ffb254c3a65d1357d6f3c6dee74c4ab}
+
+
+Responds to user input, accepting or cancelling the message box. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a80edab75e121f4e08b007f47206cf29c}{CityMania::GameScreen}.\hypertarget{classCityMania_1_1Button_a6b056904b50808d69f7699dcde88415d}{
+\index{CityMania::Button@{CityMania::Button}!LoadContent@{LoadContent}}
+\index{LoadContent@{LoadContent}!CityMania::Button@{CityMania::Button}}
+\subsubsection[{LoadContent}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::Button::LoadContent ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1Button_a6b056904b50808d69f7699dcde88415d}
+
+
+Loads graphics content for the buttons. This uses the shared ContentManager provided by the Game class. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a4dc3798784fff49b20280903d796c94c}{CityMania::GameScreen}.
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+CityMania/GUI/Elements/Button.cs\end{DoxyCompactItemize}

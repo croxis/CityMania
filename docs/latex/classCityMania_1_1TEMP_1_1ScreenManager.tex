@@ -1,0 +1,150 @@
+\hypertarget{classCityMania_1_1TEMP_1_1ScreenManager}{
+\section{CityMania::TEMP::ScreenManager Class Reference}
+\label{classCityMania_1_1TEMP_1_1ScreenManager}\index{CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}}
+}
+
+
+The screen manager is a component which manages one or more \hyperlink{classCityMania_1_1GameScreen}{GameScreen} instances. It maintains a stack of screens, calls their Update and Draw methods at the appropriate times, and automatically routes input to the topmost active screen.  
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classCityMania_1_1TEMP_1_1ScreenManager_ace76a27fd3ec41aaec4de35b39776e8a}{ScreenManager} (Game game)
+\begin{DoxyCompactList}\small\item\em Constructs a new screen manager component. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1TEMP_1_1ScreenManager_a066e176e641ea365b4d20798d0588296}{Initialize} ()
+\begin{DoxyCompactList}\small\item\em Initializes the screen manager component. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1TEMP_1_1ScreenManager_a29bb9d9173fc172bb748520434bb9956}{Update} (GameTime gameTime)
+\begin{DoxyCompactList}\small\item\em Allows each screen to run logic. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1TEMP_1_1ScreenManager_a032f7787468dfbcc4d130cc53bd9f480}{Draw} (GameTime gameTime)
+\begin{DoxyCompactList}\small\item\em Tells each screen to draw itself. \item\end{DoxyCompactList}\item 
+void \hyperlink{classCityMania_1_1TEMP_1_1ScreenManager_afcb90267a7dd2ba71a8a61da4dd100f4}{AddScreen} (\hyperlink{classCityMania_1_1GameScreen}{GameScreen} screen, PlayerIndex?controllingPlayer)
+\begin{DoxyCompactList}\small\item\em Adds a new screen to the screen manager. \item\end{DoxyCompactList}\item 
+void \hyperlink{classCityMania_1_1TEMP_1_1ScreenManager_a89569f0a358ed32c83beed2913194a88}{RemoveScreen} (\hyperlink{classCityMania_1_1GameScreen}{GameScreen} screen)
+\begin{DoxyCompactList}\small\item\em Removes a screen from the screen manager. You should normally use \hyperlink{classCityMania_1_1GameScreen_ada4a6b75da175b4286662d888eefc3e2}{GameScreen.ExitScreen} instead of calling this directly, so the screen can gradually transition off rather than just being instantly removed. \item\end{DoxyCompactList}\item 
+\hyperlink{classCityMania_1_1GameScreen}{GameScreen}\mbox{[}$\,$\mbox{]} \hyperlink{classCityMania_1_1TEMP_1_1ScreenManager_a5592ebdeeb6968d4b45faf7fa905c9a8}{GetScreens} ()
+\begin{DoxyCompactList}\small\item\em Expose an array holding all the screens. We return a copy rather than the real master list, because screens should only ever be added or removed using the AddScreen and RemoveScreen methods. \item\end{DoxyCompactList}\item 
+void \hyperlink{classCityMania_1_1TEMP_1_1ScreenManager_abd1ee6fbaabfdb5a8363c4df60550aa4}{FadeBackBufferToBlack} (int alpha)
+\begin{DoxyCompactList}\small\item\em Helper draws a translucent black fullscreen sprite, used for fading screens in and out, and for darkening the background behind popups. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+override void \hyperlink{classCityMania_1_1TEMP_1_1ScreenManager_a0adf33efb7ec6a3aece591d7dc8d01b4}{LoadContent} ()
+\begin{DoxyCompactList}\small\item\em Load your graphics content. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1TEMP_1_1ScreenManager_a6054a8c276fd02a31500a0d2ecf05da2}{UnloadContent} ()
+\begin{DoxyCompactList}\small\item\em Unload your graphics content. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+SpriteBatch \hyperlink{classCityMania_1_1TEMP_1_1ScreenManager_a89dc251770c88ab602b89b7d30d5da69}{SpriteBatch}\hspace{0.3cm}{\ttfamily  \mbox{[}get\mbox{]}}
+\begin{DoxyCompactList}\small\item\em A default SpriteBatch shared by all the screens. This saves each screen having to bother creating their own local instance. \item\end{DoxyCompactList}\item 
+SpriteFont \hyperlink{classCityMania_1_1TEMP_1_1ScreenManager_a50897fc0fe5df9097d558c2e94f5adb7}{Font}\hspace{0.3cm}{\ttfamily  \mbox{[}get\mbox{]}}
+\begin{DoxyCompactList}\small\item\em A default font shared by all the screens. This saves each screen having to bother loading their own local copy. \item\end{DoxyCompactList}\item 
+bool \hyperlink{classCityMania_1_1TEMP_1_1ScreenManager_ab060ac0c95c465e6f41757a6f0ca1be8}{TraceEnabled}\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}
+\begin{DoxyCompactList}\small\item\em If true, the manager prints out a list of all the screens each time it is updated. This can be useful for making sure everything is being added and removed at the right times. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+The screen manager is a component which manages one or more \hyperlink{classCityMania_1_1GameScreen}{GameScreen} instances. It maintains a stack of screens, calls their Update and Draw methods at the appropriate times, and automatically routes input to the topmost active screen. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classCityMania_1_1TEMP_1_1ScreenManager_ace76a27fd3ec41aaec4de35b39776e8a}{
+\index{CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}!ScreenManager@{ScreenManager}}
+\index{ScreenManager@{ScreenManager}!CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}}
+\subsubsection[{ScreenManager}]{\setlength{\rightskip}{0pt plus 5cm}CityMania::TEMP::ScreenManager::ScreenManager (Game {\em game})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1TEMP_1_1ScreenManager_ace76a27fd3ec41aaec4de35b39776e8a}
+
+
+Constructs a new screen manager component. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classCityMania_1_1TEMP_1_1ScreenManager_afcb90267a7dd2ba71a8a61da4dd100f4}{
+\index{CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}!AddScreen@{AddScreen}}
+\index{AddScreen@{AddScreen}!CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}}
+\subsubsection[{AddScreen}]{\setlength{\rightskip}{0pt plus 5cm}void CityMania::TEMP::ScreenManager::AddScreen ({\bf GameScreen} {\em screen}, \/  PlayerIndex? {\em controllingPlayer})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1TEMP_1_1ScreenManager_afcb90267a7dd2ba71a8a61da4dd100f4}
+
+
+Adds a new screen to the screen manager. \hypertarget{classCityMania_1_1TEMP_1_1ScreenManager_a032f7787468dfbcc4d130cc53bd9f480}{
+\index{CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}!Draw@{Draw}}
+\index{Draw@{Draw}!CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}}
+\subsubsection[{Draw}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::TEMP::ScreenManager::Draw (GameTime {\em gameTime})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1TEMP_1_1ScreenManager_a032f7787468dfbcc4d130cc53bd9f480}
+
+
+Tells each screen to draw itself. \hypertarget{classCityMania_1_1TEMP_1_1ScreenManager_abd1ee6fbaabfdb5a8363c4df60550aa4}{
+\index{CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}!FadeBackBufferToBlack@{FadeBackBufferToBlack}}
+\index{FadeBackBufferToBlack@{FadeBackBufferToBlack}!CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}}
+\subsubsection[{FadeBackBufferToBlack}]{\setlength{\rightskip}{0pt plus 5cm}void CityMania::TEMP::ScreenManager::FadeBackBufferToBlack (int {\em alpha})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1TEMP_1_1ScreenManager_abd1ee6fbaabfdb5a8363c4df60550aa4}
+
+
+Helper draws a translucent black fullscreen sprite, used for fading screens in and out, and for darkening the background behind popups. \hypertarget{classCityMania_1_1TEMP_1_1ScreenManager_a5592ebdeeb6968d4b45faf7fa905c9a8}{
+\index{CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}!GetScreens@{GetScreens}}
+\index{GetScreens@{GetScreens}!CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}}
+\subsubsection[{GetScreens}]{\setlength{\rightskip}{0pt plus 5cm}{\bf GameScreen} \mbox{[}$\,$\mbox{]} CityMania::TEMP::ScreenManager::GetScreens ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1TEMP_1_1ScreenManager_a5592ebdeeb6968d4b45faf7fa905c9a8}
+
+
+Expose an array holding all the screens. We return a copy rather than the real master list, because screens should only ever be added or removed using the AddScreen and RemoveScreen methods. \hypertarget{classCityMania_1_1TEMP_1_1ScreenManager_a066e176e641ea365b4d20798d0588296}{
+\index{CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}!Initialize@{Initialize}}
+\index{Initialize@{Initialize}!CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}}
+\subsubsection[{Initialize}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::TEMP::ScreenManager::Initialize ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1TEMP_1_1ScreenManager_a066e176e641ea365b4d20798d0588296}
+
+
+Initializes the screen manager component. \hypertarget{classCityMania_1_1TEMP_1_1ScreenManager_a0adf33efb7ec6a3aece591d7dc8d01b4}{
+\index{CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}!LoadContent@{LoadContent}}
+\index{LoadContent@{LoadContent}!CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}}
+\subsubsection[{LoadContent}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::TEMP::ScreenManager::LoadContent ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected\mbox{]}}}}
+\label{classCityMania_1_1TEMP_1_1ScreenManager_a0adf33efb7ec6a3aece591d7dc8d01b4}
+
+
+Load your graphics content. \hypertarget{classCityMania_1_1TEMP_1_1ScreenManager_a89569f0a358ed32c83beed2913194a88}{
+\index{CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}!RemoveScreen@{RemoveScreen}}
+\index{RemoveScreen@{RemoveScreen}!CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}}
+\subsubsection[{RemoveScreen}]{\setlength{\rightskip}{0pt plus 5cm}void CityMania::TEMP::ScreenManager::RemoveScreen ({\bf GameScreen} {\em screen})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1TEMP_1_1ScreenManager_a89569f0a358ed32c83beed2913194a88}
+
+
+Removes a screen from the screen manager. You should normally use \hyperlink{classCityMania_1_1GameScreen_ada4a6b75da175b4286662d888eefc3e2}{GameScreen.ExitScreen} instead of calling this directly, so the screen can gradually transition off rather than just being instantly removed. \hypertarget{classCityMania_1_1TEMP_1_1ScreenManager_a6054a8c276fd02a31500a0d2ecf05da2}{
+\index{CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}!UnloadContent@{UnloadContent}}
+\index{UnloadContent@{UnloadContent}!CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}}
+\subsubsection[{UnloadContent}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::TEMP::ScreenManager::UnloadContent ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected\mbox{]}}}}
+\label{classCityMania_1_1TEMP_1_1ScreenManager_a6054a8c276fd02a31500a0d2ecf05da2}
+
+
+Unload your graphics content. \hypertarget{classCityMania_1_1TEMP_1_1ScreenManager_a29bb9d9173fc172bb748520434bb9956}{
+\index{CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}!Update@{Update}}
+\index{Update@{Update}!CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}}
+\subsubsection[{Update}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::TEMP::ScreenManager::Update (GameTime {\em gameTime})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1TEMP_1_1ScreenManager_a29bb9d9173fc172bb748520434bb9956}
+
+
+Allows each screen to run logic. 
+
+\subsection{Property Documentation}
+\hypertarget{classCityMania_1_1TEMP_1_1ScreenManager_a50897fc0fe5df9097d558c2e94f5adb7}{
+\index{CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}!Font@{Font}}
+\index{Font@{Font}!CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}}
+\subsubsection[{Font}]{\setlength{\rightskip}{0pt plus 5cm}SpriteFont CityMania::TEMP::ScreenManager::Font\hspace{0.3cm}{\ttfamily  \mbox{[}get\mbox{]}}}}
+\label{classCityMania_1_1TEMP_1_1ScreenManager_a50897fc0fe5df9097d558c2e94f5adb7}
+
+
+A default font shared by all the screens. This saves each screen having to bother loading their own local copy. \hypertarget{classCityMania_1_1TEMP_1_1ScreenManager_a89dc251770c88ab602b89b7d30d5da69}{
+\index{CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}!SpriteBatch@{SpriteBatch}}
+\index{SpriteBatch@{SpriteBatch}!CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}}
+\subsubsection[{SpriteBatch}]{\setlength{\rightskip}{0pt plus 5cm}SpriteBatch CityMania::TEMP::ScreenManager::SpriteBatch\hspace{0.3cm}{\ttfamily  \mbox{[}get\mbox{]}}}}
+\label{classCityMania_1_1TEMP_1_1ScreenManager_a89dc251770c88ab602b89b7d30d5da69}
+
+
+A default SpriteBatch shared by all the screens. This saves each screen having to bother creating their own local instance. \hypertarget{classCityMania_1_1TEMP_1_1ScreenManager_ab060ac0c95c465e6f41757a6f0ca1be8}{
+\index{CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}!TraceEnabled@{TraceEnabled}}
+\index{TraceEnabled@{TraceEnabled}!CityMania::TEMP::ScreenManager@{CityMania::TEMP::ScreenManager}}
+\subsubsection[{TraceEnabled}]{\setlength{\rightskip}{0pt plus 5cm}bool CityMania::TEMP::ScreenManager::TraceEnabled\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}}}
+\label{classCityMania_1_1TEMP_1_1ScreenManager_ab060ac0c95c465e6f41757a6f0ca1be8}
+
+
+If true, the manager prints out a list of all the screens each time it is updated. This can be useful for making sure everything is being added and removed at the right times. 
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+CityMania/GUI/GUIManager.cs\end{DoxyCompactItemize}

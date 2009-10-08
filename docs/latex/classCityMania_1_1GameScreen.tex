@@ -1,0 +1,189 @@
+\hypertarget{classCityMania_1_1GameScreen}{
+\section{CityMania::GameScreen Class Reference}
+\label{classCityMania_1_1GameScreen}\index{CityMania::GameScreen@{CityMania::GameScreen}}
+}
+
+
+A screen is a single layer that has update and draw logic, and which can be combined with other layers to build up a complex menu system. For instance the main menu, the options menu, the \char`\"{}are you sure you
+        want to quit\char`\"{} message box, and the main game itself are all implemented as screens.  
+Inheritance diagram for CityMania::GameScreen::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=1.40704cm]{classCityMania_1_1GameScreen}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \hyperlink{classCityMania_1_1GameScreen_a4dc3798784fff49b20280903d796c94c}{LoadContent} ()
+\begin{DoxyCompactList}\small\item\em Load graphics content for the screen. \item\end{DoxyCompactList}\item 
+virtual void \hyperlink{classCityMania_1_1GameScreen_a038a86bacf5b7d62141477980312f49b}{UnloadContent} ()
+\begin{DoxyCompactList}\small\item\em Unload content for the screen. \item\end{DoxyCompactList}\item 
+virtual void \hyperlink{classCityMania_1_1GameScreen_a7f0d5b33eca521dc7fcd89eec337ccf9}{Update} (GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
+\begin{DoxyCompactList}\small\item\em Allows the screen to run logic, such as updating the transition position. Unlike HandleInput, this method is called regardless of whether the screen is active, hidden, or in the middle of a transition. \item\end{DoxyCompactList}\item 
+virtual void \hyperlink{classCityMania_1_1GameScreen_a80edab75e121f4e08b007f47206cf29c}{HandleInput} (\hyperlink{classCityMania_1_1InputState}{InputState} input)
+\begin{DoxyCompactList}\small\item\em Allows the screen to handle user input. Unlike Update, this method is only called when the screen is active, and not when some other screen has taken the focus. \item\end{DoxyCompactList}\item 
+virtual void \hyperlink{classCityMania_1_1GameScreen_a28fbcdba21da5e606d32d87b18bcdf29}{Draw} (GameTime gameTime)
+\begin{DoxyCompactList}\small\item\em This is called when the screen should draw itself. \item\end{DoxyCompactList}\item 
+void \hyperlink{classCityMania_1_1GameScreen_ada4a6b75da175b4286662d888eefc3e2}{ExitScreen} ()
+\begin{DoxyCompactList}\small\item\em Tells the screen to go away. Unlike \hyperlink{classCityMania_1_1ScreenManager_ae9d2ac095225f11261734ca461847242}{ScreenManager.RemoveScreen}, which instantly kills the screen, this method respects the transition timings and will give the screen a chance to gradually transition off. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classCityMania_1_1GameScreen_ac1650f02642474499b1d750454a07811}{IsPopup}\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}
+\begin{DoxyCompactList}\small\item\em Normally when one screen is brought up over the top of another, the first screen will transition off to make room for the new one. This property indicates whether the screen is only a small popup, in which case screens underneath it do not need to bother transitioning off. \item\end{DoxyCompactList}\item 
+TimeSpan \hyperlink{classCityMania_1_1GameScreen_af9bb1ff62e3922e0553977cd8ea5aeb3}{TransitionOnTime}\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}
+\begin{DoxyCompactList}\small\item\em Indicates how long the screen takes to transition on when it is activated. \item\end{DoxyCompactList}\item 
+TimeSpan \hyperlink{classCityMania_1_1GameScreen_a3f775f10cd0d16be17c9cdbdf9f058b8}{TransitionOffTime}\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}
+\begin{DoxyCompactList}\small\item\em Indicates how long the screen takes to transition off when it is deactivated. \item\end{DoxyCompactList}\item 
+float \hyperlink{classCityMania_1_1GameScreen_ad26489543c8a249c65182b77a5f8c68f}{TransitionPosition}\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}
+\begin{DoxyCompactList}\small\item\em Gets the current position of the screen transition, ranging from zero (fully active, no transition) to one (transitioned fully off to nothing). \item\end{DoxyCompactList}\item 
+byte \hyperlink{classCityMania_1_1GameScreen_ac874b0c2bc737aba6a017e24fa564d74}{TransitionAlpha}\hspace{0.3cm}{\ttfamily  \mbox{[}get\mbox{]}}
+\begin{DoxyCompactList}\small\item\em Gets the current alpha of the screen transition, ranging from 255 (fully active, no transition) to 0 (transitioned fully off to nothing). \item\end{DoxyCompactList}\item 
+ScreenState \hyperlink{classCityMania_1_1GameScreen_af7771d5fc80b7cf95ad3aa1ac74b54f5}{ScreenState}\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}
+\begin{DoxyCompactList}\small\item\em Gets the current screen transition state. \item\end{DoxyCompactList}\item 
+bool \hyperlink{classCityMania_1_1GameScreen_a6e36c40cbf1c0b0cd6d0c8599269c8f0}{IsExiting}\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}
+\begin{DoxyCompactList}\small\item\em There are two possible reasons why a screen might be transitioning off. It could be temporarily going away to make room for another screen that is on top of it, or it could be going away for good. This property indicates whether the screen is exiting for real: if set, the screen will automatically remove itself as soon as the transition finishes. \item\end{DoxyCompactList}\item 
+bool \hyperlink{classCityMania_1_1GameScreen_a50204f4b2c99f890598285395bfeda02}{IsActive}\hspace{0.3cm}{\ttfamily  \mbox{[}get\mbox{]}}
+\begin{DoxyCompactList}\small\item\em Checks whether this screen is active and can respond to user input. \item\end{DoxyCompactList}\item 
+\hyperlink{classCityMania_1_1ScreenManager}{ScreenManager} \hyperlink{classCityMania_1_1GameScreen_ac15df0115281ac945ef2f4d30daa68d5}{ScreenManager}\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}
+\begin{DoxyCompactList}\small\item\em Gets the manager that this screen belongs to. \item\end{DoxyCompactList}\item 
+PlayerIndex \hyperlink{classCityMania_1_1GameScreen_a71ed7a4240f030e9e0eb88d107d891b1}{ControllingPlayer}\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}
+\begin{DoxyCompactList}\small\item\em Gets the index of the player who is currently controlling this screen, or null if it is accepting input from any player. This is used to lock the game to a specific player profile. The main menu responds to input from any connected gamepad, but whichever player makes a selection from this menu is given control over all subsequent screens, so other gamepads are inactive until the controlling player returns to the main menu. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A screen is a single layer that has update and draw logic, and which can be combined with other layers to build up a complex menu system. For instance the main menu, the options menu, the \char`\"{}are you sure you
+        want to quit\char`\"{} message box, and the main game itself are all implemented as screens. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classCityMania_1_1GameScreen_a28fbcdba21da5e606d32d87b18bcdf29}{
+\index{CityMania::GameScreen@{CityMania::GameScreen}!Draw@{Draw}}
+\index{Draw@{Draw}!CityMania::GameScreen@{CityMania::GameScreen}}
+\subsubsection[{Draw}]{\setlength{\rightskip}{0pt plus 5cm}virtual void CityMania::GameScreen::Draw (GameTime {\em gameTime})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1GameScreen_a28fbcdba21da5e606d32d87b18bcdf29}
+
+
+This is called when the screen should draw itself. 
+
+Reimplemented in \hyperlink{classCityMania_1_1Button_a48ed467fa9522c528d4369dc27fd1418}{CityMania::Button}, \hyperlink{classCityMania_1_1BackgroundScreen_ab1e98d9c96d18bc4395f6bbcc00a82b1}{CityMania::BackgroundScreen}, \hyperlink{classCityMania_1_1GameplayScreen_aff1697e936e9c230616cadcafbf410ee}{CityMania::GameplayScreen}, \hyperlink{classCityMania_1_1LoadingScreen_ad5f650a3e0ce04391c97347a738dab2f}{CityMania::LoadingScreen}, \hyperlink{classCityMania_1_1MenuScreen_a433f334c09ea523b02322bd153e960d1}{CityMania::MenuScreen}, \hyperlink{classCityMania_1_1MessageBoxScreen_a180792261ea11fe8d33271cc3e7d3c1d}{CityMania::MessageBoxScreen}, and \hyperlink{classCityMania_1_1PauseMenuScreen_a1daaf1e6d3dc66500fcf020c2098a675}{CityMania::PauseMenuScreen}.\hypertarget{classCityMania_1_1GameScreen_ada4a6b75da175b4286662d888eefc3e2}{
+\index{CityMania::GameScreen@{CityMania::GameScreen}!ExitScreen@{ExitScreen}}
+\index{ExitScreen@{ExitScreen}!CityMania::GameScreen@{CityMania::GameScreen}}
+\subsubsection[{ExitScreen}]{\setlength{\rightskip}{0pt plus 5cm}void CityMania::GameScreen::ExitScreen ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1GameScreen_ada4a6b75da175b4286662d888eefc3e2}
+
+
+Tells the screen to go away. Unlike \hyperlink{classCityMania_1_1ScreenManager_ae9d2ac095225f11261734ca461847242}{ScreenManager.RemoveScreen}, which instantly kills the screen, this method respects the transition timings and will give the screen a chance to gradually transition off. \hypertarget{classCityMania_1_1GameScreen_a80edab75e121f4e08b007f47206cf29c}{
+\index{CityMania::GameScreen@{CityMania::GameScreen}!HandleInput@{HandleInput}}
+\index{HandleInput@{HandleInput}!CityMania::GameScreen@{CityMania::GameScreen}}
+\subsubsection[{HandleInput}]{\setlength{\rightskip}{0pt plus 5cm}virtual void CityMania::GameScreen::HandleInput ({\bf InputState} {\em input})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1GameScreen_a80edab75e121f4e08b007f47206cf29c}
+
+
+Allows the screen to handle user input. Unlike Update, this method is only called when the screen is active, and not when some other screen has taken the focus. 
+
+Reimplemented in \hyperlink{classCityMania_1_1Button_a7ffb254c3a65d1357d6f3c6dee74c4ab}{CityMania::Button}, \hyperlink{classCityMania_1_1GameplayScreen_a3491283225749877c3325ebba7a9bd42}{CityMania::GameplayScreen}, \hyperlink{classCityMania_1_1MenuScreen_a9ec18d09465dd6ca3a476193bd25e0bd}{CityMania::MenuScreen}, and \hyperlink{classCityMania_1_1MessageBoxScreen_ac6d8b1716a1976f8769276ab078fed90}{CityMania::MessageBoxScreen}.\hypertarget{classCityMania_1_1GameScreen_a4dc3798784fff49b20280903d796c94c}{
+\index{CityMania::GameScreen@{CityMania::GameScreen}!LoadContent@{LoadContent}}
+\index{LoadContent@{LoadContent}!CityMania::GameScreen@{CityMania::GameScreen}}
+\subsubsection[{LoadContent}]{\setlength{\rightskip}{0pt plus 5cm}virtual void CityMania::GameScreen::LoadContent ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1GameScreen_a4dc3798784fff49b20280903d796c94c}
+
+
+Load graphics content for the screen. 
+
+Reimplemented in \hyperlink{classCityMania_1_1Button_a6b056904b50808d69f7699dcde88415d}{CityMania::Button}, \hyperlink{classCityMania_1_1BackgroundScreen_a1baaefcb8bbe767c96ff168f43f9c327}{CityMania::BackgroundScreen}, \hyperlink{classCityMania_1_1GameplayScreen_a6bc115541e6000548bf828762044fd46}{CityMania::GameplayScreen}, \hyperlink{classCityMania_1_1MainMenuScreen_a784682ea2036cdefdbbf8ea642f70be0}{CityMania::MainMenuScreen}, \hyperlink{classCityMania_1_1MenuScreen_ad3892ecccfde65f286cebd1f83083cd1}{CityMania::MenuScreen}, and \hyperlink{classCityMania_1_1MessageBoxScreen_a0aa4e3fd4153ea36c090fbf7d2f428fe}{CityMania::MessageBoxScreen}.\hypertarget{classCityMania_1_1GameScreen_a038a86bacf5b7d62141477980312f49b}{
+\index{CityMania::GameScreen@{CityMania::GameScreen}!UnloadContent@{UnloadContent}}
+\index{UnloadContent@{UnloadContent}!CityMania::GameScreen@{CityMania::GameScreen}}
+\subsubsection[{UnloadContent}]{\setlength{\rightskip}{0pt plus 5cm}virtual void CityMania::GameScreen::UnloadContent ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1GameScreen_a038a86bacf5b7d62141477980312f49b}
+
+
+Unload content for the screen. 
+
+Reimplemented in \hyperlink{classCityMania_1_1BackgroundScreen_ac6997881fcbc2ef11ca6a4fb8d093b4b}{CityMania::BackgroundScreen}, and \hyperlink{classCityMania_1_1GameplayScreen_ad61c20401840e56538b55b6ae3704f45}{CityMania::GameplayScreen}.\hypertarget{classCityMania_1_1GameScreen_a7f0d5b33eca521dc7fcd89eec337ccf9}{
+\index{CityMania::GameScreen@{CityMania::GameScreen}!Update@{Update}}
+\index{Update@{Update}!CityMania::GameScreen@{CityMania::GameScreen}}
+\subsubsection[{Update}]{\setlength{\rightskip}{0pt plus 5cm}virtual void CityMania::GameScreen::Update (GameTime {\em gameTime}, \/  bool {\em otherScreenHasFocus}, \/  bool {\em coveredByOtherScreen})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1GameScreen_a7f0d5b33eca521dc7fcd89eec337ccf9}
+
+
+Allows the screen to run logic, such as updating the transition position. Unlike HandleInput, this method is called regardless of whether the screen is active, hidden, or in the middle of a transition. 
+
+Reimplemented in \hyperlink{classCityMania_1_1BackgroundScreen_aee39777b1741e0c3608b13cdcf8068c3}{CityMania::BackgroundScreen}, \hyperlink{classCityMania_1_1GameplayScreen_a721faf1bb18e20ca09310f3f5240de81}{CityMania::GameplayScreen}, \hyperlink{classCityMania_1_1LoadingScreen_a587d8f5feaeb84a674f1102dfdb723d4}{CityMania::LoadingScreen}, and \hyperlink{classCityMania_1_1MenuScreen_af5c5b89dcc99c92d99ec3e0924e7bea1}{CityMania::MenuScreen}.
+
+\subsection{Property Documentation}
+\hypertarget{classCityMania_1_1GameScreen_a71ed7a4240f030e9e0eb88d107d891b1}{
+\index{CityMania::GameScreen@{CityMania::GameScreen}!ControllingPlayer@{ControllingPlayer}}
+\index{ControllingPlayer@{ControllingPlayer}!CityMania::GameScreen@{CityMania::GameScreen}}
+\subsubsection[{ControllingPlayer}]{\setlength{\rightskip}{0pt plus 5cm}PlayerIndex CityMania::GameScreen::ControllingPlayer\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}}}
+\label{classCityMania_1_1GameScreen_a71ed7a4240f030e9e0eb88d107d891b1}
+
+
+Gets the index of the player who is currently controlling this screen, or null if it is accepting input from any player. This is used to lock the game to a specific player profile. The main menu responds to input from any connected gamepad, but whichever player makes a selection from this menu is given control over all subsequent screens, so other gamepads are inactive until the controlling player returns to the main menu. \hypertarget{classCityMania_1_1GameScreen_a50204f4b2c99f890598285395bfeda02}{
+\index{CityMania::GameScreen@{CityMania::GameScreen}!IsActive@{IsActive}}
+\index{IsActive@{IsActive}!CityMania::GameScreen@{CityMania::GameScreen}}
+\subsubsection[{IsActive}]{\setlength{\rightskip}{0pt plus 5cm}bool CityMania::GameScreen::IsActive\hspace{0.3cm}{\ttfamily  \mbox{[}get\mbox{]}}}}
+\label{classCityMania_1_1GameScreen_a50204f4b2c99f890598285395bfeda02}
+
+
+Checks whether this screen is active and can respond to user input. \hypertarget{classCityMania_1_1GameScreen_a6e36c40cbf1c0b0cd6d0c8599269c8f0}{
+\index{CityMania::GameScreen@{CityMania::GameScreen}!IsExiting@{IsExiting}}
+\index{IsExiting@{IsExiting}!CityMania::GameScreen@{CityMania::GameScreen}}
+\subsubsection[{IsExiting}]{\setlength{\rightskip}{0pt plus 5cm}bool CityMania::GameScreen::IsExiting\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}}}
+\label{classCityMania_1_1GameScreen_a6e36c40cbf1c0b0cd6d0c8599269c8f0}
+
+
+There are two possible reasons why a screen might be transitioning off. It could be temporarily going away to make room for another screen that is on top of it, or it could be going away for good. This property indicates whether the screen is exiting for real: if set, the screen will automatically remove itself as soon as the transition finishes. \hypertarget{classCityMania_1_1GameScreen_ac1650f02642474499b1d750454a07811}{
+\index{CityMania::GameScreen@{CityMania::GameScreen}!IsPopup@{IsPopup}}
+\index{IsPopup@{IsPopup}!CityMania::GameScreen@{CityMania::GameScreen}}
+\subsubsection[{IsPopup}]{\setlength{\rightskip}{0pt plus 5cm}bool CityMania::GameScreen::IsPopup\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}}}
+\label{classCityMania_1_1GameScreen_ac1650f02642474499b1d750454a07811}
+
+
+Normally when one screen is brought up over the top of another, the first screen will transition off to make room for the new one. This property indicates whether the screen is only a small popup, in which case screens underneath it do not need to bother transitioning off. \hypertarget{classCityMania_1_1GameScreen_ac15df0115281ac945ef2f4d30daa68d5}{
+\index{CityMania::GameScreen@{CityMania::GameScreen}!ScreenManager@{ScreenManager}}
+\index{ScreenManager@{ScreenManager}!CityMania::GameScreen@{CityMania::GameScreen}}
+\subsubsection[{ScreenManager}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ScreenManager} CityMania::GameScreen::ScreenManager\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}}}
+\label{classCityMania_1_1GameScreen_ac15df0115281ac945ef2f4d30daa68d5}
+
+
+Gets the manager that this screen belongs to. \hypertarget{classCityMania_1_1GameScreen_af7771d5fc80b7cf95ad3aa1ac74b54f5}{
+\index{CityMania::GameScreen@{CityMania::GameScreen}!ScreenState@{ScreenState}}
+\index{ScreenState@{ScreenState}!CityMania::GameScreen@{CityMania::GameScreen}}
+\subsubsection[{ScreenState}]{\setlength{\rightskip}{0pt plus 5cm}ScreenState CityMania::GameScreen::ScreenState\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}}}
+\label{classCityMania_1_1GameScreen_af7771d5fc80b7cf95ad3aa1ac74b54f5}
+
+
+Gets the current screen transition state. \hypertarget{classCityMania_1_1GameScreen_ac874b0c2bc737aba6a017e24fa564d74}{
+\index{CityMania::GameScreen@{CityMania::GameScreen}!TransitionAlpha@{TransitionAlpha}}
+\index{TransitionAlpha@{TransitionAlpha}!CityMania::GameScreen@{CityMania::GameScreen}}
+\subsubsection[{TransitionAlpha}]{\setlength{\rightskip}{0pt plus 5cm}byte CityMania::GameScreen::TransitionAlpha\hspace{0.3cm}{\ttfamily  \mbox{[}get\mbox{]}}}}
+\label{classCityMania_1_1GameScreen_ac874b0c2bc737aba6a017e24fa564d74}
+
+
+Gets the current alpha of the screen transition, ranging from 255 (fully active, no transition) to 0 (transitioned fully off to nothing). \hypertarget{classCityMania_1_1GameScreen_a3f775f10cd0d16be17c9cdbdf9f058b8}{
+\index{CityMania::GameScreen@{CityMania::GameScreen}!TransitionOffTime@{TransitionOffTime}}
+\index{TransitionOffTime@{TransitionOffTime}!CityMania::GameScreen@{CityMania::GameScreen}}
+\subsubsection[{TransitionOffTime}]{\setlength{\rightskip}{0pt plus 5cm}TimeSpan CityMania::GameScreen::TransitionOffTime\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}}}
+\label{classCityMania_1_1GameScreen_a3f775f10cd0d16be17c9cdbdf9f058b8}
+
+
+Indicates how long the screen takes to transition off when it is deactivated. \hypertarget{classCityMania_1_1GameScreen_af9bb1ff62e3922e0553977cd8ea5aeb3}{
+\index{CityMania::GameScreen@{CityMania::GameScreen}!TransitionOnTime@{TransitionOnTime}}
+\index{TransitionOnTime@{TransitionOnTime}!CityMania::GameScreen@{CityMania::GameScreen}}
+\subsubsection[{TransitionOnTime}]{\setlength{\rightskip}{0pt plus 5cm}TimeSpan CityMania::GameScreen::TransitionOnTime\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}}}
+\label{classCityMania_1_1GameScreen_af9bb1ff62e3922e0553977cd8ea5aeb3}
+
+
+Indicates how long the screen takes to transition on when it is activated. \hypertarget{classCityMania_1_1GameScreen_ad26489543c8a249c65182b77a5f8c68f}{
+\index{CityMania::GameScreen@{CityMania::GameScreen}!TransitionPosition@{TransitionPosition}}
+\index{TransitionPosition@{TransitionPosition}!CityMania::GameScreen@{CityMania::GameScreen}}
+\subsubsection[{TransitionPosition}]{\setlength{\rightskip}{0pt plus 5cm}float CityMania::GameScreen::TransitionPosition\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}}}
+\label{classCityMania_1_1GameScreen_ad26489543c8a249c65182b77a5f8c68f}
+
+
+Gets the current position of the screen transition, ranging from zero (fully active, no transition) to one (transitioned fully off to nothing). 
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+CityMania/ScreenManager/GameScreen.cs\end{DoxyCompactItemize}

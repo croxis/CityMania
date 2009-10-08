@@ -1,0 +1,94 @@
+\hypertarget{classCityMania_1_1MessageBoxScreen}{
+\section{CityMania::MessageBoxScreen Class Reference}
+\label{classCityMania_1_1MessageBoxScreen}\index{CityMania::MessageBoxScreen@{CityMania::MessageBoxScreen}}
+}
+
+
+A popup message box screen, used to display \char`\"{}are you sure?\char`\"{} confirmation messages.  
+Inheritance diagram for CityMania::MessageBoxScreen::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classCityMania_1_1MessageBoxScreen}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classCityMania_1_1MessageBoxScreen_aa0d3535d7f9fe9319a6d4194d20fb5ad}{MessageBoxScreen} (string message)
+\begin{DoxyCompactList}\small\item\em Constructor automatically includes the standard \char`\"{}A=ok, B=cancel\char`\"{} usage text prompt. \item\end{DoxyCompactList}\item 
+\hyperlink{classCityMania_1_1MessageBoxScreen_a040e972bf8f7eff08ffaaa8ba5946537}{MessageBoxScreen} (string message, bool includeUsageText)
+\begin{DoxyCompactList}\small\item\em Constructor lets the caller specify whether to include the standard \char`\"{}A=ok, B=cancel\char`\"{} usage text prompt. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1MessageBoxScreen_a0aa4e3fd4153ea36c090fbf7d2f428fe}{LoadContent} ()
+\begin{DoxyCompactList}\small\item\em Loads graphics content for this screen. This uses the shared ContentManager provided by the Game class, so the content will remain loaded forever. Whenever a subsequent \hyperlink{classCityMania_1_1MessageBoxScreen}{MessageBoxScreen} tries to load this same content, it will just get back another reference to the already loaded data. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1MessageBoxScreen_ac6d8b1716a1976f8769276ab078fed90}{HandleInput} (\hyperlink{classCityMania_1_1InputState}{InputState} input)
+\begin{DoxyCompactList}\small\item\em Responds to user input, accepting or cancelling the message box. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1MessageBoxScreen_a180792261ea11fe8d33271cc3e7d3c1d}{Draw} (GameTime gameTime)
+\begin{DoxyCompactList}\small\item\em Draws the message box. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Events}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classCityMania_1_1MessageBoxScreen_a5b87f3daf8dda89152d7b09890182408}{
+EventHandler$<$ \hyperlink{classCityMania_1_1PlayerIndexEventArgs}{PlayerIndexEventArgs} $>$ {\bfseries Accepted}}
+\label{classCityMania_1_1MessageBoxScreen_a5b87f3daf8dda89152d7b09890182408}
+
+\item 
+\hypertarget{classCityMania_1_1MessageBoxScreen_a9552ce3b2d12ada50d1c859b80c275ce}{
+EventHandler$<$ \hyperlink{classCityMania_1_1PlayerIndexEventArgs}{PlayerIndexEventArgs} $>$ {\bfseries Cancelled}}
+\label{classCityMania_1_1MessageBoxScreen_a9552ce3b2d12ada50d1c859b80c275ce}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+A popup message box screen, used to display \char`\"{}are you sure?\char`\"{} confirmation messages. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classCityMania_1_1MessageBoxScreen_aa0d3535d7f9fe9319a6d4194d20fb5ad}{
+\index{CityMania::MessageBoxScreen@{CityMania::MessageBoxScreen}!MessageBoxScreen@{MessageBoxScreen}}
+\index{MessageBoxScreen@{MessageBoxScreen}!CityMania::MessageBoxScreen@{CityMania::MessageBoxScreen}}
+\subsubsection[{MessageBoxScreen}]{\setlength{\rightskip}{0pt plus 5cm}CityMania::MessageBoxScreen::MessageBoxScreen (string {\em message})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1MessageBoxScreen_aa0d3535d7f9fe9319a6d4194d20fb5ad}
+
+
+Constructor automatically includes the standard \char`\"{}A=ok, B=cancel\char`\"{} usage text prompt. \hypertarget{classCityMania_1_1MessageBoxScreen_a040e972bf8f7eff08ffaaa8ba5946537}{
+\index{CityMania::MessageBoxScreen@{CityMania::MessageBoxScreen}!MessageBoxScreen@{MessageBoxScreen}}
+\index{MessageBoxScreen@{MessageBoxScreen}!CityMania::MessageBoxScreen@{CityMania::MessageBoxScreen}}
+\subsubsection[{MessageBoxScreen}]{\setlength{\rightskip}{0pt plus 5cm}CityMania::MessageBoxScreen::MessageBoxScreen (string {\em message}, \/  bool {\em includeUsageText})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1MessageBoxScreen_a040e972bf8f7eff08ffaaa8ba5946537}
+
+
+Constructor lets the caller specify whether to include the standard \char`\"{}A=ok, B=cancel\char`\"{} usage text prompt. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classCityMania_1_1MessageBoxScreen_a180792261ea11fe8d33271cc3e7d3c1d}{
+\index{CityMania::MessageBoxScreen@{CityMania::MessageBoxScreen}!Draw@{Draw}}
+\index{Draw@{Draw}!CityMania::MessageBoxScreen@{CityMania::MessageBoxScreen}}
+\subsubsection[{Draw}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::MessageBoxScreen::Draw (GameTime {\em gameTime})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1MessageBoxScreen_a180792261ea11fe8d33271cc3e7d3c1d}
+
+
+Draws the message box. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a28fbcdba21da5e606d32d87b18bcdf29}{CityMania::GameScreen}.\hypertarget{classCityMania_1_1MessageBoxScreen_ac6d8b1716a1976f8769276ab078fed90}{
+\index{CityMania::MessageBoxScreen@{CityMania::MessageBoxScreen}!HandleInput@{HandleInput}}
+\index{HandleInput@{HandleInput}!CityMania::MessageBoxScreen@{CityMania::MessageBoxScreen}}
+\subsubsection[{HandleInput}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::MessageBoxScreen::HandleInput ({\bf InputState} {\em input})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1MessageBoxScreen_ac6d8b1716a1976f8769276ab078fed90}
+
+
+Responds to user input, accepting or cancelling the message box. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a80edab75e121f4e08b007f47206cf29c}{CityMania::GameScreen}.\hypertarget{classCityMania_1_1MessageBoxScreen_a0aa4e3fd4153ea36c090fbf7d2f428fe}{
+\index{CityMania::MessageBoxScreen@{CityMania::MessageBoxScreen}!LoadContent@{LoadContent}}
+\index{LoadContent@{LoadContent}!CityMania::MessageBoxScreen@{CityMania::MessageBoxScreen}}
+\subsubsection[{LoadContent}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::MessageBoxScreen::LoadContent ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1MessageBoxScreen_a0aa4e3fd4153ea36c090fbf7d2f428fe}
+
+
+Loads graphics content for this screen. This uses the shared ContentManager provided by the Game class, so the content will remain loaded forever. Whenever a subsequent \hyperlink{classCityMania_1_1MessageBoxScreen}{MessageBoxScreen} tries to load this same content, it will just get back another reference to the already loaded data. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a4dc3798784fff49b20280903d796c94c}{CityMania::GameScreen}.
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+CityMania/Screens/MessageBoxScreen.cs\end{DoxyCompactItemize}

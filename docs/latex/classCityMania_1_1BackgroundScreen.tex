@@ -1,0 +1,83 @@
+\hypertarget{classCityMania_1_1BackgroundScreen}{
+\section{CityMania::BackgroundScreen Class Reference}
+\label{classCityMania_1_1BackgroundScreen}\index{CityMania::BackgroundScreen@{CityMania::BackgroundScreen}}
+}
+
+
+The background screen sits behind all the other menu screens. It draws a background image that remains fixed in place regardless of whatever transitions the screens on top of it may be doing.  
+Inheritance diagram for CityMania::BackgroundScreen::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classCityMania_1_1BackgroundScreen}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classCityMania_1_1BackgroundScreen_a7ad1f7edca0074fefc1561ac4997c079}{BackgroundScreen} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1BackgroundScreen_a1baaefcb8bbe767c96ff168f43f9c327}{LoadContent} ()
+\begin{DoxyCompactList}\small\item\em Loads graphics content for this screen. The background texture is quite big, so we use our own local ContentManager to load it. This allows us to unload before going from the menus into the game itself, wheras if we used the shared ContentManager provided by the Game class, the content would remain loaded forever. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1BackgroundScreen_ac6997881fcbc2ef11ca6a4fb8d093b4b}{UnloadContent} ()
+\begin{DoxyCompactList}\small\item\em Unloads graphics content for this screen. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1BackgroundScreen_aee39777b1741e0c3608b13cdcf8068c3}{Update} (GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
+\begin{DoxyCompactList}\small\item\em Updates the background screen. Unlike most screens, this should not transition off even if it has been covered by another screen: it is supposed to be covered, after all! This overload forces the coveredByOtherScreen parameter to false in order to stop the base Update method wanting to transition off. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1BackgroundScreen_ab1e98d9c96d18bc4395f6bbcc00a82b1}{Draw} (GameTime gameTime)
+\begin{DoxyCompactList}\small\item\em Draws the background screen. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+The background screen sits behind all the other menu screens. It draws a background image that remains fixed in place regardless of whatever transitions the screens on top of it may be doing. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classCityMania_1_1BackgroundScreen_a7ad1f7edca0074fefc1561ac4997c079}{
+\index{CityMania::BackgroundScreen@{CityMania::BackgroundScreen}!BackgroundScreen@{BackgroundScreen}}
+\index{BackgroundScreen@{BackgroundScreen}!CityMania::BackgroundScreen@{CityMania::BackgroundScreen}}
+\subsubsection[{BackgroundScreen}]{\setlength{\rightskip}{0pt plus 5cm}CityMania::BackgroundScreen::BackgroundScreen ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1BackgroundScreen_a7ad1f7edca0074fefc1561ac4997c079}
+
+
+Constructor. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classCityMania_1_1BackgroundScreen_ab1e98d9c96d18bc4395f6bbcc00a82b1}{
+\index{CityMania::BackgroundScreen@{CityMania::BackgroundScreen}!Draw@{Draw}}
+\index{Draw@{Draw}!CityMania::BackgroundScreen@{CityMania::BackgroundScreen}}
+\subsubsection[{Draw}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::BackgroundScreen::Draw (GameTime {\em gameTime})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1BackgroundScreen_ab1e98d9c96d18bc4395f6bbcc00a82b1}
+
+
+Draws the background screen. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a28fbcdba21da5e606d32d87b18bcdf29}{CityMania::GameScreen}.\hypertarget{classCityMania_1_1BackgroundScreen_a1baaefcb8bbe767c96ff168f43f9c327}{
+\index{CityMania::BackgroundScreen@{CityMania::BackgroundScreen}!LoadContent@{LoadContent}}
+\index{LoadContent@{LoadContent}!CityMania::BackgroundScreen@{CityMania::BackgroundScreen}}
+\subsubsection[{LoadContent}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::BackgroundScreen::LoadContent ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1BackgroundScreen_a1baaefcb8bbe767c96ff168f43f9c327}
+
+
+Loads graphics content for this screen. The background texture is quite big, so we use our own local ContentManager to load it. This allows us to unload before going from the menus into the game itself, wheras if we used the shared ContentManager provided by the Game class, the content would remain loaded forever. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a4dc3798784fff49b20280903d796c94c}{CityMania::GameScreen}.\hypertarget{classCityMania_1_1BackgroundScreen_ac6997881fcbc2ef11ca6a4fb8d093b4b}{
+\index{CityMania::BackgroundScreen@{CityMania::BackgroundScreen}!UnloadContent@{UnloadContent}}
+\index{UnloadContent@{UnloadContent}!CityMania::BackgroundScreen@{CityMania::BackgroundScreen}}
+\subsubsection[{UnloadContent}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::BackgroundScreen::UnloadContent ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1BackgroundScreen_ac6997881fcbc2ef11ca6a4fb8d093b4b}
+
+
+Unloads graphics content for this screen. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a038a86bacf5b7d62141477980312f49b}{CityMania::GameScreen}.\hypertarget{classCityMania_1_1BackgroundScreen_aee39777b1741e0c3608b13cdcf8068c3}{
+\index{CityMania::BackgroundScreen@{CityMania::BackgroundScreen}!Update@{Update}}
+\index{Update@{Update}!CityMania::BackgroundScreen@{CityMania::BackgroundScreen}}
+\subsubsection[{Update}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::BackgroundScreen::Update (GameTime {\em gameTime}, \/  bool {\em otherScreenHasFocus}, \/  bool {\em coveredByOtherScreen})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1BackgroundScreen_aee39777b1741e0c3608b13cdcf8068c3}
+
+
+Updates the background screen. Unlike most screens, this should not transition off even if it has been covered by another screen: it is supposed to be covered, after all! This overload forces the coveredByOtherScreen parameter to false in order to stop the base Update method wanting to transition off. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a7f0d5b33eca521dc7fcd89eec337ccf9}{CityMania::GameScreen}.
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+CityMania/Screens/BackgroundScreen.cs\end{DoxyCompactItemize}

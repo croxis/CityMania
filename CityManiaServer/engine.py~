@@ -21,6 +21,8 @@ class EventManager(object):
         Adds a new listener into the database.  This is stored by event to reduce chattyness
         Overides Entity.accept(), not best design
         """
+        #print "Accepting event:", event
+        #print "For object:", object
         if event not in self.listeners:
             self.listeners[event] = {}
         self.listeners[event][object] = [method, extraArgs]
@@ -46,9 +48,9 @@ class EventManager(object):
         self.running = True
         while self.running:
             try:
-                print "Tickstep"
+                #print "Tickstep"
                 self.step()
-                print "End tick"
+                #print "End tick"
             except KeyboardInterrupt:
                 print "Interupt!"
                 messenger.post("exit")
@@ -60,7 +62,7 @@ class EventManager(object):
         
     def step(self):
         self.send()
-        print "End Send"
+        #print "End Send"
             
     def send(self):
         """
@@ -68,19 +70,25 @@ class EventManager(object):
         We also pump tick events here
         TODO: Add error checking
         """
-        print "Send"
+        #print "Send"
         objects = self.listeners["tick"]
         for object in objects:
             method, args = objects[object]
-            print "Midsend"
+            #print object, method, args
             method()
-        print "Send2"
+        #print "Send2"
         if self.eventQueue:
             event, extraArgs = self.eventQueue.pop()
-            objects = self.listeners[event]
-            for object in objects:
-                method, args = objects[object]
-                method(extraArgs)
+            #print "Event:", event, extraArgs
+            #print self.listeners
+            if event in self.listeners:
+                objects = self.listeners[event]
+                #print "Objects:", objects
+                for object in objects:
+                    method, args = objects[object]
+                    #print "method:", method
+                    method(*extraArgs)
+                    
 import __builtin__
 __builtin__.messenger = EventManager()
 

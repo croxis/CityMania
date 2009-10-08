@@ -1,0 +1,94 @@
+\hypertarget{classCityMania_1_1GameplayScreen}{
+\section{CityMania::GameplayScreen Class Reference}
+\label{classCityMania_1_1GameplayScreen}\index{CityMania::GameplayScreen@{CityMania::GameplayScreen}}
+}
+
+
+This screen implements the actual game logic. It is just a placeholder to get the idea across: you'll probably want to put some more interesting gameplay in here!  
+Inheritance diagram for CityMania::GameplayScreen::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classCityMania_1_1GameplayScreen}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classCityMania_1_1GameplayScreen_afcaf9cbe3f18bffb322a8d367428c05b}{GameplayScreen} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1GameplayScreen_a6bc115541e6000548bf828762044fd46}{LoadContent} ()
+\begin{DoxyCompactList}\small\item\em Load graphics content for the game. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1GameplayScreen_ad61c20401840e56538b55b6ae3704f45}{UnloadContent} ()
+\begin{DoxyCompactList}\small\item\em Unload graphics content used by the game. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1GameplayScreen_a721faf1bb18e20ca09310f3f5240de81}{Update} (GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
+\begin{DoxyCompactList}\small\item\em Updates the state of the game. This method checks the \hyperlink{classCityMania_1_1GameScreen_a50204f4b2c99f890598285395bfeda02}{GameScreen.IsActive} property, so the game will stop updating when the pause menu is active, or if you tab away to a different application. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1GameplayScreen_a3491283225749877c3325ebba7a9bd42}{HandleInput} (\hyperlink{classCityMania_1_1InputState}{InputState} input)
+\begin{DoxyCompactList}\small\item\em Lets the game respond to player input. Unlike the Update method, this will only be called when the gameplay screen is active. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1GameplayScreen_aff1697e936e9c230616cadcafbf410ee}{Draw} (GameTime gameTime)
+\begin{DoxyCompactList}\small\item\em Draws the gameplay screen. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This screen implements the actual game logic. It is just a placeholder to get the idea across: you'll probably want to put some more interesting gameplay in here! 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classCityMania_1_1GameplayScreen_afcaf9cbe3f18bffb322a8d367428c05b}{
+\index{CityMania::GameplayScreen@{CityMania::GameplayScreen}!GameplayScreen@{GameplayScreen}}
+\index{GameplayScreen@{GameplayScreen}!CityMania::GameplayScreen@{CityMania::GameplayScreen}}
+\subsubsection[{GameplayScreen}]{\setlength{\rightskip}{0pt plus 5cm}CityMania::GameplayScreen::GameplayScreen ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1GameplayScreen_afcaf9cbe3f18bffb322a8d367428c05b}
+
+
+Constructor. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classCityMania_1_1GameplayScreen_aff1697e936e9c230616cadcafbf410ee}{
+\index{CityMania::GameplayScreen@{CityMania::GameplayScreen}!Draw@{Draw}}
+\index{Draw@{Draw}!CityMania::GameplayScreen@{CityMania::GameplayScreen}}
+\subsubsection[{Draw}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::GameplayScreen::Draw (GameTime {\em gameTime})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1GameplayScreen_aff1697e936e9c230616cadcafbf410ee}
+
+
+Draws the gameplay screen. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a28fbcdba21da5e606d32d87b18bcdf29}{CityMania::GameScreen}.\hypertarget{classCityMania_1_1GameplayScreen_a3491283225749877c3325ebba7a9bd42}{
+\index{CityMania::GameplayScreen@{CityMania::GameplayScreen}!HandleInput@{HandleInput}}
+\index{HandleInput@{HandleInput}!CityMania::GameplayScreen@{CityMania::GameplayScreen}}
+\subsubsection[{HandleInput}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::GameplayScreen::HandleInput ({\bf InputState} {\em input})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1GameplayScreen_a3491283225749877c3325ebba7a9bd42}
+
+
+Lets the game respond to player input. Unlike the Update method, this will only be called when the gameplay screen is active. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a80edab75e121f4e08b007f47206cf29c}{CityMania::GameScreen}.\hypertarget{classCityMania_1_1GameplayScreen_a6bc115541e6000548bf828762044fd46}{
+\index{CityMania::GameplayScreen@{CityMania::GameplayScreen}!LoadContent@{LoadContent}}
+\index{LoadContent@{LoadContent}!CityMania::GameplayScreen@{CityMania::GameplayScreen}}
+\subsubsection[{LoadContent}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::GameplayScreen::LoadContent ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1GameplayScreen_a6bc115541e6000548bf828762044fd46}
+
+
+Load graphics content for the game. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a4dc3798784fff49b20280903d796c94c}{CityMania::GameScreen}.\hypertarget{classCityMania_1_1GameplayScreen_ad61c20401840e56538b55b6ae3704f45}{
+\index{CityMania::GameplayScreen@{CityMania::GameplayScreen}!UnloadContent@{UnloadContent}}
+\index{UnloadContent@{UnloadContent}!CityMania::GameplayScreen@{CityMania::GameplayScreen}}
+\subsubsection[{UnloadContent}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::GameplayScreen::UnloadContent ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1GameplayScreen_ad61c20401840e56538b55b6ae3704f45}
+
+
+Unload graphics content used by the game. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a038a86bacf5b7d62141477980312f49b}{CityMania::GameScreen}.\hypertarget{classCityMania_1_1GameplayScreen_a721faf1bb18e20ca09310f3f5240de81}{
+\index{CityMania::GameplayScreen@{CityMania::GameplayScreen}!Update@{Update}}
+\index{Update@{Update}!CityMania::GameplayScreen@{CityMania::GameplayScreen}}
+\subsubsection[{Update}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::GameplayScreen::Update (GameTime {\em gameTime}, \/  bool {\em otherScreenHasFocus}, \/  bool {\em coveredByOtherScreen})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1GameplayScreen_a721faf1bb18e20ca09310f3f5240de81}
+
+
+Updates the state of the game. This method checks the \hyperlink{classCityMania_1_1GameScreen_a50204f4b2c99f890598285395bfeda02}{GameScreen.IsActive} property, so the game will stop updating when the pause menu is active, or if you tab away to a different application. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a7f0d5b33eca521dc7fcd89eec337ccf9}{CityMania::GameScreen}.
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+CityMania/Screens/GameplayScreen.cs\end{DoxyCompactItemize}

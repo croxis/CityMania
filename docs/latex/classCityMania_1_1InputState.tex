@@ -1,0 +1,138 @@
+\hypertarget{classCityMania_1_1InputState}{
+\section{CityMania::InputState Class Reference}
+\label{classCityMania_1_1InputState}\index{CityMania::InputState@{CityMania::InputState}}
+}
+
+
+Helper for reading input from keyboard and gamepad. This class tracks both the current and previous state of both input devices, and implements query methods for high level input actions such as \char`\"{}move up through the menu\char`\"{} or \char`\"{}pause the game\char`\"{}.  
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classCityMania_1_1InputState_ad3e00d88b010b3907b2bfce4f0da2343}{InputState} ()
+\begin{DoxyCompactList}\small\item\em Constructs a new input state. \item\end{DoxyCompactList}\item 
+void \hyperlink{classCityMania_1_1InputState_ae691099430d3501cb236c0a7b0d39179}{Update} ()
+\begin{DoxyCompactList}\small\item\em Reads the latest state of the keyboard and gamepad. \item\end{DoxyCompactList}\item 
+bool \hyperlink{classCityMania_1_1InputState_a97898f622de8b21514a06de7a0b2e141}{IsNewKeyPress} (Keys key, PlayerIndex?controllingPlayer, out PlayerIndex playerIndex)
+\begin{DoxyCompactList}\small\item\em Helper for checking if a key was newly pressed during this update. The controllingPlayer parameter specifies which player to read input for. If this is null, it will accept input from any player. When a keypress is detected, the output playerIndex reports which player pressed it. \item\end{DoxyCompactList}\item 
+bool \hyperlink{classCityMania_1_1InputState_ab3a3190e6785283cc286d86659957f61}{IsNewButtonPress} (Buttons button, PlayerIndex?controllingPlayer, out PlayerIndex playerIndex)
+\begin{DoxyCompactList}\small\item\em Helper for checking if a button was newly pressed during this update. The controllingPlayer parameter specifies which player to read input for. If this is null, it will accept input from any player. When a button press is detected, the output playerIndex reports which player pressed it. \item\end{DoxyCompactList}\item 
+bool \hyperlink{classCityMania_1_1InputState_a35467f4216f2228c1288e738c1db7c4f}{IsMenuSelect} (PlayerIndex?controllingPlayer, out PlayerIndex playerIndex)
+\begin{DoxyCompactList}\small\item\em Checks for a \char`\"{}menu select\char`\"{} input action. The controllingPlayer parameter specifies which player to read input for. If this is null, it will accept input from any player. When the action is detected, the output playerIndex reports which player pressed it. \item\end{DoxyCompactList}\item 
+bool \hyperlink{classCityMania_1_1InputState_a4b2e434f6f379a0d6aa8f7ff9d915b7e}{IsMenuCancel} (PlayerIndex?controllingPlayer, out PlayerIndex playerIndex)
+\begin{DoxyCompactList}\small\item\em Checks for a \char`\"{}menu cancel\char`\"{} input action. The controllingPlayer parameter specifies which player to read input for. If this is null, it will accept input from any player. When the action is detected, the output playerIndex reports which player pressed it. \item\end{DoxyCompactList}\item 
+bool \hyperlink{classCityMania_1_1InputState_a8cb3c3fd9a65d6be25674a20a4c472b4}{IsMenuUp} (PlayerIndex?controllingPlayer)
+\begin{DoxyCompactList}\small\item\em Checks for a \char`\"{}menu up\char`\"{} input action. The controllingPlayer parameter specifies which player to read input for. If this is null, it will accept input from any player. \item\end{DoxyCompactList}\item 
+bool \hyperlink{classCityMania_1_1InputState_a3c1b0c6bd78fce6777cf3e66b11bab89}{IsMenuDown} (PlayerIndex?controllingPlayer)
+\begin{DoxyCompactList}\small\item\em Checks for a \char`\"{}menu down\char`\"{} input action. The controllingPlayer parameter specifies which player to read input for. If this is null, it will accept input from any player. \item\end{DoxyCompactList}\item 
+bool \hyperlink{classCityMania_1_1InputState_a3bd8bfe8eb38e6a6730104b22965a752}{IsPauseGame} (PlayerIndex?controllingPlayer)
+\begin{DoxyCompactList}\small\item\em Checks for a \char`\"{}pause the game\char`\"{} input action. The controllingPlayer parameter specifies which player to read input for. If this is null, it will accept input from any player. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classCityMania_1_1InputState_ac78cfe30d434938078907e0d40e47aaf}{
+const int {\bfseries MaxInputs} = 4}
+\label{classCityMania_1_1InputState_ac78cfe30d434938078907e0d40e47aaf}
+
+\item 
+\hypertarget{classCityMania_1_1InputState_a5edcfb328a0feb8dcafa0c7765a6a0fa}{
+readonly KeyboardState\mbox{[}$\,$\mbox{]} {\bfseries CurrentKeyboardStates}}
+\label{classCityMania_1_1InputState_a5edcfb328a0feb8dcafa0c7765a6a0fa}
+
+\item 
+\hypertarget{classCityMania_1_1InputState_a08cf87609a3babdb5e763d83cd6ad894}{
+readonly GamePadState\mbox{[}$\,$\mbox{]} {\bfseries CurrentGamePadStates}}
+\label{classCityMania_1_1InputState_a08cf87609a3babdb5e763d83cd6ad894}
+
+\item 
+\hypertarget{classCityMania_1_1InputState_ab602bf4a26c27900aecf452cbefbe631}{
+readonly KeyboardState\mbox{[}$\,$\mbox{]} {\bfseries LastKeyboardStates}}
+\label{classCityMania_1_1InputState_ab602bf4a26c27900aecf452cbefbe631}
+
+\item 
+\hypertarget{classCityMania_1_1InputState_a86f8b5c6bdcf2cba1d39667f65a8f122}{
+readonly GamePadState\mbox{[}$\,$\mbox{]} {\bfseries LastGamePadStates}}
+\label{classCityMania_1_1InputState_a86f8b5c6bdcf2cba1d39667f65a8f122}
+
+\item 
+\hypertarget{classCityMania_1_1InputState_a9604cdb41a7251c0fa68b13ffa28581f}{
+readonly bool\mbox{[}$\,$\mbox{]} {\bfseries GamePadWasConnected}}
+\label{classCityMania_1_1InputState_a9604cdb41a7251c0fa68b13ffa28581f}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Helper for reading input from keyboard and gamepad. This class tracks both the current and previous state of both input devices, and implements query methods for high level input actions such as \char`\"{}move up through the menu\char`\"{} or \char`\"{}pause the game\char`\"{}. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classCityMania_1_1InputState_ad3e00d88b010b3907b2bfce4f0da2343}{
+\index{CityMania::InputState@{CityMania::InputState}!InputState@{InputState}}
+\index{InputState@{InputState}!CityMania::InputState@{CityMania::InputState}}
+\subsubsection[{InputState}]{\setlength{\rightskip}{0pt plus 5cm}CityMania::InputState::InputState ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1InputState_ad3e00d88b010b3907b2bfce4f0da2343}
+
+
+Constructs a new input state. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classCityMania_1_1InputState_a4b2e434f6f379a0d6aa8f7ff9d915b7e}{
+\index{CityMania::InputState@{CityMania::InputState}!IsMenuCancel@{IsMenuCancel}}
+\index{IsMenuCancel@{IsMenuCancel}!CityMania::InputState@{CityMania::InputState}}
+\subsubsection[{IsMenuCancel}]{\setlength{\rightskip}{0pt plus 5cm}bool CityMania::InputState::IsMenuCancel (PlayerIndex? {\em controllingPlayer}, \/  out PlayerIndex {\em playerIndex})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1InputState_a4b2e434f6f379a0d6aa8f7ff9d915b7e}
+
+
+Checks for a \char`\"{}menu cancel\char`\"{} input action. The controllingPlayer parameter specifies which player to read input for. If this is null, it will accept input from any player. When the action is detected, the output playerIndex reports which player pressed it. \hypertarget{classCityMania_1_1InputState_a3c1b0c6bd78fce6777cf3e66b11bab89}{
+\index{CityMania::InputState@{CityMania::InputState}!IsMenuDown@{IsMenuDown}}
+\index{IsMenuDown@{IsMenuDown}!CityMania::InputState@{CityMania::InputState}}
+\subsubsection[{IsMenuDown}]{\setlength{\rightskip}{0pt plus 5cm}bool CityMania::InputState::IsMenuDown (PlayerIndex? {\em controllingPlayer})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1InputState_a3c1b0c6bd78fce6777cf3e66b11bab89}
+
+
+Checks for a \char`\"{}menu down\char`\"{} input action. The controllingPlayer parameter specifies which player to read input for. If this is null, it will accept input from any player. \hypertarget{classCityMania_1_1InputState_a35467f4216f2228c1288e738c1db7c4f}{
+\index{CityMania::InputState@{CityMania::InputState}!IsMenuSelect@{IsMenuSelect}}
+\index{IsMenuSelect@{IsMenuSelect}!CityMania::InputState@{CityMania::InputState}}
+\subsubsection[{IsMenuSelect}]{\setlength{\rightskip}{0pt plus 5cm}bool CityMania::InputState::IsMenuSelect (PlayerIndex? {\em controllingPlayer}, \/  out PlayerIndex {\em playerIndex})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1InputState_a35467f4216f2228c1288e738c1db7c4f}
+
+
+Checks for a \char`\"{}menu select\char`\"{} input action. The controllingPlayer parameter specifies which player to read input for. If this is null, it will accept input from any player. When the action is detected, the output playerIndex reports which player pressed it. \hypertarget{classCityMania_1_1InputState_a8cb3c3fd9a65d6be25674a20a4c472b4}{
+\index{CityMania::InputState@{CityMania::InputState}!IsMenuUp@{IsMenuUp}}
+\index{IsMenuUp@{IsMenuUp}!CityMania::InputState@{CityMania::InputState}}
+\subsubsection[{IsMenuUp}]{\setlength{\rightskip}{0pt plus 5cm}bool CityMania::InputState::IsMenuUp (PlayerIndex? {\em controllingPlayer})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1InputState_a8cb3c3fd9a65d6be25674a20a4c472b4}
+
+
+Checks for a \char`\"{}menu up\char`\"{} input action. The controllingPlayer parameter specifies which player to read input for. If this is null, it will accept input from any player. \hypertarget{classCityMania_1_1InputState_ab3a3190e6785283cc286d86659957f61}{
+\index{CityMania::InputState@{CityMania::InputState}!IsNewButtonPress@{IsNewButtonPress}}
+\index{IsNewButtonPress@{IsNewButtonPress}!CityMania::InputState@{CityMania::InputState}}
+\subsubsection[{IsNewButtonPress}]{\setlength{\rightskip}{0pt plus 5cm}bool CityMania::InputState::IsNewButtonPress (Buttons {\em button}, \/  PlayerIndex? {\em controllingPlayer}, \/  out PlayerIndex {\em playerIndex})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1InputState_ab3a3190e6785283cc286d86659957f61}
+
+
+Helper for checking if a button was newly pressed during this update. The controllingPlayer parameter specifies which player to read input for. If this is null, it will accept input from any player. When a button press is detected, the output playerIndex reports which player pressed it. \hypertarget{classCityMania_1_1InputState_a97898f622de8b21514a06de7a0b2e141}{
+\index{CityMania::InputState@{CityMania::InputState}!IsNewKeyPress@{IsNewKeyPress}}
+\index{IsNewKeyPress@{IsNewKeyPress}!CityMania::InputState@{CityMania::InputState}}
+\subsubsection[{IsNewKeyPress}]{\setlength{\rightskip}{0pt plus 5cm}bool CityMania::InputState::IsNewKeyPress (Keys {\em key}, \/  PlayerIndex? {\em controllingPlayer}, \/  out PlayerIndex {\em playerIndex})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1InputState_a97898f622de8b21514a06de7a0b2e141}
+
+
+Helper for checking if a key was newly pressed during this update. The controllingPlayer parameter specifies which player to read input for. If this is null, it will accept input from any player. When a keypress is detected, the output playerIndex reports which player pressed it. \hypertarget{classCityMania_1_1InputState_a3bd8bfe8eb38e6a6730104b22965a752}{
+\index{CityMania::InputState@{CityMania::InputState}!IsPauseGame@{IsPauseGame}}
+\index{IsPauseGame@{IsPauseGame}!CityMania::InputState@{CityMania::InputState}}
+\subsubsection[{IsPauseGame}]{\setlength{\rightskip}{0pt plus 5cm}bool CityMania::InputState::IsPauseGame (PlayerIndex? {\em controllingPlayer})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1InputState_a3bd8bfe8eb38e6a6730104b22965a752}
+
+
+Checks for a \char`\"{}pause the game\char`\"{} input action. The controllingPlayer parameter specifies which player to read input for. If this is null, it will accept input from any player. \hypertarget{classCityMania_1_1InputState_ae691099430d3501cb236c0a7b0d39179}{
+\index{CityMania::InputState@{CityMania::InputState}!Update@{Update}}
+\index{Update@{Update}!CityMania::InputState@{CityMania::InputState}}
+\subsubsection[{Update}]{\setlength{\rightskip}{0pt plus 5cm}void CityMania::InputState::Update ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1InputState_ae691099430d3501cb236c0a7b0d39179}
+
+
+Reads the latest state of the keyboard and gamepad. 
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+CityMania/ScreenManager/InputState.cs\end{DoxyCompactItemize}
