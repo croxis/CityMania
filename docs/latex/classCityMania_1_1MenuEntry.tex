@@ -1,0 +1,102 @@
+\hypertarget{classCityMania_1_1MenuEntry}{
+\section{CityMania::MenuEntry Class Reference}
+\label{classCityMania_1_1MenuEntry}\index{CityMania::MenuEntry@{CityMania::MenuEntry}}
+}
+
+
+Helper class represents a single entry in a \hyperlink{classCityMania_1_1MenuScreen}{MenuScreen}. By default this just draws the entry text string, but it can be customized to display menu entries in different ways. This also provides an event that will be raised when the menu entry is selected.  
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classCityMania_1_1MenuEntry_a2767be7f86275b7d0063d938897bdc55}{MenuEntry} (string text)
+\begin{DoxyCompactList}\small\item\em Constructs a new menu entry with the specified text. \item\end{DoxyCompactList}\item 
+virtual void \hyperlink{classCityMania_1_1MenuEntry_a0e1a13e81f7c27a116122ca5d59b3858}{Update} (\hyperlink{classCityMania_1_1MenuScreen}{MenuScreen} screen, bool isSelected, GameTime gameTime)
+\begin{DoxyCompactList}\small\item\em Updates the menu entry. \item\end{DoxyCompactList}\item 
+virtual void \hyperlink{classCityMania_1_1MenuEntry_a967b77f88de3650229d320712349d3b0}{Draw} (\hyperlink{classCityMania_1_1MenuScreen}{MenuScreen} screen, Vector2 position, bool isSelected, GameTime gameTime)
+\begin{DoxyCompactList}\small\item\em Draws the menu entry. This can be overridden to customize the appearance. \item\end{DoxyCompactList}\item 
+virtual int \hyperlink{classCityMania_1_1MenuEntry_ac547564728d74c6e59747e57831a0d07}{GetHeight} (\hyperlink{classCityMania_1_1MenuScreen}{MenuScreen} screen)
+\begin{DoxyCompactList}\small\item\em Queries how much space this menu entry requires. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual internal void \hyperlink{classCityMania_1_1MenuEntry_ab163a7cb2a760af1007a923cd2bc87ed}{OnSelectEntry} (PlayerIndex playerIndex)
+\begin{DoxyCompactList}\small\item\em Method for raising the Selected event. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+string \hyperlink{classCityMania_1_1MenuEntry_a9acc56b2750d90a7c5c3f190367b803e}{Text}\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}
+\begin{DoxyCompactList}\small\item\em Gets or sets the text of this menu entry. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Events}
+\begin{DoxyCompactItemize}
+\item 
+EventHandler$<$ \hyperlink{classCityMania_1_1PlayerIndexEventArgs}{PlayerIndexEventArgs} $>$ \hyperlink{classCityMania_1_1MenuEntry_a936e132fbdf1e2e598b82ef1b022f96c}{Selected}
+\begin{DoxyCompactList}\small\item\em Event raised when the menu entry is selected. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Helper class represents a single entry in a \hyperlink{classCityMania_1_1MenuScreen}{MenuScreen}. By default this just draws the entry text string, but it can be customized to display menu entries in different ways. This also provides an event that will be raised when the menu entry is selected. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classCityMania_1_1MenuEntry_a2767be7f86275b7d0063d938897bdc55}{
+\index{CityMania::MenuEntry@{CityMania::MenuEntry}!MenuEntry@{MenuEntry}}
+\index{MenuEntry@{MenuEntry}!CityMania::MenuEntry@{CityMania::MenuEntry}}
+\subsubsection[{MenuEntry}]{\setlength{\rightskip}{0pt plus 5cm}CityMania::MenuEntry::MenuEntry (string {\em text})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1MenuEntry_a2767be7f86275b7d0063d938897bdc55}
+
+
+Constructs a new menu entry with the specified text. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classCityMania_1_1MenuEntry_a967b77f88de3650229d320712349d3b0}{
+\index{CityMania::MenuEntry@{CityMania::MenuEntry}!Draw@{Draw}}
+\index{Draw@{Draw}!CityMania::MenuEntry@{CityMania::MenuEntry}}
+\subsubsection[{Draw}]{\setlength{\rightskip}{0pt plus 5cm}virtual void CityMania::MenuEntry::Draw ({\bf MenuScreen} {\em screen}, \/  Vector2 {\em position}, \/  bool {\em isSelected}, \/  GameTime {\em gameTime})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1MenuEntry_a967b77f88de3650229d320712349d3b0}
+
+
+Draws the menu entry. This can be overridden to customize the appearance. \hypertarget{classCityMania_1_1MenuEntry_ac547564728d74c6e59747e57831a0d07}{
+\index{CityMania::MenuEntry@{CityMania::MenuEntry}!GetHeight@{GetHeight}}
+\index{GetHeight@{GetHeight}!CityMania::MenuEntry@{CityMania::MenuEntry}}
+\subsubsection[{GetHeight}]{\setlength{\rightskip}{0pt plus 5cm}virtual int CityMania::MenuEntry::GetHeight ({\bf MenuScreen} {\em screen})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1MenuEntry_ac547564728d74c6e59747e57831a0d07}
+
+
+Queries how much space this menu entry requires. \hypertarget{classCityMania_1_1MenuEntry_ab163a7cb2a760af1007a923cd2bc87ed}{
+\index{CityMania::MenuEntry@{CityMania::MenuEntry}!OnSelectEntry@{OnSelectEntry}}
+\index{OnSelectEntry@{OnSelectEntry}!CityMania::MenuEntry@{CityMania::MenuEntry}}
+\subsubsection[{OnSelectEntry}]{\setlength{\rightskip}{0pt plus 5cm}virtual internal void CityMania::MenuEntry::OnSelectEntry (PlayerIndex {\em playerIndex})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected, virtual\mbox{]}}}}
+\label{classCityMania_1_1MenuEntry_ab163a7cb2a760af1007a923cd2bc87ed}
+
+
+Method for raising the Selected event. \hypertarget{classCityMania_1_1MenuEntry_a0e1a13e81f7c27a116122ca5d59b3858}{
+\index{CityMania::MenuEntry@{CityMania::MenuEntry}!Update@{Update}}
+\index{Update@{Update}!CityMania::MenuEntry@{CityMania::MenuEntry}}
+\subsubsection[{Update}]{\setlength{\rightskip}{0pt plus 5cm}virtual void CityMania::MenuEntry::Update ({\bf MenuScreen} {\em screen}, \/  bool {\em isSelected}, \/  GameTime {\em gameTime})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1MenuEntry_a0e1a13e81f7c27a116122ca5d59b3858}
+
+
+Updates the menu entry. 
+
+\subsection{Property Documentation}
+\hypertarget{classCityMania_1_1MenuEntry_a9acc56b2750d90a7c5c3f190367b803e}{
+\index{CityMania::MenuEntry@{CityMania::MenuEntry}!Text@{Text}}
+\index{Text@{Text}!CityMania::MenuEntry@{CityMania::MenuEntry}}
+\subsubsection[{Text}]{\setlength{\rightskip}{0pt plus 5cm}string CityMania::MenuEntry::Text\hspace{0.3cm}{\ttfamily  \mbox{[}get, set\mbox{]}}}}
+\label{classCityMania_1_1MenuEntry_a9acc56b2750d90a7c5c3f190367b803e}
+
+
+Gets or sets the text of this menu entry. 
+
+\subsection{Event Documentation}
+\hypertarget{classCityMania_1_1MenuEntry_a936e132fbdf1e2e598b82ef1b022f96c}{
+\index{CityMania::MenuEntry@{CityMania::MenuEntry}!Selected@{Selected}}
+\index{Selected@{Selected}!CityMania::MenuEntry@{CityMania::MenuEntry}}
+\subsubsection[{Selected}]{\setlength{\rightskip}{0pt plus 5cm}EventHandler$<${\bf PlayerIndexEventArgs}$>$ CityMania::MenuEntry::Selected}}
+\label{classCityMania_1_1MenuEntry_a936e132fbdf1e2e598b82ef1b022f96c}
+
+
+Event raised when the menu entry is selected. 
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+CityMania/Screens/MenuEntry.cs\end{DoxyCompactItemize}

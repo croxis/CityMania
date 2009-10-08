@@ -1,0 +1,106 @@
+\hypertarget{classchat_1_1ChatServer}{
+\section{chat::ChatServer Class Reference}
+\label{classchat_1_1ChatServer}\index{chat::ChatServer@{chat::ChatServer}}
+}
+Inheritance diagram for chat::ChatServer::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classchat_1_1ChatServer}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classchat_1_1ChatServer_a983f009344e16e16bd811b941ef43e48}{\_\-\_\-init\_\-\_\-}
+\item 
+def \hyperlink{classchat_1_1ChatServer_a7f0db34ae9aae25478664ce7395b11f3}{processChat}
+\item 
+\hypertarget{classchat_1_1ChatServer_a7d952b71aac4056ee37c9fcabf0977be}{
+def {\bfseries sendChat}}
+\label{classchat_1_1ChatServer_a7d952b71aac4056ee37c9fcabf0977be}
+
+\item 
+def \hyperlink{classchat_1_1ChatServer_a3155b5a8e4933d9dffbfdd7ccdc5c162}{processIRCChat}
+\item 
+\hypertarget{classchat_1_1ChatServer_a29f5cbdb203803d78e0bd93b9a0a5190}{
+def {\bfseries removeUser}}
+\label{classchat_1_1ChatServer_a29f5cbdb203803d78e0bd93b9a0a5190}
+
+\item 
+\hypertarget{classchat_1_1ChatServer_afd5d201c2cfdfd826c7bb92ee4c08477}{
+def {\bfseries joinChannel}}
+\label{classchat_1_1ChatServer_afd5d201c2cfdfd826c7bb92ee4c08477}
+
+\item 
+\hypertarget{classchat_1_1ChatServer_a85588411071687dabfbfa9a77d6d1149}{
+def {\bfseries addUser}}
+\label{classchat_1_1ChatServer_a85588411071687dabfbfa9a77d6d1149}
+
+\item 
+def \hyperlink{classchat_1_1ChatServer_a2608f0b49950c686ee1c1ffc17e4ddfd}{parsemsg}
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classchat_1_1ChatServer_aa578865668216e06f4f312a3524b9410}{
+{\bfseries users}}
+\label{classchat_1_1ChatServer_aa578865668216e06f4f312a3524b9410}
+
+\item 
+\hypertarget{classchat_1_1ChatServer_ac991d0d1a52246a1f40b2fbc9a6276d8}{
+{\bfseries channels}}
+\label{classchat_1_1ChatServer_ac991d0d1a52246a1f40b2fbc9a6276d8}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}
+Chat server implimentation
+There are plans to intigrate a minimal IRC capacity into this
+self.users = {username: peer}
+\end{DoxyVerb}
+ 
+
+\subsection{Member Function Documentation}
+\hypertarget{classchat_1_1ChatServer_a983f009344e16e16bd811b941ef43e48}{
+\index{chat::ChatServer@{chat::ChatServer}!\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}}
+\index{\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}!chat::ChatServer@{chat::ChatServer}}
+\subsubsection[{\_\-\_\-init\_\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def chat::ChatServer::\_\-\_\-init\_\-\_\- ( {\em self})}}
+\label{classchat_1_1ChatServer_a983f009344e16e16bd811b941ef43e48}
+\begin{DoxyVerb}
+\end{DoxyVerb}
+ 
+
+Reimplemented from \hyperlink{classengine_1_1Entity}{engine::Entity}.\hypertarget{classchat_1_1ChatServer_a2608f0b49950c686ee1c1ffc17e4ddfd}{
+\index{chat::ChatServer@{chat::ChatServer}!parsemsg@{parsemsg}}
+\index{parsemsg@{parsemsg}!chat::ChatServer@{chat::ChatServer}}
+\subsubsection[{parsemsg}]{\setlength{\rightskip}{0pt plus 5cm}def chat::ChatServer::parsemsg ( {\em self}, \/   {\em s})}}
+\label{classchat_1_1ChatServer_a2608f0b49950c686ee1c1ffc17e4ddfd}
+\begin{DoxyVerb}
+Breaks a message from an IRC server into its prefix, command, and arguments.
+Theved from twisted
+\end{DoxyVerb}
+ \hypertarget{classchat_1_1ChatServer_a7f0db34ae9aae25478664ce7395b11f3}{
+\index{chat::ChatServer@{chat::ChatServer}!processChat@{processChat}}
+\index{processChat@{processChat}!chat::ChatServer@{chat::ChatServer}}
+\subsubsection[{processChat}]{\setlength{\rightskip}{0pt plus 5cm}def chat::ChatServer::processChat ( {\em self}, \/   {\em peer}, \/   {\em chat})}}
+\label{classchat_1_1ChatServer_a7f0db34ae9aae25478664ce7395b11f3}
+\begin{DoxyVerb}
+Peeks into the chat container for what to do
+The chat container is then resent, intact,
+to the message target
+\end{DoxyVerb}
+ \hypertarget{classchat_1_1ChatServer_a3155b5a8e4933d9dffbfdd7ccdc5c162}{
+\index{chat::ChatServer@{chat::ChatServer}!processIRCChat@{processIRCChat}}
+\index{processIRCChat@{processIRCChat}!chat::ChatServer@{chat::ChatServer}}
+\subsubsection[{processIRCChat}]{\setlength{\rightskip}{0pt plus 5cm}def chat::ChatServer::processIRCChat ( {\em self}, \/   {\em peer}, \/   {\em message})}}
+\label{classchat_1_1ChatServer_a3155b5a8e4933d9dffbfdd7ccdc5c162}
+\begin{DoxyVerb}
+Processes irc (RFC 1459) messages
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+CityManiaServer/chat.py\end{DoxyCompactItemize}

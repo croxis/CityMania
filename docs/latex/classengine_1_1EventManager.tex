@@ -1,0 +1,104 @@
+\hypertarget{classengine_1_1EventManager}{
+\section{engine::EventManager Class Reference}
+\label{classengine_1_1EventManager}\index{engine::EventManager@{engine::EventManager}}
+}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classengine_1_1EventManager_a9937f92e3a44e5db7cb0cff939a7e3a9}{\_\-\_\-init\_\-\_\-}
+\item 
+def \hyperlink{classengine_1_1EventManager_a4c2fe323a92b282bfc2b41f45db2c622}{accept}
+\item 
+def \hyperlink{classengine_1_1EventManager_a3cbecffdaca2a66699c41f3b2ff8d5ae}{ignore}
+\item 
+def \hyperlink{classengine_1_1EventManager_a80462c68550513026b2ffe34ede4fca6}{post}
+\item 
+\hypertarget{classengine_1_1EventManager_aaf771584ec632fe5c077a6461fa29b98}{
+def {\bfseries start}}
+\label{classengine_1_1EventManager_aaf771584ec632fe5c077a6461fa29b98}
+
+\item 
+\hypertarget{classengine_1_1EventManager_a5bbd01cde9fb7d71af264297bb74a8d1}{
+def {\bfseries stop}}
+\label{classengine_1_1EventManager_a5bbd01cde9fb7d71af264297bb74a8d1}
+
+\item 
+\hypertarget{classengine_1_1EventManager_a305869a1781643c9600c220e5a4d1a76}{
+def {\bfseries step}}
+\label{classengine_1_1EventManager_a305869a1781643c9600c220e5a4d1a76}
+
+\item 
+def \hyperlink{classengine_1_1EventManager_a20ef19419adf221c5632d4258f1def37}{send}
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classengine_1_1EventManager_ac1ec3444ffc78a3d2303e5cf1b437630}{
+{\bfseries listeners}}
+\label{classengine_1_1EventManager_ac1ec3444ffc78a3d2303e5cf1b437630}
+
+\item 
+\hypertarget{classengine_1_1EventManager_a737e3b4449d2a5e311f2baaee88c91dd}{
+{\bfseries eventQueue}}
+\label{classengine_1_1EventManager_a737e3b4449d2a5e311f2baaee88c91dd}
+
+\item 
+\hypertarget{classengine_1_1EventManager_a825eeee99ae084c22cd26764f69298fb}{
+{\bfseries running}}
+\label{classengine_1_1EventManager_a825eeee99ae084c22cd26764f69298fb}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classengine_1_1EventManager_a9937f92e3a44e5db7cb0cff939a7e3a9}{
+\index{engine::EventManager@{engine::EventManager}!\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}}
+\index{\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}!engine::EventManager@{engine::EventManager}}
+\subsubsection[{\_\-\_\-init\_\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def engine::EventManager::\_\-\_\-init\_\-\_\- ( {\em self})}}
+\label{classengine_1_1EventManager_a9937f92e3a44e5db7cb0cff939a7e3a9}
+\begin{DoxyVerb}
+self.listeners: {event: {object1: [method, [arguments]], object2: [method2, [arguments]]}, event2... }
+I *think* this is thread safe as is as thread's arn't directly writing to it.
+We'll find out :P
+\end{DoxyVerb}
+ \hypertarget{classengine_1_1EventManager_a4c2fe323a92b282bfc2b41f45db2c622}{
+\index{engine::EventManager@{engine::EventManager}!accept@{accept}}
+\index{accept@{accept}!engine::EventManager@{engine::EventManager}}
+\subsubsection[{accept}]{\setlength{\rightskip}{0pt plus 5cm}def engine::EventManager::accept ( {\em self}, \/   {\em event}, \/   {\em method}, \/   {\em extraArgs}, \/   {\em object})}}
+\label{classengine_1_1EventManager_a4c2fe323a92b282bfc2b41f45db2c622}
+\begin{DoxyVerb}
+Adds a new listener into the database.  This is stored by event to reduce chattyness
+Overides Entity.accept(), not best design
+\end{DoxyVerb}
+ \hypertarget{classengine_1_1EventManager_a3cbecffdaca2a66699c41f3b2ff8d5ae}{
+\index{engine::EventManager@{engine::EventManager}!ignore@{ignore}}
+\index{ignore@{ignore}!engine::EventManager@{engine::EventManager}}
+\subsubsection[{ignore}]{\setlength{\rightskip}{0pt plus 5cm}def engine::EventManager::ignore ( {\em self}, \/   {\em event}, \/   {\em object})}}
+\label{classengine_1_1EventManager_a3cbecffdaca2a66699c41f3b2ff8d5ae}
+\begin{DoxyVerb}
+Removes listening object from database
+Removes event if that event databse is empty
+\end{DoxyVerb}
+ \hypertarget{classengine_1_1EventManager_a80462c68550513026b2ffe34ede4fca6}{
+\index{engine::EventManager@{engine::EventManager}!post@{post}}
+\index{post@{post}!engine::EventManager@{engine::EventManager}}
+\subsubsection[{post}]{\setlength{\rightskip}{0pt plus 5cm}def engine::EventManager::post ( {\em self}, \/   {\em event}, \/   {\em extraArgs} = {\ttfamily \mbox{[}\mbox{]}})}}
+\label{classengine_1_1EventManager_a80462c68550513026b2ffe34ede4fca6}
+\begin{DoxyVerb}
+Events are posted into self.eventQueue
+\end{DoxyVerb}
+ \hypertarget{classengine_1_1EventManager_a20ef19419adf221c5632d4258f1def37}{
+\index{engine::EventManager@{engine::EventManager}!send@{send}}
+\index{send@{send}!engine::EventManager@{engine::EventManager}}
+\subsubsection[{send}]{\setlength{\rightskip}{0pt plus 5cm}def engine::EventManager::send ( {\em self})}}
+\label{classengine_1_1EventManager_a20ef19419adf221c5632d4258f1def37}
+\begin{DoxyVerb}
+Notify all listening object of an event
+We also pump tick events here
+TODO: Add error checking
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+CityManiaServer/engine.py\end{DoxyCompactItemize}

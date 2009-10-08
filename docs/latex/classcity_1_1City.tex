@@ -1,0 +1,74 @@
+\hypertarget{classcity_1_1City}{
+\section{city::City Class Reference}
+\label{classcity_1_1City}\index{city::City@{city::City}}
+}
+Inheritance diagram for city::City::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classcity_1_1City}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classcity_1_1City_af66d86e522c54c232f0ee7e7df63e82e}{\_\-\_\-init\_\-\_\-}
+\item 
+\hypertarget{classcity_1_1City_a9d6ea46a76bf0b19a52c8c9b1e1bf392}{
+def {\bfseries generate}}
+\label{classcity_1_1City_a9d6ea46a76bf0b19a52c8c9b1e1bf392}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classcity_1_1City_a6fe4953ed866f39ff28f9772846fca1e}{
+{\bfseries name}}
+\label{classcity_1_1City_a6fe4953ed866f39ff28f9772846fca1e}
+
+\item 
+\hypertarget{classcity_1_1City_ab9f83339e37095ab039310767c519af1}{
+{\bfseries size}}
+\label{classcity_1_1City_ab9f83339e37095ab039310767c519af1}
+
+\item 
+\hypertarget{classcity_1_1City_accc3327248bab8927ecd0792486f9845}{
+{\bfseries id}}
+\label{classcity_1_1City_accc3327248bab8927ecd0792486f9845}
+
+\item 
+\hypertarget{classcity_1_1City_ae5abf3124a6aef59e90276493b5d830c}{
+{\bfseries position}}
+\label{classcity_1_1City_ae5abf3124a6aef59e90276493b5d830c}
+
+\item 
+\hypertarget{classcity_1_1City_af253a073b93aab945e8751c1c5711d91}{
+{\bfseries neighbors}}
+\label{classcity_1_1City_af253a073b93aab945e8751c1c5711d91}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}
+This is the City class, the center piece to the entire simulation
+\end{DoxyVerb}
+ 
+
+\subsection{Member Function Documentation}
+\hypertarget{classcity_1_1City_af66d86e522c54c232f0ee7e7df63e82e}{
+\index{city::City@{city::City}!\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}}
+\index{\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}!city::City@{city::City}}
+\subsubsection[{\_\-\_\-init\_\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def city::City::\_\-\_\-init\_\-\_\- ( {\em self}, \/   {\em name} = {\ttfamily \char`\"{}City\char`\"{}}, \/   {\em size} = {\ttfamily 1})}}
+\label{classcity_1_1City_af66d86e522c54c232f0ee7e7df63e82e}
+\begin{DoxyVerb}
+self.size: City size.  Equivlent to SC4 city sizes.  Size 1 is small, Size 2 is Medium, Size 4 is large
+self.id: Unique ID for the city, position in the region cities list
+self.position:  Position of the city in the region
+self.neighbors: coordiants and cityID of the neighbor at those coordiants
+ex: (0,49,1) from tile 0 to 49 on that side, city 1 is the neighbor. NESW ([[(0,49,4)],[],[],[]])
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+CityManiaServer/city.py\end{DoxyCompactItemize}

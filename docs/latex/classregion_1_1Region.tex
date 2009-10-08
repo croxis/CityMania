@@ -1,0 +1,78 @@
+\hypertarget{classregion_1_1Region}{
+\section{region::Region Class Reference}
+\label{classregion_1_1Region}\index{region::Region@{region::Region}}
+}
+Inheritance diagram for region::Region::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classregion_1_1Region}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classregion_1_1Region_a9b4be4786787466e271d97fb8063c8f2}{
+def {\bfseries \_\-\_\-init\_\-\_\-}}
+\label{classregion_1_1Region_a9b4be4786787466e271d97fb8063c8f2}
+
+\item 
+def \hyperlink{classregion_1_1Region_a526194edb7c6a6cb23d3f36a89093cf8}{generate}
+\item 
+def \hyperlink{classregion_1_1Region_a496244739549595cb98062d08d774ec1}{loadCity}
+\item 
+def \hyperlink{classregion_1_1Region_a7b8b846713ca3d88d57d9939aafe7ab4}{syncCities}
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classregion_1_1Region_aee27735b667d7300346a5b301a24ef61}{
+{\bfseries name}}
+\label{classregion_1_1Region_aee27735b667d7300346a5b301a24ef61}
+
+\item 
+\hypertarget{classregion_1_1Region_a8be52b89fefd13a44cf9ae1f0be2ee15}{
+{\bfseries cities}}
+\label{classregion_1_1Region_a8be52b89fefd13a44cf9ae1f0be2ee15}
+
+\item 
+\hypertarget{classregion_1_1Region_a4fd333b6f3d9baf0c32cadcd97051225}{
+{\bfseries terrainTextureDB}}
+\label{classregion_1_1Region_a4fd333b6f3d9baf0c32cadcd97051225}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classregion_1_1Region_a526194edb7c6a6cb23d3f36a89093cf8}{
+\index{region::Region@{region::Region}!generate@{generate}}
+\index{generate@{generate}!region::Region@{region::Region}}
+\subsubsection[{generate}]{\setlength{\rightskip}{0pt plus 5cm}def region::Region::generate ( {\em self}, \/   {\em hightMapPath} = {\ttfamily None}, \/   {\em colorMapPath} = {\ttfamily None}, \/   {\em cityMapPath} = {\ttfamily None}, \/   {\em terrainTextureDB} = {\ttfamily None})}}
+\label{classregion_1_1Region_a526194edb7c6a6cb23d3f36a89093cf8}
+\begin{DoxyVerb}
+Generates region
+heightmap is a filepath for grayscale bitmap for heigh
+colormap is color bitmap for terrain texture
+terrainTextureDB is data on texture to use for color map
+Creates an unfounded city
+\end{DoxyVerb}
+ \hypertarget{classregion_1_1Region_a496244739549595cb98062d08d774ec1}{
+\index{region::Region@{region::Region}!loadCity@{loadCity}}
+\index{loadCity@{loadCity}!region::Region@{region::Region}}
+\subsubsection[{loadCity}]{\setlength{\rightskip}{0pt plus 5cm}def region::Region::loadCity ( {\em self}, \/   {\em cityKey}, \/   {\em playerName}, \/   {\em password} = {\ttfamily \char`\"{}\char`\"{}})}}
+\label{classregion_1_1Region_a496244739549595cb98062d08d774ec1}
+\begin{DoxyVerb}
+loads a city based on cityKey
+\end{DoxyVerb}
+ \hypertarget{classregion_1_1Region_a7b8b846713ca3d88d57d9939aafe7ab4}{
+\index{region::Region@{region::Region}!syncCities@{syncCities}}
+\index{syncCities@{syncCities}!region::Region@{region::Region}}
+\subsubsection[{syncCities}]{\setlength{\rightskip}{0pt plus 5cm}def region::Region::syncCities ( {\em self})}}
+\label{classregion_1_1Region_a7b8b846713ca3d88d57d9939aafe7ab4}
+\begin{DoxyVerb}
+Syncronizes intercity effects on a regulat basis
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+CityManiaServer/region.py\end{DoxyCompactItemize}

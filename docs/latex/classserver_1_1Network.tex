@@ -1,0 +1,102 @@
+\hypertarget{classserver_1_1Network}{
+\section{server::Network Class Reference}
+\label{classserver_1_1Network}\index{server::Network@{server::Network}}
+}
+Inheritance diagram for server::Network::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3cm]{classserver_1_1Network}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classserver_1_1Network_ab05d0277f8db59d2aa4ab24c8ecc5df3}{
+def {\bfseries \_\-\_\-init\_\-\_\-}}
+\label{classserver_1_1Network_ab05d0277f8db59d2aa4ab24c8ecc5df3}
+
+\item 
+\hypertarget{classserver_1_1Network_a0883a7b2371147208d265c0ea682c890}{
+def {\bfseries run}}
+\label{classserver_1_1Network_a0883a7b2371147208d265c0ea682c890}
+
+\item 
+def \hyperlink{classserver_1_1Network_a981b8652a76e0bba27263690fcdf9a62}{listen}
+\item 
+def \hyperlink{classserver_1_1Network_acc3f7a604bfde9cbafb300b693593993}{broadcast}
+\item 
+def \hyperlink{classserver_1_1Network_ab10936565ca90ef460d5497ac40a4618}{send}
+\item 
+def \hyperlink{classserver_1_1Network_a638b4611a8e77862e8b974848dc775e5}{exit}
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classserver_1_1Network_aeefb1ebd2458414c630a85a12b2d2eab}{
+{\bfseries running}}
+\label{classserver_1_1Network_aeefb1ebd2458414c630a85a12b2d2eab}
+
+\item 
+\hypertarget{classserver_1_1Network_aa56ec41dd847ce96a675d5f94f7c5264}{
+{\bfseries clients}}
+\label{classserver_1_1Network_aa56ec41dd847ce96a675d5f94f7c5264}
+
+\item 
+\hypertarget{classserver_1_1Network_a1264b49262cf955848a0f2d2f928e012}{
+{\bfseries s}}
+\label{classserver_1_1Network_a1264b49262cf955848a0f2d2f928e012}
+
+\item 
+\hypertarget{classserver_1_1Network_aa8fbad2d74eb9fd8952ba86759307caa}{
+{\bfseries daemon}}
+\label{classserver_1_1Network_aa8fbad2d74eb9fd8952ba86759307caa}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}
+Network interface
+\end{DoxyVerb}
+ 
+
+\subsection{Member Function Documentation}
+\hypertarget{classserver_1_1Network_acc3f7a604bfde9cbafb300b693593993}{
+\index{server::Network@{server::Network}!broadcast@{broadcast}}
+\index{broadcast@{broadcast}!server::Network@{server::Network}}
+\subsubsection[{broadcast}]{\setlength{\rightskip}{0pt plus 5cm}def server::Network::broadcast ( {\em self}, \/   {\em data})}}
+\label{classserver_1_1Network_acc3f7a604bfde9cbafb300b693593993}
+\begin{DoxyVerb}
+Broadcasts data to all clients 
+\end{DoxyVerb}
+ \hypertarget{classserver_1_1Network_a638b4611a8e77862e8b974848dc775e5}{
+\index{server::Network@{server::Network}!exit@{exit}}
+\index{exit@{exit}!server::Network@{server::Network}}
+\subsubsection[{exit}]{\setlength{\rightskip}{0pt plus 5cm}def server::Network::exit ( {\em self})}}
+\label{classserver_1_1Network_a638b4611a8e77862e8b974848dc775e5}
+\begin{DoxyVerb}
+Server is shutting down, so let us tidy up
+\end{DoxyVerb}
+ \hypertarget{classserver_1_1Network_a981b8652a76e0bba27263690fcdf9a62}{
+\index{server::Network@{server::Network}!listen@{listen}}
+\index{listen@{listen}!server::Network@{server::Network}}
+\subsubsection[{listen}]{\setlength{\rightskip}{0pt plus 5cm}def server::Network::listen ( {\em self})}}
+\label{classserver_1_1Network_a981b8652a76e0bba27263690fcdf9a62}
+\begin{DoxyVerb}
+Listens for new connection and spawn processes
+\end{DoxyVerb}
+ 
+
+Reimplemented in \hyperlink{classserver_1_1NetworkIRC_ae45074cb1b23332c54b323d5304d5512}{server::NetworkIRC}.\hypertarget{classserver_1_1Network_ab10936565ca90ef460d5497ac40a4618}{
+\index{server::Network@{server::Network}!send@{send}}
+\index{send@{send}!server::Network@{server::Network}}
+\subsubsection[{send}]{\setlength{\rightskip}{0pt plus 5cm}def server::Network::send ( {\em self}, \/   {\em peer}, \/   {\em data})}}
+\label{classserver_1_1Network_ab10936565ca90ef460d5497ac40a4618}
+\begin{DoxyVerb}
+Sends data to a specific client
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+CityManiaServer/server.py\end{DoxyCompactItemize}

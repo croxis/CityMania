@@ -1,0 +1,134 @@
+\hypertarget{classCityMania_1_1MenuScreen}{
+\section{CityMania::MenuScreen Class Reference}
+\label{classCityMania_1_1MenuScreen}\index{CityMania::MenuScreen@{CityMania::MenuScreen}}
+}
+
+
+Base class for screens that contain a menu of options. The user can move up and down to select an entry, or cancel to back out of the screen.  
+Inheritance diagram for CityMania::MenuScreen::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.81407cm]{classCityMania_1_1MenuScreen}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classCityMania_1_1MenuScreen_a21cdf9ff5eee4bc23ba30a59b297c765}{MenuScreen} (string menuTitle)
+\begin{DoxyCompactList}\small\item\em Constructor. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1MenuScreen_ad3892ecccfde65f286cebd1f83083cd1}{LoadContent} ()
+\begin{DoxyCompactList}\small\item\em Load graphics content for the screen. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1MenuScreen_a9ec18d09465dd6ca3a476193bd25e0bd}{HandleInput} (\hyperlink{classCityMania_1_1InputState}{InputState} input)
+\begin{DoxyCompactList}\small\item\em Responds to user input, changing the selected entry and accepting or cancelling the menu. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1MenuScreen_af5c5b89dcc99c92d99ec3e0924e7bea1}{Update} (GameTime gameTime, bool otherScreenHasFocus, bool coveredByOtherScreen)
+\begin{DoxyCompactList}\small\item\em Updates the menu. \item\end{DoxyCompactList}\item 
+override void \hyperlink{classCityMania_1_1MenuScreen_a433f334c09ea523b02322bd153e960d1}{Draw} (GameTime gameTime)
+\begin{DoxyCompactList}\small\item\em Draws the menu. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \hyperlink{classCityMania_1_1MenuScreen_a43061349ad3024e285e418cb1716e887}{OnSelectEntry} (int entryIndex, PlayerIndex playerIndex)
+\begin{DoxyCompactList}\small\item\em Handler for when the user has chosen a menu entry. \item\end{DoxyCompactList}\item 
+virtual void \hyperlink{classCityMania_1_1MenuScreen_adba6d36ac9e5f30e2e3c2147c7510bf0}{OnCancel} (PlayerIndex playerIndex)
+\begin{DoxyCompactList}\small\item\em Handler for when the user has cancelled the menu. \item\end{DoxyCompactList}\item 
+void \hyperlink{classCityMania_1_1MenuScreen_a89a79a688ebc8fdddf3ee1aabb43dad1}{OnCancel} (object sender, \hyperlink{classCityMania_1_1PlayerIndexEventArgs}{PlayerIndexEventArgs} e)
+\begin{DoxyCompactList}\small\item\em Helper overload makes it easy to use OnCancel as a \hyperlink{classCityMania_1_1MenuEntry}{MenuEntry} event handler. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+IList$<$ \hyperlink{classCityMania_1_1MenuEntry}{MenuEntry} $>$ \hyperlink{classCityMania_1_1MenuScreen_a62f17cbe5d646e7ba2e9d8b129069e22}{MenuEntries}\hspace{0.3cm}{\ttfamily  \mbox{[}get\mbox{]}}
+\begin{DoxyCompactList}\small\item\em Gets the list of menu entries, so derived classes can add or change the menu contents. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Base class for screens that contain a menu of options. The user can move up and down to select an entry, or cancel to back out of the screen. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classCityMania_1_1MenuScreen_a21cdf9ff5eee4bc23ba30a59b297c765}{
+\index{CityMania::MenuScreen@{CityMania::MenuScreen}!MenuScreen@{MenuScreen}}
+\index{MenuScreen@{MenuScreen}!CityMania::MenuScreen@{CityMania::MenuScreen}}
+\subsubsection[{MenuScreen}]{\setlength{\rightskip}{0pt plus 5cm}CityMania::MenuScreen::MenuScreen (string {\em menuTitle})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCityMania_1_1MenuScreen_a21cdf9ff5eee4bc23ba30a59b297c765}
+
+
+Constructor. 
+
+\subsection{Member Function Documentation}
+\hypertarget{classCityMania_1_1MenuScreen_a433f334c09ea523b02322bd153e960d1}{
+\index{CityMania::MenuScreen@{CityMania::MenuScreen}!Draw@{Draw}}
+\index{Draw@{Draw}!CityMania::MenuScreen@{CityMania::MenuScreen}}
+\subsubsection[{Draw}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::MenuScreen::Draw (GameTime {\em gameTime})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1MenuScreen_a433f334c09ea523b02322bd153e960d1}
+
+
+Draws the menu. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a28fbcdba21da5e606d32d87b18bcdf29}{CityMania::GameScreen}.
+
+Reimplemented in \hyperlink{classCityMania_1_1PauseMenuScreen_a1daaf1e6d3dc66500fcf020c2098a675}{CityMania::PauseMenuScreen}.\hypertarget{classCityMania_1_1MenuScreen_a9ec18d09465dd6ca3a476193bd25e0bd}{
+\index{CityMania::MenuScreen@{CityMania::MenuScreen}!HandleInput@{HandleInput}}
+\index{HandleInput@{HandleInput}!CityMania::MenuScreen@{CityMania::MenuScreen}}
+\subsubsection[{HandleInput}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::MenuScreen::HandleInput ({\bf InputState} {\em input})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1MenuScreen_a9ec18d09465dd6ca3a476193bd25e0bd}
+
+
+Responds to user input, changing the selected entry and accepting or cancelling the menu. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a80edab75e121f4e08b007f47206cf29c}{CityMania::GameScreen}.\hypertarget{classCityMania_1_1MenuScreen_ad3892ecccfde65f286cebd1f83083cd1}{
+\index{CityMania::MenuScreen@{CityMania::MenuScreen}!LoadContent@{LoadContent}}
+\index{LoadContent@{LoadContent}!CityMania::MenuScreen@{CityMania::MenuScreen}}
+\subsubsection[{LoadContent}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::MenuScreen::LoadContent ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1MenuScreen_ad3892ecccfde65f286cebd1f83083cd1}
+
+
+Load graphics content for the screen. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a4dc3798784fff49b20280903d796c94c}{CityMania::GameScreen}.
+
+Reimplemented in \hyperlink{classCityMania_1_1MainMenuScreen_a784682ea2036cdefdbbf8ea642f70be0}{CityMania::MainMenuScreen}.\hypertarget{classCityMania_1_1MenuScreen_a89a79a688ebc8fdddf3ee1aabb43dad1}{
+\index{CityMania::MenuScreen@{CityMania::MenuScreen}!OnCancel@{OnCancel}}
+\index{OnCancel@{OnCancel}!CityMania::MenuScreen@{CityMania::MenuScreen}}
+\subsubsection[{OnCancel}]{\setlength{\rightskip}{0pt plus 5cm}void CityMania::MenuScreen::OnCancel (object {\em sender}, \/  {\bf PlayerIndexEventArgs} {\em e})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected\mbox{]}}}}
+\label{classCityMania_1_1MenuScreen_a89a79a688ebc8fdddf3ee1aabb43dad1}
+
+
+Helper overload makes it easy to use OnCancel as a \hyperlink{classCityMania_1_1MenuEntry}{MenuEntry} event handler. \hypertarget{classCityMania_1_1MenuScreen_adba6d36ac9e5f30e2e3c2147c7510bf0}{
+\index{CityMania::MenuScreen@{CityMania::MenuScreen}!OnCancel@{OnCancel}}
+\index{OnCancel@{OnCancel}!CityMania::MenuScreen@{CityMania::MenuScreen}}
+\subsubsection[{OnCancel}]{\setlength{\rightskip}{0pt plus 5cm}virtual void CityMania::MenuScreen::OnCancel (PlayerIndex {\em playerIndex})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected, virtual\mbox{]}}}}
+\label{classCityMania_1_1MenuScreen_adba6d36ac9e5f30e2e3c2147c7510bf0}
+
+
+Handler for when the user has cancelled the menu. 
+
+Reimplemented in \hyperlink{classCityMania_1_1MainMenuScreen_a46244ba46d101dafbdad93e8a8cb00a2}{CityMania::MainMenuScreen}.\hypertarget{classCityMania_1_1MenuScreen_a43061349ad3024e285e418cb1716e887}{
+\index{CityMania::MenuScreen@{CityMania::MenuScreen}!OnSelectEntry@{OnSelectEntry}}
+\index{OnSelectEntry@{OnSelectEntry}!CityMania::MenuScreen@{CityMania::MenuScreen}}
+\subsubsection[{OnSelectEntry}]{\setlength{\rightskip}{0pt plus 5cm}virtual void CityMania::MenuScreen::OnSelectEntry (int {\em entryIndex}, \/  PlayerIndex {\em playerIndex})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected, virtual\mbox{]}}}}
+\label{classCityMania_1_1MenuScreen_a43061349ad3024e285e418cb1716e887}
+
+
+Handler for when the user has chosen a menu entry. \hypertarget{classCityMania_1_1MenuScreen_af5c5b89dcc99c92d99ec3e0924e7bea1}{
+\index{CityMania::MenuScreen@{CityMania::MenuScreen}!Update@{Update}}
+\index{Update@{Update}!CityMania::MenuScreen@{CityMania::MenuScreen}}
+\subsubsection[{Update}]{\setlength{\rightskip}{0pt plus 5cm}override void CityMania::MenuScreen::Update (GameTime {\em gameTime}, \/  bool {\em otherScreenHasFocus}, \/  bool {\em coveredByOtherScreen})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCityMania_1_1MenuScreen_af5c5b89dcc99c92d99ec3e0924e7bea1}
+
+
+Updates the menu. 
+
+Reimplemented from \hyperlink{classCityMania_1_1GameScreen_a7f0d5b33eca521dc7fcd89eec337ccf9}{CityMania::GameScreen}.
+
+\subsection{Property Documentation}
+\hypertarget{classCityMania_1_1MenuScreen_a62f17cbe5d646e7ba2e9d8b129069e22}{
+\index{CityMania::MenuScreen@{CityMania::MenuScreen}!MenuEntries@{MenuEntries}}
+\index{MenuEntries@{MenuEntries}!CityMania::MenuScreen@{CityMania::MenuScreen}}
+\subsubsection[{MenuEntries}]{\setlength{\rightskip}{0pt plus 5cm}IList$<${\bf MenuEntry}$>$ CityMania::MenuScreen::MenuEntries\hspace{0.3cm}{\ttfamily  \mbox{[}get, protected\mbox{]}}}}
+\label{classCityMania_1_1MenuScreen_a62f17cbe5d646e7ba2e9d8b129069e22}
+
+
+Gets the list of menu entries, so derived classes can add or change the menu contents. 
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+CityMania/Screens/MenuScreen.cs\end{DoxyCompactItemize}

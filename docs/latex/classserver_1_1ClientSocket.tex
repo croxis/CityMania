@@ -1,0 +1,78 @@
+\hypertarget{classserver_1_1ClientSocket}{
+\section{server::ClientSocket Class Reference}
+\label{classserver_1_1ClientSocket}\index{server::ClientSocket@{server::ClientSocket}}
+}
+Inheritance diagram for server::ClientSocket::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3cm]{classserver_1_1ClientSocket}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classserver_1_1ClientSocket_aaeb638a576ccbac7a8a0d96a680b55fe}{\_\-\_\-init\_\-\_\-}
+\item 
+\hypertarget{classserver_1_1ClientSocket_aa3630c3c7dcb84037b537a81ee513247}{
+def {\bfseries run}}
+\label{classserver_1_1ClientSocket_aa3630c3c7dcb84037b537a81ee513247}
+
+\item 
+def \hyperlink{classserver_1_1ClientSocket_af0ce9184f5505c6fee6cc4a767f84198}{send}
+\item 
+\hypertarget{classserver_1_1ClientSocket_af95a5408be10559e255f37b54bcbc73e}{
+def {\bfseries exit}}
+\label{classserver_1_1ClientSocket_af95a5408be10559e255f37b54bcbc73e}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classserver_1_1ClientSocket_ae3ab6b3e713565897b0e8f570c8744f2}{
+{\bfseries s}}
+\label{classserver_1_1ClientSocket_ae3ab6b3e713565897b0e8f570c8744f2}
+
+\item 
+\hypertarget{classserver_1_1ClientSocket_ad97dd671ec62a77a90e89370f07e680c}{
+{\bfseries peer}}
+\label{classserver_1_1ClientSocket_ad97dd671ec62a77a90e89370f07e680c}
+
+\item 
+\hypertarget{classserver_1_1ClientSocket_a9f77c1171467ed535dbae07d4c402251}{
+{\bfseries running}}
+\label{classserver_1_1ClientSocket_a9f77c1171467ed535dbae07d4c402251}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}
+Connection to client
+\end{DoxyVerb}
+ 
+
+\subsection{Member Function Documentation}
+\hypertarget{classserver_1_1ClientSocket_aaeb638a576ccbac7a8a0d96a680b55fe}{
+\index{server::ClientSocket@{server::ClientSocket}!\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}}
+\index{\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}!server::ClientSocket@{server::ClientSocket}}
+\subsubsection[{\_\-\_\-init\_\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def server::ClientSocket::\_\-\_\-init\_\-\_\- ( {\em self}, \/   {\em clientsock})}}
+\label{classserver_1_1ClientSocket_aaeb638a576ccbac7a8a0d96a680b55fe}
+\begin{DoxyVerb}
+Overide to threading for client socket
+\end{DoxyVerb}
+ \hypertarget{classserver_1_1ClientSocket_af0ce9184f5505c6fee6cc4a767f84198}{
+\index{server::ClientSocket@{server::ClientSocket}!send@{send}}
+\index{send@{send}!server::ClientSocket@{server::ClientSocket}}
+\subsubsection[{send}]{\setlength{\rightskip}{0pt plus 5cm}def server::ClientSocket::send ( {\em self}, \/   {\em data})}}
+\label{classserver_1_1ClientSocket_af0ce9184f5505c6fee6cc4a767f84198}
+\begin{DoxyVerb}
+sends data to client
+data needs to be a Protocol Buffer object
+\end{DoxyVerb}
+ 
+
+Reimplemented in \hyperlink{classserver_1_1ClientSocketIRC_a513635125e7ae1ef86175971b09b9a0c}{server::ClientSocketIRC}.
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+CityManiaServer/server.py\end{DoxyCompactItemize}

@@ -1,0 +1,43 @@
+// Protocols common to both client and server
+// Base container which stores all messages
+message Container {
+    optional Chat chat = 1;
+    optional Login login = 2;
+    optional LoginResponse loginResponse =3;
+    optional SelectCity selectCity = 4;
+    optional SelectCityResponse selectCityResponse = 5;
+}
+
+message Chat {
+    //Chat message
+    required string message = 1;
+    optional string to = 2;
+    optional string sender = 3; //Added by server
+}
+
+message Login {
+    required string name = 1;
+    required string password = 2 [default=""];
+    required string regionPassword = 3 [default=""];
+}
+
+message LoginResponse {
+    enum Type {
+        FAILURE = 0;
+        SUCCESS = 1;
+    }
+    required Type type = 1;
+    optional string message = 2 [default=""];
+}
+
+message SelectCity {
+    required int32 cityID = 1;
+}
+
+message SelectCityResponse {
+    enum Type {
+        FAILURE = 0;
+        SUCCESS = 1;
+    }
+    required Type type = 1;
+}

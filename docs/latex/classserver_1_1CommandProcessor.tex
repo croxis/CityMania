@@ -1,0 +1,113 @@
+\hypertarget{classserver_1_1CommandProcessor}{
+\section{server::CommandProcessor Class Reference}
+\label{classserver_1_1CommandProcessor}\index{server::CommandProcessor@{server::CommandProcessor}}
+}
+Inheritance diagram for server::CommandProcessor::\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classserver_1_1CommandProcessor}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classserver_1_1CommandProcessor_a94af5de40814b0bbfcc427397a0593f1}{
+def {\bfseries \_\-\_\-init\_\-\_\-}}
+\label{classserver_1_1CommandProcessor_a94af5de40814b0bbfcc427397a0593f1}
+
+\item 
+\hypertarget{classserver_1_1CommandProcessor_a97aba9b5f69e54284a59779d6a861a77}{
+def {\bfseries lockQueue}}
+\label{classserver_1_1CommandProcessor_a97aba9b5f69e54284a59779d6a861a77}
+
+\item 
+\hypertarget{classserver_1_1CommandProcessor_a59451fbff3f92f014a02c20001b8d19e}{
+def {\bfseries unlockQueue}}
+\label{classserver_1_1CommandProcessor_a59451fbff3f92f014a02c20001b8d19e}
+
+\item 
+\hypertarget{classserver_1_1CommandProcessor_ab0b37f081870accecb3311fb756fafca}{
+def {\bfseries queue}}
+\label{classserver_1_1CommandProcessor_ab0b37f081870accecb3311fb756fafca}
+
+\item 
+\hypertarget{classserver_1_1CommandProcessor_adfbc8e43f3143865981b489075a00adc}{
+def {\bfseries step}}
+\label{classserver_1_1CommandProcessor_adfbc8e43f3143865981b489075a00adc}
+
+\item 
+def \hyperlink{classserver_1_1CommandProcessor_acc6fe3dd91d4fdf1f62a77533c9c788a}{processData}
+\item 
+def \hyperlink{classserver_1_1CommandProcessor_a9e1c9fcb08ab4ee46e832153cbb65b60}{addPlayer}
+\item 
+def \hyperlink{classserver_1_1CommandProcessor_ab08f48cd02cb0b2ec77673fe3c590f27}{login}
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classserver_1_1CommandProcessor_aea36aa623b8a0882b4f323db165394be}{
+{\bfseries commandQueue}}
+\label{classserver_1_1CommandProcessor_aea36aa623b8a0882b4f323db165394be}
+
+\item 
+\hypertarget{classserver_1_1CommandProcessor_ae22edb4ff4f1f2a8902994ec325041c3}{
+{\bfseries lock}}
+\label{classserver_1_1CommandProcessor_ae22edb4ff4f1f2a8902994ec325041c3}
+
+\item 
+\hypertarget{classserver_1_1CommandProcessor_a9013d3dcf56098db2da38580ae81e11e}{
+{\bfseries password}}
+\label{classserver_1_1CommandProcessor_a9013d3dcf56098db2da38580ae81e11e}
+
+\item 
+\hypertarget{classserver_1_1CommandProcessor_aa3c8c2789ff3be6af3e58cf5c0610073}{
+{\bfseries players}}
+\label{classserver_1_1CommandProcessor_aa3c8c2789ff3be6af3e58cf5c0610073}
+
+\item 
+\hypertarget{classserver_1_1CommandProcessor_ab06bf4b2c6aa6b2e3c76f69707882f8c}{
+{\bfseries playersLoggedIn}}
+\label{classserver_1_1CommandProcessor_ab06bf4b2c6aa6b2e3c76f69707882f8c}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}
+This converts incomming communication into the server message system
+Locking system provided so the server can halt the queue mid operation
+TODO: Add more refined locking for a per city basis (so one city update wont block the others)
+TODO: Add user account management/command authorization here
+\end{DoxyVerb}
+ 
+
+\subsection{Member Function Documentation}
+\hypertarget{classserver_1_1CommandProcessor_a9e1c9fcb08ab4ee46e832153cbb65b60}{
+\index{server::CommandProcessor@{server::CommandProcessor}!addPlayer@{addPlayer}}
+\index{addPlayer@{addPlayer}!server::CommandProcessor@{server::CommandProcessor}}
+\subsubsection[{addPlayer}]{\setlength{\rightskip}{0pt plus 5cm}def server::CommandProcessor::addPlayer ( {\em self}, \/   {\em playerName}, \/   {\em password})}}
+\label{classserver_1_1CommandProcessor_a9e1c9fcb08ab4ee46e832153cbb65b60}
+\begin{DoxyVerb}
+Adds player to region
+\end{DoxyVerb}
+ \hypertarget{classserver_1_1CommandProcessor_ab08f48cd02cb0b2ec77673fe3c590f27}{
+\index{server::CommandProcessor@{server::CommandProcessor}!login@{login}}
+\index{login@{login}!server::CommandProcessor@{server::CommandProcessor}}
+\subsubsection[{login}]{\setlength{\rightskip}{0pt plus 5cm}def server::CommandProcessor::login ( {\em self}, \/   {\em peer}, \/   {\em login})}}
+\label{classserver_1_1CommandProcessor_ab08f48cd02cb0b2ec77673fe3c590f27}
+\begin{DoxyVerb}
+Logs in player to the server
+\end{DoxyVerb}
+ \hypertarget{classserver_1_1CommandProcessor_acc6fe3dd91d4fdf1f62a77533c9c788a}{
+\index{server::CommandProcessor@{server::CommandProcessor}!processData@{processData}}
+\index{processData@{processData}!server::CommandProcessor@{server::CommandProcessor}}
+\subsubsection[{processData}]{\setlength{\rightskip}{0pt plus 5cm}def server::CommandProcessor::processData ( {\em self}, \/   {\em peer}, \/   {\em data})}}
+\label{classserver_1_1CommandProcessor_acc6fe3dd91d4fdf1f62a77533c9c788a}
+\begin{DoxyVerb}
+processes serialized network event object into internal message system
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file:\begin{DoxyCompactItemize}
+\item 
+CityManiaServer/server.py\end{DoxyCompactItemize}
