@@ -1,0 +1,18 @@
+# Generic UI elements
+TXT_UI_NEWGAME:
+  english: New Game
+TXT_UI_QUIT:
+  english: Quit
+TXT_UI_ONLINE:
+  english: Online
+TXT_UI_OFFLINE:
+  english: Offline
+TXT_UI_OK:
+  english: Ok
+TXT_UI_MAINMENUTITLE:
+  english: City Mania
+TXT_UI_LOGINMP:
+    english: Multiplayer
+TXT_UI_LOGINTITLE:
+    english: Multiplayer
+    
