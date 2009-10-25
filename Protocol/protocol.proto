@@ -6,6 +6,12 @@ message Container {
     optional LoginResponse loginResponse =3;
     optional SelectCity selectCity = 4;
     optional SelectCityResponse selectCityResponse = 5;
+    repeated Map maps = 6;
+    optional int32 serverState =7;
+    
+    // Client --> Server requests. 100-199
+    optional bool requestServerState = 100;
+    optional bool requestMaps = 101;
 }
 
 message Chat {
@@ -40,4 +46,10 @@ message SelectCityResponse {
         SUCCESS = 1;
     }
     required Type type = 1;
+}
+
+message Map {
+    required string name = 1;
+    required string heightmap = 2;
+    required string bitmap =3;
 }

@@ -1,2 +1,2 @@
  
-protoc --proto_path=/. --python_out=/. protocol.proto
+protoc --proto_path=. --python_out=. protocol.proto

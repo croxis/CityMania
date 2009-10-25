@@ -353,7 +353,7 @@ class GUIController(DirectObject.DirectObject):
     def loginMP(self):
         self.mainMenu.destroy()
         self.loginDialog = pw.StandardWindow(title = self.script.getText("TXT_UI_LOGINTITLE"), center = True)
-        hostEntry = DirectEntry(initialText="Host")
+        hostEntry = DirectEntry(initialText="localhost")
         userNameEntry = DirectEntry(initialText = "Name")
         userPasswordEntry = DirectEntry(initialText="Password", obscured=True)
         okButton = DirectButton(text = self.script.getText('TXT_UI_OK', self.language), command = self.login)

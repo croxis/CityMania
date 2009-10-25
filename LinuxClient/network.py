@@ -17,8 +17,10 @@ class ServerSocket(threading.Thread, DirectObject.DirectObject):
     def __init__(self):
         """
         Overide to threading for client socket
+        self.buffer:    Buffer string for incoming messages
         """
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.buffer = ""
         self.accept("exit", self.exit)
         self.accept("connect", self.connect)
         self.accept("sendData", self.send)
@@ -44,8 +46,11 @@ class ServerSocket(threading.Thread, DirectObject.DirectObject):
         self.running = True
         while self.running:
             try:
-                data = self.s.recv(4096)
+                # Appends message to any existing buffer
+                d = self.s.recv(4096)
+                self.buffer += d
             except socket.timeout:
+                # No message this time!
                 continue
             except socket.error:
                 # caused by main thread doing a socket.close on this socket
@@ -57,11 +62,17 @@ class ServerSocket(threading.Thread, DirectObject.DirectObject):
                 self.running = False
                 break
                 return
-            if not len(data): # a disconnect (socket.close() by client)
+            if not len(d): # a disconnect (socket.close() by client)
                 self.running = False
                 break
                 return
-            self.processData(data)
+            # We now check for the end tag "[!]" and fire off the appropriate serialized string
+            if "[!]" in self.buffer:
+                # Only one string is brought out at a time
+                # What ever partial or complete message is left is put back into the buffer for the next cycle
+                # This is because I am lazy
+                data, self.buffer = self.buffer.split("[!]", 1)
+                self.processData(data)
             #print "Recieved Data:", data
             #print "From:", self.peer
             #messenger.post("gotData", data)
@@ -79,9 +90,9 @@ class ServerSocket(threading.Thread, DirectObject.DirectObject):
             if container.chat.to.startswith("#"):
                 # Chat room
                 print container.chat.to + " <" + container.chat.sender + "> " + container.chat.message
-                else:
+            else:
                     # Direct PM
-                    print "<" + container.sender + "> " + container.message
+                print "<" + container.sender + "> " + container.message
         if container.HasField("serverState"):
             if container.serverState is 0:
                 # Nothing running?! Lets get us some maps!
@@ -89,12 +100,13 @@ class ServerSocket(threading.Thread, DirectObject.DirectObject):
                 container.requestMaps = 1
                 self.send(container)
                 # TODO: Notice of incoming files, or loading bar, or something
-        elif container.HasField("maps"):
-            maps = []
+        # Because this is a repeted field we need to check for length as it will always be present
+        elif len(container.maps):
+            maps = {}
             import base64
             for map in container.maps:
                 maps[map.name] = (base64.b64decode(map.heightmap), base64.b64decode(map.bitmap))
-            messenger.send("onGetMaps", maps)
+            messenger.send("onGetMaps", [maps])
         elif container.HasField("loginResponse"):
             if container.loginResponse.type is 1:
                 # Awesome, now we send a request to the server asking for the game state
