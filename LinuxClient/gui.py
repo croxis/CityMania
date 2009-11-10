@@ -3,7 +3,7 @@
 Classes and functions for the user interface
 '''
 
-from pandac.PandaModules import CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode
+from pandac.PandaModules import CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode, Texture, PNMImage, StringStream
 from direct.showbase import DirectObject
 from direct.gui.DirectGui import *
 
@@ -26,6 +26,7 @@ from direct.task.TaskOrig import Task
 #import Meshes
 #import Menu
 import pixelwindow as pw
+import protocol_pb2 as proto
 #import layout
 #import treegui
 #from treegui.core import Gui
@@ -383,6 +384,46 @@ class GUIController(DirectObject.DirectObject):
         Generate a window with list and thumbnails of region maps availiable.
         Provide two options, load map or, if there is no local version, save local version
         """
+        #mapDialog = pw.StandardWindow(title = "Select Map", center = True)
+        mapList = {}
+        #mapScrollList  = DirectScrolledList(
+                #decButton_pos= (0.35, 0, 0.53),
+                #decButton_text = "Dec",
+                #decButton_text_scale = 0.04,
+                #decButton_borderWidth = (0.005, 0.005),
+                #incButton_pos= (0.35, 0, -0.02),
+                #incButton_text = "Inc",
+                #incButton_text_scale = 0.04,
+                #incButton_borderWidth = (0.005, 0.005),
+                #frameSize = (0.0, 0.7, -0.05, 0.59),
+                #frameColor = (1,0,0,0.5),
+                #pos = (-1, 0, 0),
+                #itemFrame_frameSize = (-0.2, 0.2, -0.37, 0.11),
+                #itemFrame_pos = (0.35, 0, 0.4),
+                #)
+        
+        for mapName in maps:
+            
+            #mapScrollList.addItem(mapName)
+            # This is how Panda converts the string contents of an image file into a texture
+            heightmap = maps[mapName][0]
+            image = PNMImage()
+            image.read(StringStream(heightmap))
+            heightTexture = Texture()
+            #heightTexture.load(image)
+            
+            #bitmap = maps[mapName][1]
+            #image = PNMImage()
+            #image.read(StringStream(bitmap))
+            #bitmapTexture = Texture()
+            #bitmapTexture.load(image)
+            
+        #mapDialoge.addHorizontal([mapScrollList])
+        # TODO: Impliment map selection. For now we are just going to skip this
+        # and use the TestRegion, load it, and see how much memory the map consumes.
+        container = proto.Container()
+        container.mapRequest = "TestRegion"
+        messenger.send("sendData", [container])
 
 
 class Lights:
@@ -418,17 +459,15 @@ class Camera(DirectObject.DirectObject):
         Edge screen panning
         Middle mouse panning
     '''
-    def __init__(self, ancestor = None, isometric = True):
+    def __init__(self, isometric = True):
         '''
         ancestor: Parent Node
         isometric: orthographic view
         '''
-        self.ancestor=ancestor
         self.dz=.5
         #center=(len(self.ancestor.terrain.data)/2,len(self.ancestor.terrain.data[0])/2,self.dz)
         base.disableMouse()
         base.camLens.setFov(50)
-        base.camera.reparentTo(self.ancestor.root)
         #base.camera.setPos(-center[0]*2,-center[1]*2,5)
         base.camera.setPos(0,-11,5)
         base.camera.setHpr(0,-35,0)

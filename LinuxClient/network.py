@@ -20,6 +20,7 @@ class ServerSocket(threading.Thread, DirectObject.DirectObject):
         self.buffer:    Buffer string for incoming messages
         """
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        
         self.buffer = ""
         self.accept("exit", self.exit)
         self.accept("connect", self.connect)
@@ -31,7 +32,8 @@ class ServerSocket(threading.Thread, DirectObject.DirectObject):
         connects with the server
         """
         self.s.connect((host, 52003))
-        self.s.settimeout(1)
+        self.s.setblocking(0)
+        #self.s.settimeout(1)
         self.peer = self.s.getpeername()
         print "Connection created with:", self.peer
         # Fire login data!
@@ -55,10 +57,10 @@ class ServerSocket(threading.Thread, DirectObject.DirectObject):
             except socket.error:
                 # caused by main thread doing a socket.close on this socket
                 # It is a race condition if this exception is raised or not.
-                print "Broken3"
+                print "Race Condition!"
+                raise
                 return
             except:  # some error or connection reset by peer
-                print "Broken1"
                 self.running = False
                 break
                 return
@@ -85,13 +87,13 @@ class ServerSocket(threading.Thread, DirectObject.DirectObject):
         """
         container = proto.Container()
         container.ParseFromString(data)
-        print "Recieved Data:", container
+        #print "Recieved Data:", container
         if container.HasField("chat"):
             if container.chat.to.startswith("#"):
                 # Chat room
                 print container.chat.to + " <" + container.chat.sender + "> " + container.chat.message
             else:
-                    # Direct PM
+                # Direct PM
                 print "<" + container.sender + "> " + container.message
         if container.HasField("serverState"):
             if container.serverState is 0:
@@ -105,7 +107,7 @@ class ServerSocket(threading.Thread, DirectObject.DirectObject):
             maps = {}
             import base64
             for map in container.maps:
-                maps[map.name] = (base64.b64decode(map.heightmap), base64.b64decode(map.bitmap))
+                maps[map.name] = (base64.b64decode(map.heightmap))
             messenger.send("onGetMaps", [maps])
         elif container.HasField("loginResponse"):
             if container.loginResponse.type is 1:
@@ -116,6 +118,8 @@ class ServerSocket(threading.Thread, DirectObject.DirectObject):
             else:
                 # Got to think of an error message process for here
                 pass
+        elif container.HasField("gameState"):
+            messenger.send("generateRegion", [container.gameState])
     
     def send(self, data):
         """
@@ -127,7 +131,6 @@ class ServerSocket(threading.Thread, DirectObject.DirectObject):
             self.s.send(data.SerializeToString())
         except:
             print "Object is not a protocol buffer object or is missing a parameter."
-
     
     def exit(self):
         self.s.close()

@@ -63,7 +63,7 @@ RETRO=True
 SUBDIVIDE=3
 
 # From Camera.py
-from pandac.PandaModules import NodePath,Vec3,Point3
+from pandac.PandaModules import NodePath,Vec3,Point3, GeoMipTerrain, PNMImage, StringStream
 from direct.task.Task import Task
 
 #import Meshes
@@ -83,14 +83,16 @@ class World(DirectObject.DirectObject):
         self.keys()
         
         # Initialize classes
-        self.camera = None
+        camera.node().clearEffects()
+        self.camera = gui.Camera()
+        self.lights = gui.Lights(self, lightsOn = True, showLights = True)
         
         self.root = NodePath('rootMain')
         self.root.reparentTo(render)
         
         #self.picker = Picker(self)
         
-        #self.terrainManager = TerrainManager(self)
+        self.terrainManager = TerrainManager()
         # Load the structure database
         #self.structuresDatabase = loadStructures()
         # GUI
@@ -114,12 +116,6 @@ class World(DirectObject.DirectObject):
         base.toggleWireframe()
     def toggleTexture(self):
         base.toggleTexture()
-        
-    def generateWorld(self, grid, theme):
-        self.lights = gui.Lights(self, lightsOn = True, showLights = False)
-        camera.node().clearEffects()
-        #self.camera = Camera(self, isometric = False)
-        self.camera = gui.Camera(self, isometric = True)
 
     def exit(self):
         print "Exit"
@@ -152,37 +148,22 @@ class TerrainManager(DirectObject.DirectObject):
     '''
     Manages the creation and display of terrain levels
     '''
-    def __init__(self, ancestor):
-        self.accept('readyStartGame', self.generateWorld)
+    def __init__(self):
+        self.accept('generateRegion', self.generateWorld)
         self.accept('switchLevelRequest', self.switchLevel)
         self.terrains = []
-        self.ancestor = ancestor
-        self.root = NodePath('rootTerrainManager')
-        self.root.reparentTo(self.ancestor.root)
     
-    def generateWorld(self, grid, type):
-        for i in range(len(grid)):
-            terrain = Map.Terrain(self, data=grid[i], z=i, theme = type, mappath=filesystem.home()+"Maps/Client/Random/")
-            terrain.root.setPos(0,0,i*-5)
-            terrain.root.setHpr(-45,0,0)
-            axis = ThreeAxisGrid(zsize = 0)
-            gridnodepath = axis.create()
-            gridnodepath.reparentTo(terrain.root)
-            gridnodepath.setPos(0,0,0.01)
-            if i > 0:
-                terrain.root.setAlphaScale(0)
-                terrain.root.hide()
-            # Looks for any structures and erect proper graphics
-            for x in range(len(terrain.data)):
-                for y in range(len(terrain.data[x])):
-                    if terrain.data[x][y]['structure']:
-                        if terrain.data[x][y]['structure'].underConstruction:
-                            structureGraphic = StructureGraphic(terrain, terrain.data[x][y]['structure'].structureID, [(x,y,i)])
-                        else: 
-                            structureGraphic = StructureGraphic(terrain, terrain.data[x][y]['structure'].structureID, [(x,y,i)], structureObject = terrain.data[x][y]['structure'])
-                        terrain.data[x][y]['structureGraphic'] = structureGraphic
-            
-            self.terrains.append([terrain, axis, gridnodepath])
+    def generateWorld(self, container):
+        #terrain = GeoMipTerrain("surface")
+        import base64
+        #image = PNMImage()
+        #image.read(StringStream(base64.b64decode(container.heightmap)))
+        #terrain.setHeightfield(image)
+        #terrain.setBruteforce(True)
+        #terrain.getRoot().reparentTo(render)
+        #terrain.generate()
+        #self.terrains.append(terrain)
+        print "Done with terrain generation"
     
     def getTerrain(self, level):
         '''
@@ -238,7 +219,6 @@ def main():
     
     sys.stdout = Logger()
     connection = network.ServerSocket()
-    #connection.start()
     
     script = gui.Script()
     
@@ -252,8 +232,6 @@ def main():
     guiController.mainMenu()
     serverHost = 'localhost'
     serverPort = 52003
-    #client = Network.Client(serverHost, serverPort)
-    #nsc =  Network.NetworkServerController()
 
     run()
 

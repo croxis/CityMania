@@ -9,9 +9,12 @@ message Container {
     repeated Map maps = 6;
     optional int32 serverState =7;
     
+    optional GameState gameState = 10;
+    
     // Client --> Server requests. 100-199
     optional bool requestServerState = 100;
     optional bool requestMaps = 101;
+    optional string mapRequest = 102;
 }
 
 message Chat {
@@ -51,5 +54,13 @@ message SelectCityResponse {
 message Map {
     required string name = 1;
     required string heightmap = 2;
-    required string bitmap =3;
+    // Whops! We are changing this. This will be the flag to identify the map as a sc4 map
+    optional string bitmap = 3;
+}
+
+//This is THE incarnation of the game state which a client recieves when it first conects
+//This holds everything a client needs to generate the visual world for the player
+message GameState {
+    required string name = 1; //Name of the region
+    required string heightmap = 2; //Current state of heightmap. Encoded in base64 string
 }
