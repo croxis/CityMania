@@ -35,7 +35,7 @@ loadPrcFileData("", "audio-library-name p3openal_audio")
 #import panda modules
 import direct.directbase.DirectStart
 from direct.showbase import DirectObject
-from pandac.PandaModules import OrthographicLens, VBase3, GeomVertexReader
+from pandac.PandaModules import OrthographicLens, VBase3, GeomVertexReader, Texture
 from direct.gui.OnscreenText import OnscreenText,TextNode
 from direct.interval.IntervalGlobal import *
 from direct.fsm import FSM
@@ -63,10 +63,9 @@ RETRO=True
 SUBDIVIDE=3
 
 # From Camera.py
-from pandac.PandaModules import NodePath,Vec3,Point3, GeoMipTerrain, PNMImage, StringStream
+from pandac.PandaModules import NodePath,Vec3,Point3, GeoMipTerrain, PNMImage, StringStream, TextureStage
 from direct.task.Task import Task
 
-#import Meshes
 
 #This below belongs here
 class World(DirectObject.DirectObject):
@@ -84,7 +83,7 @@ class World(DirectObject.DirectObject):
         
         # Initialize classes
         camera.node().clearEffects()
-        self.camera = gui.Camera()
+        #self.camera = gui.Camera()
         self.lights = gui.Lights(self, lightsOn = True, showLights = True)
         
         self.root = NodePath('rootMain')
@@ -142,7 +141,7 @@ class World(DirectObject.DirectObject):
             z = False
         conn.close()
         messenger.send('connect')
-
+        
 
 class TerrainManager(DirectObject.DirectObject):
     '''
@@ -151,18 +150,79 @@ class TerrainManager(DirectObject.DirectObject):
     def __init__(self):
         self.accept('generateRegion', self.generateWorld)
         self.accept('switchLevelRequest', self.switchLevel)
-        self.terrains = []
+        self.terrains=[]        
     
     def generateWorld(self, container):
-        #terrain = GeoMipTerrain("surface")
+        terrain = GeoMipTerrain("surface")
+        root = terrain.getRoot()
+        root.reparentTo(render)
+        root.setSz(100)
+        
         import base64
-        #image = PNMImage()
-        #image.read(StringStream(base64.b64decode(container.heightmap)))
-        #terrain.setHeightfield(image)
-        #terrain.setBruteforce(True)
-        #terrain.getRoot().reparentTo(render)
-        #terrain.generate()
-        #self.terrains.append(terrain)
+        heightmap = PNMImage()
+        imageString = base64.b64decode(container.heightmap)
+        #heightmap.makeGrayscale()
+        heightmap.read(StringStream(imageString))
+        
+        terrain.setHeightfield(heightmap)
+        terrain.setBruteforce(True)
+        
+        terrain.generate()
+        self.terrains.append(terrain)
+        
+        colormap = PNMImage(heightmap.getXSize(), heightmap.getYSize())
+        colormap.addAlpha()
+        slopemap = terrain.makeSlopeImage()
+        
+        # Iterate through every pix of color map. This will be very slow so until faster method is developed, use sparingly
+        # getXSize returns pixles length starting with 1, subtract 1 for obvious reasons
+        for x in range(0, colormap.getXSize()-1):
+            for y in range(0, colormap.getYSize()-1):
+                # Else if statements used to make sure one channel is used per pixel
+                # Also for some optimization
+                # Snow. We do things funky here as alpha will be 1 already.
+                if heightmap.getGrayVal(x, y) < 200:
+                    colormap.setAlpha(x, y, 0)
+                else:
+                    colormap.setAlpha(x, y, 1)
+                # Beach. Estimations from http://www.simtropolis.com/omnibus/index.cfm/Main.SimCity_4.Custom_Content.Custom_Terrains_and_Using_USGS_Data
+                if heightmap.getGrayVal(x,y) < 62:
+                    colormap.setBlue(x, y, 1)
+                elif slopemap.getGrayVal(x, y) > 200:
+                    colormap.setRed(x, y, 1)
+                else:
+                    colormap.setGreen(x, y, 1)
+        
+        colorTexture = Texture()
+        colorTexture.load(colormap)
+        
+        # Textureize
+        grassTexture = loader.loadTexture("Textures/grass.png")
+        #grassTexture.setWrapU(Texture.WMMirror)
+        #grassTexture.setWrapV(Texture.WMMirror)
+        
+        rockTexture = loader.loadTexture("Textures/rock.jpg")
+        rockTexture.setWrapU(Texture.WMMirror)
+        rockTexture.setWrapV(Texture.WMMirror)
+        
+        sandTexture = loader.loadTexture("Textures/sand.jpg")
+        
+        snowTexture = loader.loadTexture("Textures/ice.png")
+        snowTexture.setWrapU(Texture.WMMirror)
+        snowTexture.setWrapV(Texture.WMMirror)
+        
+        # Set multi texture
+        # Source http://www.panda3d.org/phpbb2/viewtopic.php?t=4536
+        
+        root.setTexture( TextureStage('color'),colorTexture ) 
+        root.setTexture( TextureStage('rock'),rockTexture )
+        root.setTexture( TextureStage('grass'),grassTexture ) 
+        root.setTexture( TextureStage('sand'), sandTexture) 
+        root.setTexture( TextureStage('snow'), snowTexture ) 
+        
+        root.setShader(loader.loadShader('Shaders/terraintexture.sha')) 
+        terrain.update()
+        
         print "Done with terrain generation"
     
     def getTerrain(self, level):
@@ -170,6 +230,7 @@ class TerrainManager(DirectObject.DirectObject):
         Returns the terrain object for a given level
         '''
         return self.terrains[level][0]
+        
     def switchLevel(self, level):
         self.terrains[level][0].root.show()
         move = LerpPosInterval(self.root, 3, VBase3(0, 0, level*10), blendType = 'easeInOut')
