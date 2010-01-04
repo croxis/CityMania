@@ -42,7 +42,7 @@ from direct.fsm import FSM
 from direct.gui.DirectGui import *
 
 #import python modules
-import sys, subprocess, logging
+import sys, subprocess, logging, math
 
 #import custom modules
 import gui
@@ -64,10 +64,11 @@ SUBDIVIDE=3
 
 # From Camera.py
 from pandac.PandaModules import NodePath,Vec3,Point3, GeoMipTerrain, PNMImage, StringStream, TextureStage
-from direct.task.Task import Task
-
+from direct.task.Task import Task    
 
 #This below belongs here
+from direct.gui.DirectGui import *
+from pandac.PandaModules import CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode
 class World(DirectObject.DirectObject):
     def __init__(self):
         """initialize"""
@@ -76,13 +77,15 @@ class World(DirectObject.DirectObject):
         self.singlePlayer = False
         self.accept('exit', self.exit)
         self.accept('newSPGame', self.launchSPServer)
-
+        
+        base.disableMouse()
+        
         base.setFrameRateMeter(True)
-        #self.toggleWireFrame()
+        render.setShaderAuto()
         self.keys()
         
         # Initialize classes
-        camera.node().clearEffects()
+        #base.camera.node().clearEffects()
         #self.camera = gui.Camera()
         self.lights = gui.Lights(self, lightsOn = True, showLights = True)
         
@@ -92,6 +95,8 @@ class World(DirectObject.DirectObject):
         #self.picker = Picker(self)
         
         self.terrainManager = TerrainManager()
+        
+        
         # Load the structure database
         #self.structuresDatabase = loadStructures()
         # GUI
@@ -103,16 +108,78 @@ class World(DirectObject.DirectObject):
         #self.guiController.mainMenu()
         #self.gameState = PhonyGameState(self)
         #self.game = Game.ClientGame()
+        #create traverser
+        base.cTrav = CollisionTraverser()
+        #create collision ray
+        self.createRay(self,base.camera,name="mouseRay",show=True)
+        self.accept('mouse1', self.mouse_pick, [self.queue])
+        self.accept('makePickable', self.makePickable)
+    
+    def mouseLeft(self,pickedObj,pickedPoint):
+        if pickedObj==None:  return
+        #print "mouseLeft", pickedObj, pickedPoint
+        cell=(int(math.floor(pickedPoint[0])),int(math.floor(pickedPoint[1])))
+        #messenger.send('cellCoords', [cell,])
+        print cell  
+    
+    def mouse_pick(self, queue):
+        #print "Mousepick"
+        #get mouse coords
+        if base.mouseWatcherNode.hasMouse()==False: return
+        mpos=base.mouseWatcherNode.getMouse()
+        #locate ray from camera lens to mouse coords
+        self.ray.setFromLens(base.camNode, mpos.getX(),mpos.getY())
+        #get collision: picked obj and point
+        pickedObj,pickedPoint=self.getCollision(queue)
+        self.mouseLeft(pickedObj,pickedPoint)
+        
+    def createRay(self,obj,ent,name,show=False,x=0,y=0,z=0,dx=0,dy=0,dz=-1):
+        #create queue
+        obj.queue=CollisionHandlerQueue()
+        #create ray  
+        obj.rayNP=ent.attachNewNode(CollisionNode(name))
+        obj.ray=CollisionRay(x,y,z,dx,dy,dz)
+        obj.rayNP.node().addSolid(obj.ray)
+        obj.rayNP.node().setFromCollideMask(GeomNode.getDefaultCollideMask())
+        base.cTrav.addCollider(obj.rayNP, obj.queue) 
+        if show: obj.rayNP.show()
+    """Returns the picked nodepath and the picked 3d point"""
+    def getCollision(self, queue):
+        #do the traverse
+        base.cTrav.traverse(render)
+        #process collision entries in queue
+        if queue.getNumEntries() > 0:
+            queue.sortEntries()
+            for i in range(queue.getNumEntries()):
+                collisionEntry=queue.getEntry(i)
+                pickedObj=collisionEntry.getIntoNodePath()
+                #iterate up in model hierarchy to found a pickable tag
+                parent=pickedObj.getParent()
+                for n in range(1):
+                    if parent.getTag('pickable')!="" or parent==render: break
+                    parent=parent.getParent()
+                #return appropiate picked object
+                if parent.getTag('pickable')!="":
+                    pickedObj=parent
+                    pickedPoint = collisionEntry.getSurfacePoint(pickedObj)
+                    #pickedNormal = collisionEntry.getSurfaceNormal(self.ancestor.worldNode)
+                    #pickedDistance=pickedPoint.lengthSquared()#distance between your object and the collision
+                    return pickedObj,pickedPoint         
+        return None,None
+    def makePickable(self,newObj,tag='true'):
+        """sets nodepath pickable state"""
+        newObj.setTag('pickable',tag)
+        #print "Pickable: ",newObj,"as",tag
+    
         
     def keys(self):
         """keys"""
-        self.accept('w',self.toggleWireFrame)
+        base.accept("w", base.toggleWireframe)
         self.accept('t',self.toggleTexture)
         self.accept('s',self.snapShot)
     def snapShot(self):
         base.screenshot("Snapshot")
-    def toggleWireFrame(self):
-        base.toggleWireframe()
+    
     def toggleTexture(self):
         base.toggleTexture()
 
@@ -157,6 +224,8 @@ class TerrainManager(DirectObject.DirectObject):
         root = terrain.getRoot()
         root.reparentTo(render)
         root.setSz(100)
+        root.setShaderAuto()
+        messenger.send('makePickable', [root])
         
         import base64
         heightmap = PNMImage()
@@ -168,7 +237,22 @@ class TerrainManager(DirectObject.DirectObject):
         terrain.setBruteforce(True)
         
         terrain.generate()
+        
+        # Right now we will be at our texture limit for the main terrain
+        # To have a grid I am going to need to do another terrain
+        # How to color the grid to show different cities will be another feat another time
+        
+        #gridTerrain = GeoMipTerrain("grid")
+        #groot = gridTerrain.getRoot()
+        #groot.reparentTo(render)
+        #groot.setSz(100)
+        #groot.setPos(0,0,0.1)
+        #gridTerrain.setHeightfield(heightmap)
+        #gridTerrain.setBruteforce(True)
+        #gridTerrain.generate()
+        
         self.terrains.append(terrain)
+        #self.terrains.append(gridTerrain)
         
         colormap = PNMImage(heightmap.getXSize(), heightmap.getYSize())
         colormap.addAlpha()
@@ -188,38 +272,69 @@ class TerrainManager(DirectObject.DirectObject):
                 # Beach. Estimations from http://www.simtropolis.com/omnibus/index.cfm/Main.SimCity_4.Custom_Content.Custom_Terrains_and_Using_USGS_Data
                 if heightmap.getGrayVal(x,y) < 62:
                     colormap.setBlue(x, y, 1)
-                elif slopemap.getGrayVal(x, y) > 200:
+                # Rock
+                elif slopemap.getGrayVal(x, y) > 170:
                     colormap.setRed(x, y, 1)
                 else:
                     colormap.setGreen(x, y, 1)
         
         colorTexture = Texture()
         colorTexture.load(colormap)
+        colorTS = TextureStage('color')
+        colorTS.setSort(0)
         
         # Textureize
         grassTexture = loader.loadTexture("Textures/grass.png")
-        #grassTexture.setWrapU(Texture.WMMirror)
-        #grassTexture.setWrapV(Texture.WMMirror)
+        grassTS = TextureStage('grass')
+        grassTS.setSort(1)
+        grassTS.setPriority(5)
         
         rockTexture = loader.loadTexture("Textures/rock.jpg")
-        rockTexture.setWrapU(Texture.WMMirror)
-        rockTexture.setWrapV(Texture.WMMirror)
+        rockTS = TextureStage('rock')
+        rockTS.setSort(2)
+        rockTS.setPriority(5)
         
         sandTexture = loader.loadTexture("Textures/sand.jpg")
+        sandTS = TextureStage('sand')
+        sandTS.setSort(3)
+        sandTS.setPriority(5)
         
         snowTexture = loader.loadTexture("Textures/ice.png")
-        snowTexture.setWrapU(Texture.WMMirror)
-        snowTexture.setWrapV(Texture.WMMirror)
+        snowTS = TextureStage('snow')
+        snowTS.setSort(4)
+        snowTS.setPriority(0)
+        
+        # Grid for city placement and guide and stuff
+        gridTexture = loader.loadTexture("Textures/grid.png")
+        gridTexture.setWrapU(Texture.WMRepeat)
+        gridTexture.setWrapV(Texture.WMRepeat)
+        gridTS = TextureStage('grid')
+        gridTS.setSort(5)
+        gridTS.setPriority(10)
+        
+        #gridTexStage = TextureStage("grid")
+        #gridTexStage.setMode(TextureStage.MDecal)
         
         # Set multi texture
         # Source http://www.panda3d.org/phpbb2/viewtopic.php?t=4536
         
-        root.setTexture( TextureStage('color'),colorTexture ) 
-        root.setTexture( TextureStage('rock'),rockTexture )
-        root.setTexture( TextureStage('grass'),grassTexture ) 
-        root.setTexture( TextureStage('sand'), sandTexture) 
-        root.setTexture( TextureStage('snow'), snowTexture ) 
+        root.setTexture( colorTS, colorTexture ) 
+        root.setTexture( grassTS, grassTexture )
+        root.setTexture( rockTS, rockTexture ) 
+        root.setTexture( sandTS, sandTexture) 
+        root.setTexture( snowTS, snowTexture ) 
+        root.setTexture( gridTS, gridTexture ) 
         
+        #root.setTexture(gridTexStage, gridTexture )
+        #root.setTexture(gridTexture, 1 )
+        #groot.setTexScale(gridTexStage, 2, 2)
+        
+        if colormap.getXSize() > colormap.getYSize():
+            size = colormap.getXSize()
+        else:
+            size = colormap.getYSize()
+        
+        root.setShaderInput('size', size, size, size, size)
         root.setShader(loader.loadShader('Shaders/terraintexture.sha')) 
         terrain.update()
         
@@ -289,6 +404,7 @@ def main():
     #audioManager = Audio.AudioManager()
 
     world=World()
+    camera = gui.Camera()
     guiController = gui.GUIController(script)
     guiController.mainMenu()
     serverHost = 'localhost'

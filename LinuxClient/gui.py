@@ -459,18 +459,17 @@ class Camera(DirectObject.DirectObject):
         Edge screen panning
         Middle mouse panning
     '''
-    def __init__(self, isometric = True):
+    def __init__(self, isometric = False):
         '''
-        ancestor: Parent Node
-        isometric: orthographic view
         '''
         self.dz=.5
         #center=(len(self.ancestor.terrain.data)/2,len(self.ancestor.terrain.data[0])/2,self.dz)
         base.disableMouse()
-        base.camLens.setFov(50)
+        #base.camLens.setFov(50)
         #base.camera.setPos(-center[0]*2,-center[1]*2,5)
-        base.camera.setPos(0,-11,5)
-        base.camera.setHpr(0,-35,0)
+        base.camera.setPos(200, 0, 100)
+        base.camera.setHpr(30,-45,0)
+        self.isometric = isometric
         
         if isometric:
             lens = OrthographicLens()
@@ -481,8 +480,17 @@ class Camera(DirectObject.DirectObject):
         
         self.accept('mouse2', self.middleMouseDown, [])
         self.accept('mouse2-up', self.middleMouseUp, [])
+        self.accept('=', self.zoomIn, [])
+        self.accept('-', self.zoomOut, [])
         
         taskMgr.add(self.update,"updateCameraTask")
+        
+        # Zoom level. 0 is closest
+        # VBase2(1.0, 0.75) is default
+        self.zoom = 5
+        
+        #lens = base.cam.node().getLens()
+        #print "Lens:", lens.getFilmSize()
     
     def middleMouseDown(self):
         #print "middleMouseDown"
@@ -501,3 +509,30 @@ class Camera(DirectObject.DirectObject):
             base.camera.setPos(base.camera.getPos()[0] + delta[0], base.camera.getPos()[1] - delta[1], base.camera.getPos()[2])
             
         return Task.cont
+    
+    def zoomIn(self):
+        # We don't want to zoom in tooooo far!
+        print "Zooming"
+        if self.zoom < 0:
+            return
+        self.zoom -= 1
+        lens = base.cam.node().getLens()
+        print "Lens pre:", lens.getFilmSize()
+        print "Lens pre:", lens.getFilmSize()[0]
+        #lens.setFov(lens.getFov()/2)
+        lens.setFilmSize(lens.getFilmSize()[0]/2)
+        #print "Lens post:", lens.getFilmSize()
+        base.cam.node().setLens(lens)
+        print "Zoomed!"
+    
+    def zoomOut(self):
+        # We don't want to zoom out tooooo far!
+        print "Zooming"
+        if self.zoom > 9:
+            return
+        self.zoom += 1
+        lens = base.cam.node().getLens()
+        #lens.setFilmSize(lens.getFilmSize()*2)
+        #lens.setFov(lens.getFov()*2)
+        base.cam.node().setLens(lens)
+        print "Zoomed!"
