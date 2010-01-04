@@ -20,7 +20,7 @@ from pandac.PandaModules import LineSegs, NodePath
 from pandac.PandaModules import WindowProperties
 from pandac.PandaModules import VBase3, GeomVertexReader
 
-from direct.task.TaskOrig import Task
+from direct.task import Task
 
 #import math
 #import Meshes
