@@ -235,6 +235,7 @@ class TerrainManager(DirectObject.DirectObject):
         
         terrain.setHeightfield(heightmap)
         terrain.setBruteforce(True)
+        #terrain.setFocalPoint(base.camera)
         
         terrain.generate()
         
@@ -334,11 +335,13 @@ class TerrainManager(DirectObject.DirectObject):
         else:
             size = colormap.getYSize()
         
-        root.setShaderInput('size', size, size, size, size)
+        root.setShaderInput('size', size-1, size-1, size-1, size-1)
         root.setShader(loader.loadShader('Shaders/terraintexture.sha')) 
         terrain.update()
         
         print "Done with terrain generation"
+        #camera = gui.Camera()
+        #camera = gui.CameraHandler()
     
     def getTerrain(self, level):
         '''
@@ -405,6 +408,7 @@ def main():
 
     world=World()
     camera = gui.Camera()
+    #camera = gui.CameraHandler()
     guiController = gui.GUIController(script)
     guiController.mainMenu()
     serverHost = 'localhost'
