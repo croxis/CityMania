@@ -208,6 +208,8 @@ class ServerSocket(DirectObject.DirectObject):
                 pass
         elif container.HasField("gameState"):
             messenger.send("generateRegion", [container.gameState])
+        elif container.HasField("newCityResponse"):
+            messenger.send("newCityResponse", [container.newCityResponse])
     
     def send(self, data):
         """
@@ -223,25 +225,3 @@ class ServerSocket(DirectObject.DirectObject):
         print "Closing up shop"
         self.s.close()
         self.running = False
-
-
-## Login Test
-#print "Conducting Login Test"
-#container = proto.Container()
-#container.login.name = "croxis"
-#container.login.password = ""
-#container.login.regionPassword = ""
-#connection.send(container)
-
-## Wait for sucess login so we don't send other tests premature
-#wait = True
-#global wait
-#while wait:
-    #pass
-#print "Login Successful"
-
-## Chat test
-#print "Conducting chat test"
-#container = proto.Container()
-#container.chat.message = "Hello world!"
-#connection.send(container)

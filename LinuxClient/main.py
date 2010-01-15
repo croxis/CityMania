@@ -14,10 +14,6 @@ loadPrcFileData( '', 'frame-rate-meter-scale 0.035' )
 loadPrcFileData( '', 'frame-rate-meter-side-margin 0.1' )
 loadPrcFileData( '', 'show-frame-rate-meter 1' )
 
-#if os.name == "nt":
-#    loadPrcFileData( '', 'load-display pandadx9' )
-#else:
-#    loadPrcFileData( '', 'load-display pandagl' )
 loadPrcFileData( '', 'notify-level-util error' )
 loadPrcFileData( '', 'window-title '+title )
 
@@ -30,19 +26,19 @@ loadPrcFileData("", "clock-mode limited")
 loadPrcFileData("", "clock-frame-rate 25")
 
 loadPrcFileData("", "audio-library-name p3openal_audio")
-#loadPrcFileData("", "direct-gui-edit 1")
 
 #import panda modules
 import direct.directbase.DirectStart
 from direct.showbase import DirectObject
-from pandac.PandaModules import OrthographicLens, VBase3, GeomVertexReader, Texture
+from pandac.PandaModules import OrthographicLens, VBase3, GeomVertexReader, Texture, Vec4
 from direct.gui.OnscreenText import OnscreenText,TextNode
 from direct.interval.IntervalGlobal import *
 from direct.fsm import FSM
 from direct.gui.DirectGui import *
 
 #import python modules
-import sys, subprocess, logging, math
+import sys, subprocess, math
+#import logging
 
 #import custom modules
 import gui
@@ -53,8 +49,6 @@ import gui
 import network
 #import filesystem
 
-#import Axis.ThreeAxisGrid as TAG
-#from Axis import ThreeAxisGrid
 
 #define constants
 SIZE=65 # has to be a 2 exponent number plus one
@@ -109,10 +103,10 @@ class World(DirectObject.DirectObject):
         #self.gameState = PhonyGameState(self)
         #self.game = Game.ClientGame()
         #create traverser
-        base.cTrav = CollisionTraverser()
+        #base.cTrav = CollisionTraverser()
         #create collision ray
-        self.createRay(self,base.camera,name="mouseRay",show=True)
-        self.accept('mouse1', self.mouse_pick, [self.queue])
+        #self.createRay(self,base.camera,name="mouseRay",show=True)
+        #self.accept('mouse1', self.mouse_pick, [self.queue])
         self.accept('makePickable', self.makePickable)
     
     def mouseLeft(self,pickedObj,pickedPoint):
@@ -216,16 +210,24 @@ class TerrainManager(DirectObject.DirectObject):
     '''
     def __init__(self):
         self.accept('generateRegion', self.generateWorld)
-        self.accept('switchLevelRequest', self.switchLevel)
-        self.terrains=[]        
+        self.accept("regionView_normal", self.regionViewNormal)
+        self.accept("regionView_owners", self.regionViewOwners)
+        self.accept("regionView_foundNew", self.regionViewFound)
+        self.terrains=[]   
+        base.cTrav = CollisionTraverser()
+        self.createRay(self,base.camera,name="mouseRay",show=True)
     
     def generateWorld(self, container):
         terrain = GeoMipTerrain("surface")
+        self.regionTerrain = GeoMipTerrain("region_surface")
         root = terrain.getRoot()
         root.reparentTo(render)
         root.setSz(100)
+        self.regionTerrain.getRoot().setSz(100)
         root.setShaderAuto()
         messenger.send('makePickable', [root])
+        messenger.send("makePickable", [self.regionTerrain.getRoot()])
+        self.active_terrain = terrain
         
         import base64
         heightmap = PNMImage()
@@ -236,24 +238,13 @@ class TerrainManager(DirectObject.DirectObject):
         terrain.setHeightfield(heightmap)
         terrain.setBruteforce(True)
         #terrain.setFocalPoint(base.camera)
+        self.regionTerrain.setHeightfield(heightmap)
+        self.regionTerrain.setBruteforce(True)
         
         terrain.generate()
-        
-        # Right now we will be at our texture limit for the main terrain
-        # To have a grid I am going to need to do another terrain
-        # How to color the grid to show different cities will be another feat another time
-        
-        #gridTerrain = GeoMipTerrain("grid")
-        #groot = gridTerrain.getRoot()
-        #groot.reparentTo(render)
-        #groot.setSz(100)
-        #groot.setPos(0,0,0.1)
-        #gridTerrain.setHeightfield(heightmap)
-        #gridTerrain.setBruteforce(True)
-        #gridTerrain.generate()
+        self.regionTerrain.generate()
         
         self.terrains.append(terrain)
-        #self.terrains.append(gridTerrain)
         
         colormap = PNMImage(heightmap.getXSize(), heightmap.getYSize())
         colormap.addAlpha()
@@ -283,17 +274,22 @@ class TerrainManager(DirectObject.DirectObject):
         colorTexture.load(colormap)
         colorTS = TextureStage('color')
         colorTS.setSort(0)
+        colorTS.setPriority(1)
+        #colorTS.setSavedResult(True)
         
         # Textureize
         grassTexture = loader.loadTexture("Textures/grass.png")
         grassTS = TextureStage('grass')
         grassTS.setSort(1)
-        grassTS.setPriority(5)
+        #grassTS.setPriority(100)
+        #grassTS.setCombineRgb(TextureStage.CMReplace, TextureStage.CSPrevious, TextureStage.COSrcColor)
         
         rockTexture = loader.loadTexture("Textures/rock.jpg")
         rockTS = TextureStage('rock')
         rockTS.setSort(2)
-        rockTS.setPriority(5)
+        #rockTS.setPriority(5)
+        rockTS.setCombineRgb(TextureStage.CMAdd, TextureStage.CSLastSavedResult, TextureStage.COSrcColor, TextureStage.CSTexture, TextureStage.COSrcColor)
+        #rockTS.setCombineRgb(TextureStage.CMReplace, TextureStage.CSLastSavedResult, TextureStage.COSrcColor)
         
         sandTexture = loader.loadTexture("Textures/sand.jpg")
         sandTS = TextureStage('sand')
@@ -311,65 +307,162 @@ class TerrainManager(DirectObject.DirectObject):
         gridTexture.setWrapV(Texture.WMRepeat)
         gridTS = TextureStage('grid')
         gridTS.setSort(5)
-        gridTS.setPriority(10)
-        
-        #gridTexStage = TextureStage("grid")
-        #gridTexStage.setMode(TextureStage.MDecal)
-        
+        gridTS.setPriority(10)        
+                
         # Set multi texture
         # Source http://www.panda3d.org/phpbb2/viewtopic.php?t=4536
         
+        if colormap.getXSize() > colormap.getYSize():
+            size = colormap.getXSize()-1
+        else:
+            size = colormap.getYSize()-1
+        self.size = size
+        
         root.setTexture( colorTS, colorTexture ) 
         root.setTexture( grassTS, grassTexture )
+        root.setTexScale(grassTS, size, size) 
         root.setTexture( rockTS, rockTexture ) 
+        root.setTexScale(rockTS, size, size) 
         root.setTexture( sandTS, sandTexture) 
+        root.setTexScale(sandTS, size, size) 
         root.setTexture( snowTS, snowTexture ) 
+        root.setTexScale(snowTS, size, size) 
         root.setTexture( gridTS, gridTexture ) 
+        root.setTexScale(gridTS, size, size)
         
-        #root.setTexture(gridTexStage, gridTexture )
-        #root.setTexture(gridTexture, 1 )
-        #groot.setTexScale(gridTexStage, 2, 2)
+        self.regionTerrain.getRoot().setTexture( gridTS, gridTexture)
+        self.regionTerrain.getRoot().setTexScale(gridTS, size, size)
         
-        if colormap.getXSize() > colormap.getYSize():
-            size = colormap.getXSize()
-        else:
-            size = colormap.getYSize()
-        
-        root.setShaderInput('size', size-1, size-1, size-1, size-1)
+        root.setShaderInput('size', size, size, size, size)
         root.setShader(loader.loadShader('Shaders/terraintexture.sha')) 
         terrain.update()
         
         print "Done with terrain generation"
-        #camera = gui.Camera()
+        camera = gui.Camera()
         #camera = gui.CameraHandler()
+        #camera.setPanLimits(-20, size+20, -20, size+20)
+        #task = taskMgr.add(self.updateTerrain, "updateTerrain")
+        messenger.send("finishedTerrainGen")
     
-    def getTerrain(self, level):
-        '''
-        Returns the terrain object for a given level
-        '''
-        return self.terrains[level][0]
+    #def updateTerrain(self, task):
+    #    root = self.active_terrain.getRoot()
+    #    position = self.getMouseCell(self.queue)
+    #    if position:
+    #        print "Position:", position
+    #        #root.setTexOffset(self.tileTS, float(position[0])/self.size, float(position[1])/self.size)
+    #        #root.setTexOffset(self.tileTS, float(position[0]), float(position[1]))      
+    #    try:
+    #        #print "Position:", position
+    #        #print root.getTexOffset(self.tileTS)
+    #        pass
+    #    except:
+    #        #print "error", position
+    #        pass
+    #    return Task.cont
+    
+    def getMouseCell(self, queue):
+        #print "Mousepick"
+        #get mouse coords
+        #if base.mouseWatcherNode.hasMouse()==False: return "Mouse is theved"
+        if base.mouseWatcherNode.hasMouse()==False: return
+        mpos=base.mouseWatcherNode.getMouse()
+        #locate ray from camera lens to mouse coords
+        self.ray.setFromLens(base.camNode, mpos.getX(),mpos.getY())
+        #get collision: picked obj and point
+        pickedObj,pickedPoint=self.getCollision(queue)
+        if pickedObj==None:  return
+        cell=(int(math.floor(pickedPoint[0])),int(math.floor(pickedPoint[1])))
+        return cell
         
-    def switchLevel(self, level):
-        self.terrains[level][0].root.show()
-        move = LerpPosInterval(self.root, 3, VBase3(0, 0, level*10), blendType = 'easeInOut')
-        alphaFade = LerpFunc(self.fadeOut, duration = 1.25, name = 'fadeout', extraArgs = [self.ancestor.level])
-        alphaIn = LerpFunc(self.fadeIn, duration = 1.25, name = 'fadein', extraArgs = [level])
-        fadeSequ = Sequence(alphaFade, Wait(0.5), alphaIn)
-        parallel = Parallel(move, fadeSequ, name = 'Level Mover')
-        self.terrains[self.ancestor.level][1].parentNodePath.hide()
-        parallel.start()
-        self.terrains[level][1].parentNodePath.show()
-        self.ancestor.level = level
-        #print 'Level:', level
-    def fadeOut(self, time, oldLevel):
-        self.terrains[oldLevel][0].root.setAlphaScale(1-time)
-        if 1-time < 0.1: self.terrains[oldLevel][0].root.hide()
-    def fadeIn(self, time, level):
-        #print self.terrains[level][0].root.getColorScale()
-        if time == 0: self.terrains[level][1].parentNodePath.hide()
-        elif time == 1: self.terrains[level][1].parentNodePath.show()
-        self.terrains[level][0].root.setAlphaScale(time)
+    def createRay(self,obj,ent,name,show=False,x=0,y=0,z=0,dx=0,dy=0,dz=-1):
+        #create queue
+        obj.queue=CollisionHandlerQueue()
+        #create ray  
+        obj.rayNP=ent.attachNewNode(CollisionNode(name))
+        obj.ray=CollisionRay(x,y,z,dx,dy,dz)
+        obj.rayNP.node().addSolid(obj.ray)
+        obj.rayNP.node().setFromCollideMask(GeomNode.getDefaultCollideMask())
+        base.cTrav.addCollider(obj.rayNP, obj.queue) 
+        if show: obj.rayNP.show()
+    """Returns the picked nodepath and the picked 3d point"""
+    def getCollision(self, queue):
+        #do the traverse
+        base.cTrav.traverse(render)
+        #process collision entries in queue
+        if queue.getNumEntries() > 0:
+            queue.sortEntries()
+            for i in range(queue.getNumEntries()):
+                collisionEntry=queue.getEntry(i)
+                pickedObj=collisionEntry.getIntoNodePath()
+                #iterate up in model hierarchy to found a pickable tag
+                parent=pickedObj.getParent()
+                for n in range(1):
+                    if parent.getTag('pickable')!="" or parent==render: break
+                    parent=parent.getParent()
+                #return appropiate picked object
+                if parent.getTag('pickable')!="":
+                    pickedObj=parent
+                    pickedPoint = collisionEntry.getSurfacePoint(pickedObj)
+                    #pickedNormal = collisionEntry.getSurfaceNormal(self.ancestor.worldNode)
+                    #pickedDistance=pickedPoint.lengthSquared()#distance between your object and the collision
+                    return pickedObj,pickedPoint         
+        return None,None
     
+    def regionViewNormal(self):
+        self.regionTerrain.getRoot().detachNode()
+        self.terrains[0].getRoot().reparentTo(render)
+        self.active_terrain = self.terrains[0]
+    
+    def regionViewOwners(self):
+        self.terrains[0].getRoot().detachNode()
+        self.regionTerrain.getRoot().reparentTo(render)
+        self.active_terrain = self.regionTerrain
+    
+    def regionViewFound(self):
+        '''Gui for founding a new city!'''
+        root = self.regionTerrain.getRoot()
+        task = taskMgr.add(self.newTerrainOverlay, "newTerrainOverlay")
+        tileTexture = loader.loadTexture("Textures/tile2.png")
+        tileTexture.setWrapU(Texture.WMClamp)
+        tileTexture.setWrapV(Texture.WMClamp)
+        self.tileTS = TextureStage('tile')
+        self.tileTS.setSort(6)
+        #self.tileTS.setMode(TextureStage.MBlend)
+        self.tileTS.setMode(TextureStage.MDecal)
+        #self.tileTS.setColor(Vec4(1,0,1,1))
+        root.setTexture(self.tileTS, tileTexture)
+        root.setTexScale(self.tileTS, self.size/32, self.size/32)
+        self.acceptOnce("mouse1", self.regionViewFound2)
+    
+    def newTerrainOverlay(self, task):
+        root = self.active_terrain.getRoot()
+        position = self.getMouseCell(self.queue)
+        if position:
+            # Check to make sure we do not og out of bounds
+            if position[0] < 16:
+                position = (16, position[1])
+            elif position[0] > self.size-16:
+                position = (self.size-16, position[1])
+            if position[1] < 16:
+                position = (position[0], 16)
+            elif position [1] > self.size-16:
+                position = (position[0], self.size-16)                
+            root.setTexOffset(self.tileTS, -float(position[0]-16)/32, -float(position[1]-16)/32)
+        return Task.cont
+    
+    def regionViewFound2(self):
+        '''Grabs cell location for founding.
+        The texture coordinate is used as the mouse may enter an out of bounds area.
+        '''
+        root = self.active_terrain.getRoot()
+        root_position = root.getTexOffset(self.tileTS)
+        # We offset the position of the texture, so we will now put the origin of the new city not on mouse cursor but the "bottom left" of it. Just need to add 32 to get other edge
+        position = [int(abs(root_position[0]*32)), int(abs(root_position[1]*32))]
+        print "Position of new city is:", position
+        print "The bounds are:", position[0], position[0]+32, position[1]+32, position[1]
+        taskMgr.remove("newTerrainOverlay")
+        messenger.send("found_city_name", [position])
+            
 
 class Logger(object):
     def __init__(self):
@@ -388,13 +481,13 @@ def loadMod(name):
     Loads the designated mod into memory, will require some helper functions in other classes
     """
 
-def main():
+def main(var = None):
     # Create the directories
     #filesystem.home(oo = True)
     #print "Path:", filesystem.home()
 
-    LOG_FILENAME = 'client.log'
-    logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG,)
+    #LOG_FILENAME = 'client.log'
+    #logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG,)
     
     sys.stdout = Logger()
     connection = network.ServerSocket()
@@ -407,7 +500,7 @@ def main():
     #audioManager = Audio.AudioManager()
 
     world=World()
-    camera = gui.Camera()
+    #camera = gui.Camera()
     #camera = gui.CameraHandler()
     guiController = gui.GUIController(script)
     guiController.mainMenu()

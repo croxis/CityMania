@@ -15,6 +15,10 @@ message Container {
     optional bool requestServerState = 100;
     optional bool requestMaps = 101;
     optional string mapRequest = 102;
+    optional NewCityRequest newCityRequest = 103;
+    
+    // Server --> Client responses, usually a bool, 200-299
+    optional NewCityResponse newCityResponse = 200;
 }
 
 message Chat {
@@ -63,4 +67,21 @@ message Map {
 message GameState {
     required string name = 1; //Name of the region
     required string heightmap = 2; //Current state of heightmap. Encoded in base64 string
+}
+
+//Client requests to found a new city at this location
+message NewCityRequest {
+    required string name = 1;
+    required int32 positionx = 2;
+    required int32 positiony = 3;
+    optional string password = 4;
+}
+
+message NewCityResponse {
+    enum Type {
+        FAILURE = 0;
+        SUCCESS = 1;
+    }
+    required Type type = 1;
+    optional string message = 2 [default=""];
 }

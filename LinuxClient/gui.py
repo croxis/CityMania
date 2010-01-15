@@ -6,9 +6,10 @@ Classes and functions for the user interface
 from pandac.PandaModules import CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode, Texture, PNMImage, StringStream
 from direct.showbase import DirectObject
 from direct.gui.DirectGui import *
+from direct.interval.IntervalGlobal import *
 
 import sys
-import yaml
+#import yaml
 import glob
 import random
 
@@ -124,179 +125,15 @@ class Picker(DirectObject.DirectObject):
         if show: obj.rayNP.show()
 
 
-class ContextMenu(DirectObject.DirectObject):
-    def __init__(self, parent, structureDatabase, terrainManager, world):
-        self.parent = parent
-        self.accept('generateContextMenu', self.generateContextMenu)
-        self.structures = structureDatabase
-        self.terrainManager = terrainManager
-        self.world = world
-    
-    def buildBuildableList(self, cell):
-        '''
-        Generates the list of buildabel buildings in the right click menu.
-        Returns ()
-        '''
-        structureCache = []
-        for structure in self.structures:
-            if self.structures[structure]['build']:
-                structureCache.append((self.structures[structure]['english']['name'], None, self.buildStructure, structure, cell))
-        return tuple(structureCache)
-    
-    def buildLandersList(self, landers, cell):
-        '''
-        Generates the list of buildabel buildings in the right click menu.
-        Returns ()
-        '''
-        landersCache = []
-        #print landers
-        for lander in landers:
-            if landers[lander]:
-                landersCache.append((lander, None, self.landLander, lander, cell))
-        #print landersCache
-        return tuple(landersCache)
-    def buildLevelList(self):
-        currentLevel = self.terrainManager.ancestor.level
-        numLevels = len(self.terrainManager.terrains)
-        levelsList = []
-        for x in range(numLevels):
-            name = ''
-            if x == 0: name = 'Surface'
-            else: name = 'SubLevel '+str(x)
-            if x == currentLevel: levelsList.append((name,None,0))
-            else: levelsList.append((name,None, self.switchLevelRequest, [x]))
-        return tuple(levelsList)
-    
-    def switchLevelRequest(self, level):
-        messenger.send('switchLevelRequest', level)
-    
-    def endTurnRequest(self):
-        #print 'Requesting End of Turn'
-        messenger.send("sendData", ['endTurnRequest'])
-    def buildStructure(self, structureID, cell):
-        messenger.send("sendData", ['buildRequest', [structureID, cell]])
-    
-    def exit(self):
-        messenger.send('exit')
-    def generateContextMenu(self, contextDict):
-        '''
-        New generates right click menu function. More MVC compliant. 
-        Receives data by message from ClientGame
-        '''
-        # Dynamic menu generator
-        menu = []
-        #print 'ContextDict', contextDict
-        if 'turn' in contextDict:
-            menu.append(('Turn ' + str(contextDict['turn']), False, False))
-            menu.append(0)
-        if 'landers' in contextDict:
-            menu.append(('Land...', False, self.buildLandersList(contextDict['landers'], contextDict['cell'])))
-            menu.append(0)
-        if 'build' in contextDict:
-            menu.append(('Build...', False, self.buildBuildableList(contextDict['cell'])))
-            menu.append(0)
-        if self.world.gameState.getCurrentOrNextState() == 'Main':
-            menu.append(('Level...', False, self.buildLevelList()))
-            menu.append(('End Turn', False, self.endTurnRequest))
-        menu.append(('Save Game', False, self.save))
-        menu.append(('Load Game', False, self.load))
-        menu.append(('Exit Game', False, self.exit))
-        
-        myPopupMenu=Menu.PopupMenu(
-            items = tuple(menu),
-            #parent = self.parent,
-            baselineOffset=-.35,
-            scale=.045, itemHeight=1.2, leftPad=.2,
-            separatorHeight=.3,
-            underscoreThickness=1,
-
-            BGColor=(.9,.9,.8,.94),
-            BGBorderColor=(.8,.3,0,1),
-            separatorColor=(0,0,0,1),
-            frameColorHover=(.3,.3,.3,1),
-            frameColorPress=(0,1,0,.85),
-            textColorReady=(0,0,0,1),
-            textColorHover=(1,.7,.2,1),
-            textColorPress=(0,0,0,1),
-            textColorDisabled=(.65,.65,.65,1)
-        )
-    
-    def landLander(self, landerKey, cell):
-        #print 'Lander Request', landerKey, cell
-        if cell[2] != 0:
-            messenger.send('say', ['Landers can not be landed on subterranean surfaces.'])
-            return
-        messenger.send("sendData", ['requestLander', [landerKey, cell]])
-    
-    def save(self):
-        messenger.send('requestSave')
-    def load(self):
-        pass
-
-
-class StructureWindow(pw.StandardWindow):
-    '''
-    Base class for structure info widgets.  Modified widgets, such as the command center, will inherient from here.
-    structureObject is passed as non-enforced read only.  Changes will send a message that is recieved by Network Server View.
-        server will then impliment the change on the structure object in its end.  
-        client phony structure is then updated through network.
-    '''
-    def __init__(self, structure):
-        #pw.StandardWindow.__init__(self, title = structure.name, center=True, size = (300,300))
-        pw.StandardWindow.__init__(self, title = structure.name, center=True)
-        self.structure = structure
-        name = DirectLabel(text = self.structure.name)
-        self.pack(name)
-        if self.structure.underConstruction:
-            self.generateConstructionBox()
-        else:
-            self.generateInfo()
-        closeButton = DirectButton(text='Close', parent=self, command=self.destroy)
-
-        if self.structure.online:  onlineButtonText = 'Online'
-        else: onlineButtonText = 'Offline'
-        onlineButton = DirectButton(text = onlineButtonText, parent= self, scale=.2, pos =(-.6,0,-.7), command=self.toggleOnline)
-        onlineButton['extraArgs'] = [onlineButton]
-        
-        self.addHorizontal([onlineButton, closeButton])
-        self.draw()
-    
-    def generateInfo(self):
-        """
-        Overideable for custom structure windows
-        """
-    
-    def toggleOnline(self, button):
-        messenger.send("sendData", ['structureOnlineRequest', [self.structure.coords]])
-        if self.structure.online: 
-            #structureObject.online = False
-            button['text'] = 'Offline'
-        else: 
-            #structureObject.online = True
-            button['text'] = 'Online'
-    
-    def genrateInfoBox(self):
-        pass
-    
-    def generateConstructionBox(self):
-        label = DirectLabel(text = "Turns remaining: " + str(self.structure.buildTimer))        
-        self.pack(label)
-    
-class CommandStructureWindow(StructureWindow):
-    '''
-    Structure widget with additional info 
-    '''
-    def generateInfo(self):
-        pass
-
-
 class Script(object):
     '''
     Imports external language yaml docs into internal dict
     '''
     def __init__(self):
-        self.database = {}
-        self.loadText()
+        #self.database = {}
+        self.database = {'TXT_UI_ONLINE': {'english': 'Online'}, 'TXT_UI_QUIT': {'english': 'Quit'}, 'TXT_UI_LOGINMP': {'english': 'Multiplayer'}, 'TXT_UI_LOGINTITLE': {'english': 'Multiplayer'}, 'TXT_UI_NEWGAME': {'english': 'New Game'}, 'TXT_UI_OFFLINE': {'english': 'Offline'}, 'TXT_UI_OK': {'english': 'Ok'}, 'TXT_UI_MAINMENUTITLE': {'english': 'City Mania'}}
+        
+        #self.loadText()
     
     def loadText(self):
         # Load database
@@ -331,6 +168,9 @@ class GUIController(DirectObject.DirectObject):
         
         self.language = language
         self.accept("onGetMaps", self.mapSelection)
+        self.accept("finishedTerrainGen", self.regionGUI)
+        self.accept("found_city_name", self.foundCityName)
+        self.accept("newCityResponse", self.newCityResponse)
         
     def mainMenu(self):
         """
@@ -354,7 +194,8 @@ class GUIController(DirectObject.DirectObject):
     def loginMP(self):
         self.mainMenu.destroy()
         self.loginDialog = pw.StandardWindow(title = self.script.getText("TXT_UI_LOGINTITLE"), center = True)
-        hostEntry = DirectEntry(initialText="localhost")
+        #hostEntry = DirectEntry(initialText="croxis.dyndns.org")
+        hostEntry = DirectEntry(initialText="127.0.0.1")
         userNameEntry = DirectEntry(initialText = "Name")
         userPasswordEntry = DirectEntry(initialText="Password", obscured=True)
         okButton = DirectButton(text = self.script.getText('TXT_UI_OK', self.language), command = self.login)
@@ -424,6 +265,56 @@ class GUIController(DirectObject.DirectObject):
         container = proto.Container()
         container.mapRequest = "TestRegion"
         messenger.send("sendData", [container])
+        
+    def regionGUI(self):
+        '''Generates GUI for region view interface'''
+        #self.loginDialog = pw.StandardWindow(title = self.script.getText("TXT_UI_REGIONTITLE"), center = True)
+        self.regionWindow = pw.StandardWindow(title = "Region_Name", center = True)
+        self.v = [0]
+        buttons = [
+            DirectRadioButton(text = "Normal View", variable=self.v, value=[0], command=self.sendRegionMessage),
+            DirectRadioButton(text = "Ownership View", variable=self.v, value=[1], command=self.sendRegionMessage)]
+        for button in buttons:
+            button.setOthers(buttons)
+        newCityButton = closeButton = DirectButton(text='Incorperate New City', command=self.sendRegionMessage, extraArgs=[True])
+        self.regionWindow.addVertical(buttons + [newCityButton])
+        
+    def sendRegionMessage(self, status=None):
+        '''Send messages for region view'''
+        print "Status", status
+        if self.v == [0]:
+            messenger.send("regionView_normal")
+        elif self.v == [1]:
+            messenger.send("regionView_owners")
+        if status:
+            self.text = OnscreenText(text = "Left click to found city.", pos=(0, 0.75), scale=0.07)
+            self.regionWindow.destroy()
+            messenger.send("regionView_owners")
+            messenger.send("regionView_foundNew")
+    
+    def foundCityName(self, position):
+        self.name_city_window = pw.StandardWindow(title = "name_city", center = True)
+        cityNameEntry = DirectEntry(initialText = "city_name")
+        okButton = DirectButton(text = self.script.getText('TXT_UI_OK', self.language), command = self.foundCity, extraArgs=[position])
+        self.name_city_window.addVertical([cityNameEntry, okButton])
+    
+    def foundCity(self, position):
+        '''Sends message to server that we want to found a new city at this location'''
+        container = proto.Container()
+        info = self.name_city_window.getEntries()
+        self.name_city_window.destroy()
+        container.newCityRequest.name = info[0]
+        container.newCityRequest.positionx = position[0]
+        container.newCityRequest.positiony = position[1]
+        messenger.send("sendData", [container])
+    
+    def newCityResponse(self, info):
+        if not info.type:
+            message = pw.MessageWindow(text="City can not be founded. "+ info.message, title="Oh noes!")
+            messenger.send("regionView_foundNew")
+        else:
+            message = pw.MessageWindow(text="Your city has been founded! Awesome!")
+            messenger.send("regionView_normal")
 
 
 class Lights:
@@ -562,8 +453,8 @@ class CameraHandler(DirectObject.DirectObject):
         # This disables the default mouse based camera control used by panda. This default control is awkward, and won't be used.
         
         #base.camera.setPos(0,20,20)
-        base.camera.setPos(200, 0, 100)
-        base.camera.lookAt(100,100,0)
+        base.camera.setPos(200, 100, 100)
+        base.camera.lookAt(100,100,45)
         # Gives the camera an initial position and rotation.
         
         self.mx,self.my=0,0
@@ -671,8 +562,8 @@ class CameraHandler(DirectObject.DirectObject):
     def setPanLimits(self,xMin, xMax, yMin, yMax):
         # This function is used to set the limitations of the panning movement.
         
-        self.panLimitsX = (xMin, xMax)
-        self.panLimitsY = (yMin, yMax)
+        self.panLimitsX = Vec2(xMin, xMax)
+        self.panLimitsY = Vec2(yMin, yMax)
         # Sets the inputs into the limit variables.
         
     def clamp(self, val, minVal, maxVal):
@@ -701,17 +592,19 @@ class CameraHandler(DirectObject.DirectObject):
     def adjustCamDist(self,distFactor):
         # This function increases or decreases the distance between the camera and the target position to simulate zooming in and out.
         # The distFactor input controls the amount of camera movement.
-            # For example, inputing 0.9 will set the camera to 90% of it's previous distance.
+        # For example, inputing 0.9 will set the camera to 90% of it's previous distance.
+        coords = self.getCoords()
         
         self.camDist=self.camDist*distFactor
         # Sets the new distance into self.camDist.
         
         self.turnCameraAroundPoint(0,0)
+        #self.turnCameraAroundPoint(coords.getX(),coords.getY())
         # Calls turnCameraAroundPoint with 0s for the rotation to reset the camera to the new position.
-      
+        
     def camMoveTask(self,task):
         # This task is the camera handler's work house. It's set to be called every frame and will control both orbiting and panning the camera.
-        
+        print base.camera.getPos()
         if base.mouseWatcherNode.hasMouse():
             # We're going to use the mouse, so we have to make sure it's in the game window. If it's not and we try to use it, we'll get
             # a crash error.
@@ -805,13 +698,11 @@ class CameraHandler(DirectObject.DirectObject):
         if base.mouseWatcherNode.hasMouse()==False: return
         mpos=base.mouseWatcherNode.getMouse()
         self.ray.setFromLens(base.camNode, mpos.getX(),mpos.getY())
-        pickedObj,pickedPoint=self.getCollision(queue)
-        if pickedObj==None:  return
+        pickedObj,pickedPoint=self.getCollision(self.queue)
+        if pickedObj==None:  return Vec3D(0, 0, 0)
         #print "mouseLeft", pickedObj, pickedPoint
-        coords=(math.floor(pickedPoint[0]),math.floor(pickedPoint[1]), math.floor(pickedPoint[2]))
         #messenger.send('cellCoords', [cell,])
-        print "Coords:", coords
-        return coords
+        return pickedPoint
         
     def createRay(self,obj,ent,name,show=False,x=0,y=0,z=0,dx=0,dy=0,dz=-1):
         #create queue
@@ -823,6 +714,7 @@ class CameraHandler(DirectObject.DirectObject):
         obj.rayNP.node().setFromCollideMask(GeomNode.getDefaultCollideMask())
         base.cTrav.addCollider(obj.rayNP, obj.queue) 
         if show: obj.rayNP.show()
+        
     """Returns the picked nodepath and the picked 3d point"""
     def getCollision(self, queue):
         #do the traverse
@@ -846,6 +738,7 @@ class CameraHandler(DirectObject.DirectObject):
                     #pickedDistance=pickedPoint.lengthSquared()#distance between your object and the collision
                     return pickedObj,pickedPoint         
         return None,None
+    
     def makePickable(self,newObj,tag='true'):
         """sets nodepath pickable state"""
         newObj.setTag('pickable',tag)
