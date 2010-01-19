@@ -21,6 +21,8 @@ from pandac.PandaModules import LineSegs, NodePath
 from pandac.PandaModules import WindowProperties
 from pandac.PandaModules import VBase3, GeomVertexReader
 
+from direct.fsm import FSM
+
 from direct.task import Task
 
 #import math
@@ -28,10 +30,9 @@ from direct.task import Task
 #import Menu
 import pixelwindow as pw
 import protocol_pb2 as proto
-#import layout
-#import treegui
-#from treegui.core import Gui
-#import rtheme
+import layout
+
+
 
 class Picker(DirectObject.DirectObject):
     '''
@@ -163,8 +164,7 @@ class GUIController(DirectObject.DirectObject):
         Script be the language database
         """
         self.script = script
-        
-        messenger.send('makePickable', [base.a2dBottomLeft])
+        #messenger.send('makePickable', [base.a2dBottomLeft])
         
         self.language = language
         self.accept("onGetMaps", self.mapSelection)
@@ -225,45 +225,34 @@ class GUIController(DirectObject.DirectObject):
         Generate a window with list and thumbnails of region maps availiable.
         Provide two options, load map or, if there is no local version, save local version
         """
-        #mapDialog = pw.StandardWindow(title = "Select Map", center = True)
-        mapList = {}
-        #mapScrollList  = DirectScrolledList(
-                #decButton_pos= (0.35, 0, 0.53),
-                #decButton_text = "Dec",
-                #decButton_text_scale = 0.04,
-                #decButton_borderWidth = (0.005, 0.005),
-                #incButton_pos= (0.35, 0, -0.02),
-                #incButton_text = "Inc",
-                #incButton_text_scale = 0.04,
-                #incButton_borderWidth = (0.005, 0.005),
-                #frameSize = (0.0, 0.7, -0.05, 0.59),
-                #frameColor = (1,0,0,0.5),
-                #pos = (-1, 0, 0),
-                #itemFrame_frameSize = (-0.2, 0.2, -0.37, 0.11),
-                #itemFrame_pos = (0.35, 0, 0.4),
-                #)
-        
+        self.mapDialog = pw.StandardWindow(title = "Select Map", center = True)
+        mapList = []
+        m = [""]
+        import base64
         for mapName in maps:
-            
-            #mapScrollList.addItem(mapName)
-            # This is how Panda converts the string contents of an image file into a texture
-            heightmap = maps[mapName][0]
+            heightmap = maps[mapName]
             image = PNMImage()
-            image.read(StringStream(heightmap))
+            image.read(StringStream(heightmap))      
+            thumbnail = PNMImage(64, 64)
+            thumbnail.gaussianFilterFrom(1, image)
             heightTexture = Texture()
-            #heightTexture.load(image)
+            heightTexture.load(image)
             
-            #bitmap = maps[mapName][1]
-            #image = PNMImage()
-            #image.read(StringStream(bitmap))
-            #bitmapTexture = Texture()
-            #bitmapTexture.load(image)
-            
-        #mapDialoge.addHorizontal([mapScrollList])
-        # TODO: Impliment map selection. For now we are just going to skip this
-        # and use the TestRegion, load it, and see how much memory the map consumes.
+            #label = DirectLabel(text=mapName, image=heightTexture)
+            label = DirectRadioButton(text=mapName, image=heightTexture, variable=m, value=[mapName])
+            mapList.append(label)
+            #mapScrollList.addItem(label)
+        for button in mapList:
+            button.setOthers(mapList)
+        self.mapDialog.addScrolledList(mapList)
+        okButton = DirectButton(text = self.script.getText('TXT_UI_OK', self.language), command = self.selectMap, extraArgs=m)
+        self.mapDialog.addVertical([okButton])
+    
+    def selectMap(self, map_name):
+        '''Sends selected map to server for loading'''
+        self.mapDialog.destroy()
         container = proto.Container()
-        container.mapRequest = "TestRegion"
+        container.mapRequest = map_name
         messenger.send("sendData", [container])
         
     def regionGUI(self):
@@ -315,10 +304,14 @@ class GUIController(DirectObject.DirectObject):
         else:
             message = pw.MessageWindow(text="Your city has been founded! Awesome!")
             messenger.send("regionView_normal")
-
+            self.regionGUI()
+    
+    def makeChatWindow(self):
+        pass
+    
 
 class Lights:
-    def __init__(self,ancestor,lightsOn=True,showLights=False):  
+    def __init__(self,ancestor,lightsOn=True,showLights=False):
         self.ancestor=ancestor
         
         #Initialize bg colour
@@ -326,19 +319,19 @@ class Lights:
         base.setBackgroundColor(*colour)
         
         if lightsOn==False: return
-
+        
         # Initialise lighting
         self.alight = AmbientLight('alight')
         self.alight.setColor(VBase4(0.25, 0.25, 0.25, 1))
         self.alnp = render.attachNewNode(self.alight)
-        render.setLight(self.alnp) 
+        render.setLight(self.alnp)
         
         self.dlight = DirectionalLight('dlight')
         self.dlight.setColor(VBase4(1.0, 1.0, 1.0, 1))
         self.dlnp = render.attachNewNode(self.dlight)
         self.dlnp.setHpr(45, -45, 32)
         render.setLight(self.dlnp)
-    
+
     
 class Camera(DirectObject.DirectObject):
     '''

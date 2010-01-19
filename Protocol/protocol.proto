@@ -16,9 +16,13 @@ message Container {
     optional bool requestMaps = 101;
     optional string mapRequest = 102;
     optional NewCityRequest newCityRequest = 103;
+    optional int32 requestGameState = 104; //0: Region, Any other value is cityid. This determines what is sent to client
     
     // Server --> Client responses, usually a bool, 200-299
     optional NewCityResponse newCityResponse = 200;
+    optional GameState gamestate = 201;
+    optional MapSelectError mapSelectError = 202;
+    optional City newCity = 203; // Broadcasted to let clients know new city is founded
 }
 
 message Chat {
@@ -39,8 +43,18 @@ message LoginResponse {
         FAILURE = 0;
         SUCCESS = 1;
     }
+    enum Usertype{
+        OBSERVE = 0;
+        NORMAL = 1;
+        GM = 2;
+        ADMIN = 3;
+        OWNER = 4;
+    }
+    //User levels. 0 Observe only, 1 normal, 2 gm, 3 admin, 4 owner
+    //This is for client ui presentation, server will still validate accordingly
     required Type type = 1;
     optional string message = 2 [default=""];
+    required Usertype usertype = 3;
 }
 
 message SelectCity {
@@ -64,9 +78,19 @@ message Map {
 
 //This is THE incarnation of the game state which a client recieves when it first conects
 //This holds everything a client needs to generate the visual world for the player
+// GameState should only be sent if serverstate is 1 or more
 message GameState {
     required string name = 1; //Name of the region
     required string heightmap = 2; //Current state of heightmap. Encoded in base64 string
+    repeated Tile tiles = 3;
+    repeated City cities = 4;
+}
+
+message Tile {
+    required int32 id = 1;
+    required int32 positionx = 2;
+    required int32 positiony = 3;
+    optional int32 cityid = 4;
 }
 
 //Client requests to found a new city at this location
@@ -84,4 +108,16 @@ message NewCityResponse {
     }
     required Type type = 1;
     optional string message = 2 [default=""];
+}
+
+message MapSelectError {
+    optional string message = 1 [default=""];
+}
+
+message City {
+    required int32 id = 1;
+    optional string name = 2;
+    optional string mayor = 3;
+    optional int32 population = 4; //Basic population number
+    optional int32 money = 5;
 }

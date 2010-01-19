@@ -17,9 +17,9 @@ loadPrcFileData( '', 'show-frame-rate-meter 1' )
 loadPrcFileData( '', 'notify-level-util error' )
 loadPrcFileData( '', 'window-title '+title )
 
-#loadPrcFileData( '', 'want-pstats 1')
-#loadPrcFileData( '', 'task-timer-verbose 1')
-#loadPrcFileData( '', 'pstats-tasks 1')
+loadPrcFileData( '', 'want-pstats 1')
+loadPrcFileData( '', 'task-timer-verbose 1')
+loadPrcFileData( '', 'pstats-tasks 1')
 
 loadPrcFileData("", "interpolate-frames 1")
 loadPrcFileData("", "clock-mode limited")
@@ -51,10 +51,10 @@ import network
 
 
 #define constants
-SIZE=65 # has to be a 2 exponent number plus one
-ALT=1.0
-RETRO=True
-SUBDIVIDE=3
+#SIZE=65 # has to be a 2 exponent number plus one
+#ALT=1.0
+#RETRO=True
+#SUBDIVIDE=3
 
 # From Camera.py
 from pandac.PandaModules import NodePath,Vec3,Point3, GeoMipTerrain, PNMImage, StringStream, TextureStage
@@ -70,7 +70,6 @@ class World(DirectObject.DirectObject):
         self.language = 'english'
         self.singlePlayer = False
         self.accept('exit', self.exit)
-        self.accept('newSPGame', self.launchSPServer)
         
         base.disableMouse()
         
@@ -182,26 +181,6 @@ class World(DirectObject.DirectObject):
         messenger.send("sendData", ['killServerRequest'])
         #base.closeWindow(base.win)
         sys.exit()
-    
-    def launchServer(self):
-        self.server = subprocess.Popen([sys.executable, 'Server.py', 'SP'])
-    
-    def launchSPServer(self):
-        import socket
-        serverSocket = socket.socket()
-        serverSocket.settimeout(0.25)
-        self.launchServer()
-        z = True
-        HOST = ''                 # Symbolic name meaning all available interfaces
-        PORT = 50007              # Arbitrary non-privileged port
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.bind((HOST, PORT))
-        s.listen(1)
-        while z:
-            conn, addr = s.accept()
-            z = False
-        conn.close()
-        messenger.send('connect')
         
 
 class TerrainManager(DirectObject.DirectObject):
@@ -232,7 +211,6 @@ class TerrainManager(DirectObject.DirectObject):
         import base64
         heightmap = PNMImage()
         imageString = base64.b64decode(container.heightmap)
-        #heightmap.makeGrayscale()
         heightmap.read(StringStream(imageString))
         
         terrain.setHeightfield(heightmap)
@@ -275,21 +253,16 @@ class TerrainManager(DirectObject.DirectObject):
         colorTS = TextureStage('color')
         colorTS.setSort(0)
         colorTS.setPriority(1)
-        #colorTS.setSavedResult(True)
         
         # Textureize
         grassTexture = loader.loadTexture("Textures/grass.png")
         grassTS = TextureStage('grass')
         grassTS.setSort(1)
-        #grassTS.setPriority(100)
-        #grassTS.setCombineRgb(TextureStage.CMReplace, TextureStage.CSPrevious, TextureStage.COSrcColor)
         
         rockTexture = loader.loadTexture("Textures/rock.jpg")
         rockTS = TextureStage('rock')
         rockTS.setSort(2)
-        #rockTS.setPriority(5)
         rockTS.setCombineRgb(TextureStage.CMAdd, TextureStage.CSLastSavedResult, TextureStage.COSrcColor, TextureStage.CSTexture, TextureStage.COSrcColor)
-        #rockTS.setCombineRgb(TextureStage.CMReplace, TextureStage.CSLastSavedResult, TextureStage.COSrcColor)
         
         sandTexture = loader.loadTexture("Textures/sand.jpg")
         sandTS = TextureStage('sand')
@@ -330,12 +303,49 @@ class TerrainManager(DirectObject.DirectObject):
         root.setTexture( gridTS, gridTexture ) 
         root.setTexScale(gridTS, size, size)
         
-        self.regionTerrain.getRoot().setTexture( gridTS, gridTexture)
-        self.regionTerrain.getRoot().setTexScale(gridTS, size, size)
-        
         root.setShaderInput('size', size, size, size, size)
         root.setShader(loader.loadShader('Shaders/terraintexture.sha')) 
         terrain.update()
+        
+        # Getting messy in here eh?
+        citycolors = {}
+        citymap = PNMImage(heightmap.getXSize()-1, heightmap.getYSize()-1)
+        import random
+        #citymap.addAlpha()
+        
+        for city in container.cities:
+            citycolors[city.id] = Vec3(random.rand(), random.rand(), random.rand())
+        
+        tiles = container.tiles
+        # List with city id
+        all_tiles = []
+        position = 0
+        # Expand tile list
+        for x in range(0, heightmap.getXSize()-1 * heightmap.getYSize()-1):
+            all_tiles.append(0)
+        
+        tiles = container.tiles
+        print tiles
+        
+        for tile in container.tiles:
+            if tile.cityid:                    
+                citymap.setXel(tile.positionx, tile.positiony, citycolors[tile.cityid])
+                citymap.setAlpha(tile.positionx, tile.positiony, 1)
+                print "Owner detected"
+            else:
+                citymap.setXel(tile.positionx, tile.positiony, 1.0)
+        
+        
+
+        cityTexture = Texture()
+        cityTexture.load(citymap)
+        cityTS = TextureStage('citymap')
+        cityTS.setSort(0)
+        
+        self.regionTerrain.getRoot().setTexture(cityTS, cityTexture)
+        self.regionTerrain.getRoot().setTexture(gridTS, gridTexture)
+        self.regionTerrain.getRoot().setTexScale(gridTS, size, size)
+        self.regionTerrain.update()
         
         print "Done with terrain generation"
         camera = gui.Camera()

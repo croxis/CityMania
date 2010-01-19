@@ -13,8 +13,6 @@ from direct.task import Task
 # Networking
 import socket, select
 
-#class ServerSocket(threading.Thread, DirectObject.DirectObject):
-#class ServerSocket(Thread, DirectObject.DirectObject):
 class ServerSocket(DirectObject.DirectObject):
     """
     Connection to client
@@ -25,21 +23,11 @@ class ServerSocket(DirectObject.DirectObject):
         self.buffer:    Buffer string for incoming messages
         """
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sendBuffer = []
-        #self.cManager = QueuedConnectionManager()
-        #self.cReader = QueuedConnectionReader(self.cManager,0)
-        #self.cReader.setRawMode(True)
-        #self.cWriter = ConnectionWriter(self.cManager,0)
-        #self.cWriter.setRawMode(True)
-        #self.cListener = QueuedConnectionListener(self.cManager, 0)
-        #self.connection = None
-        
+        self.sendBuffer = []        
         self.buffer = ""
         self.accept("exit", self.exit)
         self.accept("connect", self.connect)
         self.accept("sendData", self.send)
-        #threading.Thread.__init__(self)
-        #Thread.__init__(self)
     
     def connect(self, host, userName, userPassword):
         """
@@ -49,18 +37,12 @@ class ServerSocket(DirectObject.DirectObject):
         self.s.setblocking(0)
         ##self.s.settimeout(1)
         self.peer = self.s.getpeername()
-        #print "Connection created with:", self.peer
-        # Fire login data!
-        #self.myConnection=  self.cManager.openTCPClientConnection(host,52003,3000)
-        #self.cReader.addConnection(self.myConnection)
         
         container = proto.Container()
         container.login.name = userName
         container.login.password = userPassword
         container.login.regionPassword = ""
         self.send(container)
-        #self.start()
-        #self.run()
         
         # These are for using this class in non threaded mode.
         taskMgr.add(self.getData,"Poll the connection listener",-39)
@@ -106,7 +88,6 @@ class ServerSocket(DirectObject.DirectObject):
     
     def run(self):
         self.running = True
-        import time
         while self.running:
             self.considerYield()
             inputready,outputready,exceptready = select.select([self.s], [self.s] ,[]) 
@@ -122,38 +103,6 @@ class ServerSocket(DirectObject.DirectObject):
                 print "d:", d
                 if d:
                     self.buffer += d
-            #d = ""
-            #print self.cReader.getData(d)
-            #print "Data?", self.cReader.dataAvailable()
-            #time.sleep(1)
-            #if self.cReader.dataAvailable():
-            #    v = self.cReader.getData(d)
-            #    print "I gots:", v, d
-            #    self.buffer += d
-            #try:
-                ## Appends message to any existing buffer
-                ##d = self.s.recv(4096)
-                #d = ""
-                #if self.cReader.getData(d):
-                    #self.buffer += d
-            #except socket.timeout:
-                ## No message this time!
-                #print "Yo?"
-                #continue
-            #except socket.error:
-                ## caused by main thread doing a socket.close on this socket
-                ## It is a race condition if this exception is raised or not.
-                #print "Race Condition!"
-                #raise
-                #return
-            #except:  # some error or connection reset by peer
-                #self.running = False
-                #break
-                #return
-            #if not len(d): # a disconnect (socket.close() by client)
-            #    self.running = False
-            #    break
-            #    return
             # We now check for the end tag "[!]" and fire off the appropriate serialized string
             if "[!]" in self.buffer:
                 # Only one string is brought out at a time
@@ -161,11 +110,6 @@ class ServerSocket(DirectObject.DirectObject):
                 # This is because I am lazy
                 data, self.buffer = self.buffer.split("[!]", 1)
                 self.processData(data)
-            
-            
-            #print "Recieved Data:", data
-            #print "From:", self.peer
-            #messenger.post("gotData", data)
     
     def processData(self, data):
         """
@@ -188,8 +132,12 @@ class ServerSocket(DirectObject.DirectObject):
                 # Nothing running?! Lets get us some maps!
                 container = proto.Container()
                 container.requestMaps = 1
-                self.send(container)
                 # TODO: Notice of incoming files, or loading bar, or something
+            elif container.serverState is 1:
+                # A map is loaded so we will just request the game state.
+                container = proto.Container()
+                container.requestGameState = 0
+            self.send(container)
         # Because this is a repeted field we need to check for length as it will always be present
         elif len(container.maps):
             maps = {}
@@ -199,13 +147,15 @@ class ServerSocket(DirectObject.DirectObject):
             messenger.send("onGetMaps", [maps])
         elif container.HasField("loginResponse"):
             if container.loginResponse.type is 1:
-                # Awesome, now we send a request to the server asking for the game state
+                # Awesome, Server returns an int with our user status. We will use this to set up the UI for extra goodies.
+                messenger.send("setSelfAccess", container.loginResponse.usertype)
+                #now we send a request to the server asking for the game state
                 container = proto.Container()
                 container.requestServerState = True
                 self.send(container)
             else:
                 # Got to think of an error message process for here
-                pass
+                messenger.send("loginError", container.loginResponse.message)
         elif container.HasField("gameState"):
             messenger.send("generateRegion", [container.gameState])
         elif container.HasField("newCityResponse"):
