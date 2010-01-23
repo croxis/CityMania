@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Project SYSTEM "Project-4.6.dtd">
+<!-- eric4 project file for project CityMania -->
+<!-- Saved: 2010-01-19, 10:55:44 -->
+<!-- Copyright (C) 2010 ,  -->
+<Project version="4.6">
+  <Language></Language>
+  <ProgLanguage mixed="0">Python</ProgLanguage>
+  <ProjectType>Other</ProjectType>
+  <Description></Description>
+  <Version>0.1</Version>
+  <Author></Author>
+  <Email></Email>
+  <Sources>
+    <Source>Protocol/protocol_pb2.py</Source>
+    <Source>common/protocol_pb2.py</Source>
+    <Source>server/server.py</Source>
+    <Source>server/engine.py</Source>
+    <Source>server/users.py</Source>
+    <Source>server/simulator.py</Source>
+    <Source>server/city.py</Source>
+    <Source>server/client.py</Source>
+    <Source>server/region.py</Source>
+    <Source>server/chat.py</Source>
+    <Source>server/protocol_pb2.py</Source>
+    <Source>server/filesystem.py</Source>
+    <Source>server/conf.py</Source>
+    <Source>client/directWindow.py</Source>
+    <Source>client/gui.py</Source>
+    <Source>client/network.py</Source>
+    <Source>client/layout.py</Source>
+    <Source>client/pixelwindow.py</Source>
+    <Source>client/main.py</Source>
+  </Sources>
+  <Forms>
+  </Forms>
+  <Translations>
+  </Translations>
+  <Resources>
+  </Resources>
+  <Interfaces>
+  </Interfaces>
+  <Others>
+  </Others>
+  <Vcs>
+    <VcsType>None</VcsType>
+  </Vcs>
+  <FiletypeAssociations>
+    <FiletypeAssociation pattern="*.pyw" type="SOURCES" />
+    <FiletypeAssociation pattern="*.idl" type="INTERFACES" />
+    <FiletypeAssociation pattern="*.py" type="SOURCES" />
+    <FiletypeAssociation pattern="*.ptl" type="SOURCES" />
+  </FiletypeAssociations>
+</Project>

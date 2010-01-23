@@ -4,12 +4,16 @@ region.py
 Class for region, esentially the master model
 """
 import engine
-import protocol_pb2 as proto
 import city
 import Image
 import base64, math
 import StringIO
 import users
+import sys
+sys.path.append("..")
+from common.tile import Tile
+import common.protocol_pb2 as proto
+#import .common.tile
 
 class Region(engine.Entity):
     def __init__(self):
@@ -147,18 +151,3 @@ class Region(engine.Entity):
         container.newCity.population = newcity.population
         container.newCity.money = newcity.money
         messenger.send("broadcastData", [container])
-
-
-class Tile(object):
-    """
-    Basic tile in simulation. Stores stuff
-    """
-    def __init__(self, id, cityid=0, coords = (0,0)):
-        """
-        id: id number of tile
-        cityid: id number of the city that owns the tile.
-        """
-        # TODO: Make thread safe
-        self.id = id
-        self.cityid = cityid
-        self.coords = coords

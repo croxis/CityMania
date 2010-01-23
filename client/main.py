@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
 title="City Mania"
-"""
-Here it is!
-"""
 #setup config file
 from pandac.PandaModules import loadPrcFileData
-#import os
-
 loadPrcFileData( '', 'fullscreen 0')
 loadPrcFileData( '', 'win-size 800 600' )
 loadPrcFileData( '', 'win-origin 450 90' )
@@ -38,31 +33,16 @@ from direct.gui.DirectGui import *
 
 #import python modules
 import sys, subprocess, math
+sys.path.append("..")
 #import logging
 
 #import custom modules
 import gui
-#from Structure import Structure, loadStructures, StructureGraphic
-#import Game
-#import Map
-#import Audio
 import network
-#import filesystem
+from common.tile import Tile
+from panda3d.core import NodePath, CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage
+#from direct.task.Task import Task    
 
-
-#define constants
-#SIZE=65 # has to be a 2 exponent number plus one
-#ALT=1.0
-#RETRO=True
-#SUBDIVIDE=3
-
-# From Camera.py
-from pandac.PandaModules import NodePath,Vec3,Point3, GeoMipTerrain, PNMImage, StringStream, TextureStage
-from direct.task.Task import Task    
-
-#This below belongs here
-from direct.gui.DirectGui import *
-from pandac.PandaModules import CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode
 class World(DirectObject.DirectObject):
     def __init__(self):
         """initialize"""
@@ -88,88 +68,19 @@ class World(DirectObject.DirectObject):
         #self.picker = Picker(self)
         
         self.terrainManager = TerrainManager()
-        
-        
-        # Load the structure database
-        #self.structuresDatabase = loadStructures()
-        # GUI
-        #self.contextMenu = ContextMenu(None, self.structuresDatabase, #self.terrainManager, self)
-        #self.structureWidget = StructureWidget()
-        #self.script = Script(self)
-        #self.guiController = GUIController(self.script)
-        #self.level = 0
-        #self.guiController.mainMenu()
-        #self.gameState = PhonyGameState(self)
-        #self.game = Game.ClientGame()
-        #create traverser
-        #base.cTrav = CollisionTraverser()
-        #create collision ray
-        #self.createRay(self,base.camera,name="mouseRay",show=True)
-        #self.accept('mouse1', self.mouse_pick, [self.queue])
         self.accept('makePickable', self.makePickable)
     
-    def mouseLeft(self,pickedObj,pickedPoint):
-        if pickedObj==None:  return
-        #print "mouseLeft", pickedObj, pickedPoint
-        cell=(int(math.floor(pickedPoint[0])),int(math.floor(pickedPoint[1])))
-        #messenger.send('cellCoords', [cell,])
-        print cell  
-    
-    def mouse_pick(self, queue):
-        #print "Mousepick"
-        #get mouse coords
-        if base.mouseWatcherNode.hasMouse()==False: return
-        mpos=base.mouseWatcherNode.getMouse()
-        #locate ray from camera lens to mouse coords
-        self.ray.setFromLens(base.camNode, mpos.getX(),mpos.getY())
-        #get collision: picked obj and point
-        pickedObj,pickedPoint=self.getCollision(queue)
-        self.mouseLeft(pickedObj,pickedPoint)
-        
-    def createRay(self,obj,ent,name,show=False,x=0,y=0,z=0,dx=0,dy=0,dz=-1):
-        #create queue
-        obj.queue=CollisionHandlerQueue()
-        #create ray  
-        obj.rayNP=ent.attachNewNode(CollisionNode(name))
-        obj.ray=CollisionRay(x,y,z,dx,dy,dz)
-        obj.rayNP.node().addSolid(obj.ray)
-        obj.rayNP.node().setFromCollideMask(GeomNode.getDefaultCollideMask())
-        base.cTrav.addCollider(obj.rayNP, obj.queue) 
-        if show: obj.rayNP.show()
-    """Returns the picked nodepath and the picked 3d point"""
-    def getCollision(self, queue):
-        #do the traverse
-        base.cTrav.traverse(render)
-        #process collision entries in queue
-        if queue.getNumEntries() > 0:
-            queue.sortEntries()
-            for i in range(queue.getNumEntries()):
-                collisionEntry=queue.getEntry(i)
-                pickedObj=collisionEntry.getIntoNodePath()
-                #iterate up in model hierarchy to found a pickable tag
-                parent=pickedObj.getParent()
-                for n in range(1):
-                    if parent.getTag('pickable')!="" or parent==render: break
-                    parent=parent.getParent()
-                #return appropiate picked object
-                if parent.getTag('pickable')!="":
-                    pickedObj=parent
-                    pickedPoint = collisionEntry.getSurfacePoint(pickedObj)
-                    #pickedNormal = collisionEntry.getSurfaceNormal(self.ancestor.worldNode)
-                    #pickedDistance=pickedPoint.lengthSquared()#distance between your object and the collision
-                    return pickedObj,pickedPoint         
-        return None,None
     def makePickable(self,newObj,tag='true'):
         """sets nodepath pickable state"""
         newObj.setTag('pickable',tag)
         #print "Pickable: ",newObj,"as",tag
     
-        
     def keys(self):
         """keys"""
         base.accept("w", base.toggleWireframe)
         self.accept('t',self.toggleTexture)
         self.accept('s',self.snapShot)
+    
     def snapShot(self):
         base.screenshot("Snapshot")
     
@@ -316,24 +227,44 @@ class TerrainManager(DirectObject.DirectObject):
         for city in container.cities:
             citycolors[city.id] = Vec3(random.rand(), random.rand(), random.rand())
         
-        tiles = container.tiles
         # List with city id
         all_tiles = []
         position = 0
-        # Expand tile list
-        for x in range(0, heightmap.getXSize()-1 * heightmap.getYSize()-1):
-            all_tiles.append(0)
-        
-        tiles = container.tiles
-        print tiles
-        
+        tileid = 0
+        print "heightmap sizes:", heightmap.getXSize(), heightmap.getYSize()
+        total_tiles = heightmap.getXSize()-1 * heightmap.getYSize()-1
+        ranges = []
+        # ranges = [(0, 143,0), (144,3294,1)]
+        # ranges = [(start, end, cityid)]
+        tiles = []
         for tile in container.tiles:
+            tiles.append((tile.id, tile.cityid))
+        
+        for n in range(len(tiles)):
+            try:
+                ranges.append((tiles[n][0], tiles[n+1][0]-1, tiles[n][1]))
+            except:
+                ranges.append((tiles[n][0], total_tiles, tiles[n][1]))
+        
+        for r in ranges:
+            for x in range(r[0], r[1]):
+                all_tiles.append(Tile(tileid, tile.cityid))
+                tileid += 1
+        print "Total Tiles:", total_tiles
+        print "Length of all tiles:", all_tiles
+        position = 0
+        for x in range(heightmap.getXSize()-1):
+            for y in range(heightmap.getYSize()-1):
+                all_tiles[position].coords = (x,y)
+                position += 1
+        
+        for tile in all_tiles:
             if tile.cityid:                    
-                citymap.setXel(tile.positionx, tile.positiony, citycolors[tile.cityid])
-                citymap.setAlpha(tile.positionx, tile.positiony, 1)
+                citymap.setXel(tile.coords[0], tile.coords[1], citycolors[tile.cityid])
+                citymap.setAlpha(tile.coords[0], tile.coords[1], 1)
                 print "Owner detected"
             else:
-                citymap.setXel(tile.positionx, tile.positiony, 1.0)
+                citymap.setXel(tile.coords[0], tile.coords[1], 1.0)
         
         
 

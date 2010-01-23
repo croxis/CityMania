@@ -25,9 +25,55 @@ _LOGINRESPONSE_TYPE = descriptor.EnumDescriptor(
   options=None,
 )
 
+_LOGINRESPONSE_USERTYPE = descriptor.EnumDescriptor(
+  name='Usertype',
+  full_name='LoginResponse.Usertype',
+  filename='Usertype',
+  values=[
+    descriptor.EnumValueDescriptor(
+      name='OBSERVE', index=0, number=0,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='NORMAL', index=1, number=1,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='GM', index=2, number=2,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='ADMIN', index=3, number=3,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='OWNER', index=4, number=4,
+      options=None,
+      type=None),
+  ],
+  options=None,
+)
+
 _SELECTCITYRESPONSE_TYPE = descriptor.EnumDescriptor(
   name='Type',
   full_name='SelectCityResponse.Type',
+  filename='Type',
+  values=[
+    descriptor.EnumValueDescriptor(
+      name='FAILURE', index=0, number=0,
+      options=None,
+      type=None),
+    descriptor.EnumValueDescriptor(
+      name='SUCCESS', index=1, number=1,
+      options=None,
+      type=None),
+  ],
+  options=None,
+)
+
+_NEWCITYRESPONSE_TYPE = descriptor.EnumDescriptor(
+  name='Type',
+  full_name='NewCityResponse.Type',
   filename='Type',
   values=[
     descriptor.EnumValueDescriptor(
@@ -123,6 +169,48 @@ _CONTAINER = descriptor.Descriptor(
       name='mapRequest', full_name='Container.mapRequest', index=10,
       number=102, type=9, cpp_type=9, label=1,
       default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='newCityRequest', full_name='Container.newCityRequest', index=11,
+      number=103, type=11, cpp_type=10, label=1,
+      default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='requestGameState', full_name='Container.requestGameState', index=12,
+      number=104, type=5, cpp_type=1, label=1,
+      default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='newCityResponse', full_name='Container.newCityResponse', index=13,
+      number=200, type=11, cpp_type=10, label=1,
+      default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='gamestate', full_name='Container.gamestate', index=14,
+      number=201, type=11, cpp_type=10, label=1,
+      default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='mapSelectError', full_name='Container.mapSelectError', index=15,
+      number=202, type=11, cpp_type=10, label=1,
+      default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='newCity', full_name='Container.newCity', index=16,
+      number=203, type=11, cpp_type=10, label=1,
+      default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -227,12 +315,20 @@ _LOGINRESPONSE = descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    descriptor.FieldDescriptor(
+      name='usertype', full_name='LoginResponse.usertype', index=2,
+      number=3, type=14, cpp_type=8, label=2,
+      default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
   nested_types=[],  # TODO(robinson): Implement.
   enum_types=[
     _LOGINRESPONSE_TYPE,
+    _LOGINRESPONSE_USERTYPE,
   ],
   options=None)
 
@@ -338,6 +434,208 @@ _GAMESTATE = descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    descriptor.FieldDescriptor(
+      name='tiles', full_name='GameState.tiles', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='cities', full_name='GameState.cities', index=3,
+      number=4, type=11, cpp_type=10, label=3,
+      default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],  # TODO(robinson): Implement.
+  enum_types=[
+  ],
+  options=None)
+
+
+_TILE = descriptor.Descriptor(
+  name='Tile',
+  full_name='Tile',
+  filename='protocol.proto',
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='id', full_name='Tile.id', index=0,
+      number=1, type=5, cpp_type=1, label=2,
+      default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='positionx', full_name='Tile.positionx', index=1,
+      number=2, type=5, cpp_type=1, label=2,
+      default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='positiony', full_name='Tile.positiony', index=2,
+      number=3, type=5, cpp_type=1, label=2,
+      default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='cityid', full_name='Tile.cityid', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],  # TODO(robinson): Implement.
+  enum_types=[
+  ],
+  options=None)
+
+
+_NEWCITYREQUEST = descriptor.Descriptor(
+  name='NewCityRequest',
+  full_name='NewCityRequest',
+  filename='protocol.proto',
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='name', full_name='NewCityRequest.name', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='positionx', full_name='NewCityRequest.positionx', index=1,
+      number=2, type=5, cpp_type=1, label=2,
+      default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='positiony', full_name='NewCityRequest.positiony', index=2,
+      number=3, type=5, cpp_type=1, label=2,
+      default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='password', full_name='NewCityRequest.password', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],  # TODO(robinson): Implement.
+  enum_types=[
+  ],
+  options=None)
+
+
+_NEWCITYRESPONSE = descriptor.Descriptor(
+  name='NewCityResponse',
+  full_name='NewCityResponse',
+  filename='protocol.proto',
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='type', full_name='NewCityResponse.type', index=0,
+      number=1, type=14, cpp_type=8, label=2,
+      default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='message', full_name='NewCityResponse.message', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],  # TODO(robinson): Implement.
+  enum_types=[
+    _NEWCITYRESPONSE_TYPE,
+  ],
+  options=None)
+
+
+_MAPSELECTERROR = descriptor.Descriptor(
+  name='MapSelectError',
+  full_name='MapSelectError',
+  filename='protocol.proto',
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='message', full_name='MapSelectError.message', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],  # TODO(robinson): Implement.
+  enum_types=[
+  ],
+  options=None)
+
+
+_CITY = descriptor.Descriptor(
+  name='City',
+  full_name='City',
+  filename='protocol.proto',
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='id', full_name='City.id', index=0,
+      number=1, type=5, cpp_type=1, label=2,
+      default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='name', full_name='City.name', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='mayor', full_name='City.mayor', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='population', full_name='City.population', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='funds', full_name='City.funds', index=4,
+      number=5, type=5, cpp_type=1, label=1,
+      default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -354,8 +652,17 @@ _CONTAINER.fields_by_name['selectCity'].message_type = _SELECTCITY
 _CONTAINER.fields_by_name['selectCityResponse'].message_type = _SELECTCITYRESPONSE
 _CONTAINER.fields_by_name['maps'].message_type = _MAP
 _CONTAINER.fields_by_name['gameState'].message_type = _GAMESTATE
+_CONTAINER.fields_by_name['newCityRequest'].message_type = _NEWCITYREQUEST
+_CONTAINER.fields_by_name['newCityResponse'].message_type = _NEWCITYRESPONSE
+_CONTAINER.fields_by_name['gamestate'].message_type = _GAMESTATE
+_CONTAINER.fields_by_name['mapSelectError'].message_type = _MAPSELECTERROR
+_CONTAINER.fields_by_name['newCity'].message_type = _CITY
 _LOGINRESPONSE.fields_by_name['type'].enum_type = _LOGINRESPONSE_TYPE
+_LOGINRESPONSE.fields_by_name['usertype'].enum_type = _LOGINRESPONSE_USERTYPE
 _SELECTCITYRESPONSE.fields_by_name['type'].enum_type = _SELECTCITYRESPONSE_TYPE
+_GAMESTATE.fields_by_name['tiles'].message_type = _TILE
+_GAMESTATE.fields_by_name['cities'].message_type = _CITY
+_NEWCITYRESPONSE.fields_by_name['type'].enum_type = _NEWCITYRESPONSE_TYPE
 
 class Container(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
@@ -388,4 +695,24 @@ class Map(message.Message):
 class GameState(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _GAMESTATE
+
+class Tile(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _TILE
+
+class NewCityRequest(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _NEWCITYREQUEST
+
+class NewCityResponse(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _NEWCITYRESPONSE
+
+class MapSelectError(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _MAPSELECTERROR
+
+class City(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _CITY
 

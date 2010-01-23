@@ -4,7 +4,9 @@ Chat server engine and interpriter
 TODO: impliment IRC protocol
 """
 import engine
-import protocol_pb2 as proto
+import sys
+sys.path.append("..")
+import common.protocol_pb2 as proto
 
 class ChatServer(engine.Entity):
     """

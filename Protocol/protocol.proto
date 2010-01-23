@@ -119,5 +119,5 @@ message City {
     optional string name = 2;
     optional string mayor = 3;
     optional int32 population = 4; //Basic population number
-    optional int32 money = 5;
+    optional int32 funds = 5;
 }

@@ -3,7 +3,9 @@
 Network stuffs
 """
 
-import protocol_pb2 as proto
+import sys
+sys.path.append("..")
+import common.protocol_pb2 as proto
 from direct.showbase import DirectObject
 from direct.stdpy import threading
 

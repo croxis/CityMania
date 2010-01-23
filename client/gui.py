@@ -29,7 +29,8 @@ from direct.task import Task
 #import Meshes
 #import Menu
 import pixelwindow as pw
-import protocol_pb2 as proto
+sys.path.append("..")
+import common.protocol_pb2 as proto
 import layout
 
 

@@ -5,7 +5,9 @@ Requires the python fs library http://code.google.com/p/pyfilesystem/
 http://www.willmcgugan.com/blog/tech/2008/9/21/announcing-fs-010-a-python-file-system/
 """
 import engine
-import protocol_pb2 as proto
+import sys
+sys.path.append("..")
+import common.protocol_pb2 as proto
 #import fs.osfs, fs.memoryfs, fs.utils
 import os, base64, shutil
 

@@ -1,4 +1,6 @@
-'''User management system and database. Stores users, their passwords, check access levels, and so on.
+'''User management system and database. Stores users, their passwords, 
+check access levels, and so on.
+
 userdb = {"username": {"password": password, "access": LEVEL, "loggedin": BOOL, "peer": (peer,peer)}
 Access levels:
 OBSERVER: Can only observe region and cities with permission for that user to observe. Good for guests
