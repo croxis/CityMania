@@ -15,6 +15,8 @@ class ClientSocket(engine.Entity, threading.Thread):
         self.peer = self.s.getpeername()
         print "Connection created with:", self.peer
         self.accept("exit", self.exit)
+        self.sendCache = []
+        self.sendLock = threading.Lock()
         threading.Thread.__init__(self)
         
     def run(self):
@@ -42,7 +44,6 @@ class ClientSocket(engine.Entity, threading.Thread):
             print "Recieved Data from:", self.peer
             messenger.send("gotData", [self.peer, data])
             time.sleep(0.1)
-        #messenger.send("loggout", [self.peer])
     
     def send(self, data):
         """
@@ -52,17 +53,18 @@ class ClientSocket(engine.Entity, threading.Thread):
         This way the client can accept larger file transfers
         """
         #print data.SerializeToString()+"[!]"
+        self.sendLock.acquire()
         try:
             print "Sending:", str(data)[0:100]
             self.s.sendall(data.SerializeToString()+"[!]")
         except:
             print "Object is not a protocol buffer object:", data[0:100]
-    
+        self.sendLock.release()
+        
     def exit(self):
         self.s.close()
         self.running = False
         messenger.send("logout", [self.peer])
-        print "Peer", self.peer, "attempting to exit memory"
 
 
 class Network(engine.Entity, threading.Thread):
@@ -107,14 +109,12 @@ class Network(engine.Entity, threading.Thread):
             t.start()
         except:
             print "Main socket error"    
-        print "Clients:", self.clients
     
     def broadcast(self, data):
         """
         Broadcasts data to all clients 
         """
         self.lock.acquire()
-        print "Braodcasting to clients:", self.clients
         for peer in self.clients:
             self.send(peer, data)
         self.lock.release()
@@ -123,7 +123,6 @@ class Network(engine.Entity, threading.Thread):
         """
         Sends data to a specific client
         """
-        print "Peer:", peer
         self.clients[peer].send(data)
     
     def exit(self):

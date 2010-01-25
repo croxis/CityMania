@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 region.py
-Class for region, esentially the master model
+Class for server region, esentially the master model
 """
 import engine
 import city
@@ -30,12 +30,10 @@ class Region(engine.Entity):
         self.width= 0
         self.height = 0
 
-    #def generate(self, hightMapPath=None, colorMapPath=None, cityMapPath=None, terrainTextureDB=None):
     def generate(self, name, heightmap):
         """
         Generates region
-        heightmap is a string for grayscale bitmap for heigh
-        TODO: Heightmap should be an image object instead
+        heightmap is a grayscale bitmap for height
         colormap is color bitmap for terrain texture
         terrainTextureDB is data on texture to use for color map
         """
@@ -78,16 +76,16 @@ class Region(engine.Entity):
                 t.positiony = tile.coords[1]
                 t.cityid = tile.cityid
         
-        for id, city in self.cities:
+        for ident, city in self.cities.items():
             c = container.gameState.cities.add()
-            c.id = id
+            c.id = ident
         
         messenger.send("broadcastData", [container])
         # TODO: Create method to return to previous server state after we finished sending
     
     def getCityTiles(self, cityid):
         '''Returns tiles for a particular city.'''
-        # Itterate, yuck and slow. Thankfully this should only be called when a city loads
+        # Itterate, yuck and slow. This should only be called when a city loads
         cityTiles = []
         for tile in self.tiles:
             if tile.cityid is cityid:
@@ -95,7 +93,9 @@ class Region(engine.Entity):
         return cityTiles
     
     def getTile(self, x, y):
-        '''Returns tile by coordinate. Thankfully smart enough to find a way to not iterate'''
+        '''Returns tile by coordinate. 
+        Thankfully smart enough to find a way to not iterate
+        '''
         value = y * self.width + x
         return self.tiles[value]
     
@@ -106,20 +106,23 @@ class Region(engine.Entity):
         self.cities[cityKey].login(playerName, password="")
     
     def newCity(self, peer, info):
-        '''Checks to make sure city location is valid. If so we establish city!'''
+        '''Checks to make sure city location is valid. 
+        If so we establish city!
+        '''
         for x in range(0, 32):
             for y in range(0,32):
                 tile = self.getTile(info.positionx+x, info.positiony+y)
                 if tile.cityid:
                     container = proto.Container()
                     container.newCityResponse.type = 0
-                    container.newCityResponse.message = "A city already claims tile " + str(info.positionx+x, info.positiony+y)
+                    container.newCityResponse.message = "A city already claims tile " + str((info.positionx+x, info.positiony+y))
                     messenger.send("sendData", [peer, container])
+                    return
         
         # Grab next free id. If we are at region city limit then no build!
         cityids = self.cities.keys()
-        cityid = 0
-        for n in range(0, self.city_limit):
+        cityid = 1
+        for n in range(1, self.city_limit):
             if n not in cityids:
                 cityid = n
                 break
@@ -128,26 +131,37 @@ class Region(engine.Entity):
             container.newCityResponse.type = 0
             container.newCityResponse.message = "This region has reached its max limit of  " + str(self.city_limit) + " cities."
             messenger.send("sendData", [peer, container])
+            return
         
         # Passed the test! Time to found!
         user = users.getNameFromPeer(peer)
         newcity = city.City(info.name, cityid, mayor = user)
         self.cities[cityid] = newcity
-        
+        updated_tiles = []
         for x in range(0, 32):
             for y in range(0,32):
                 tile = self.getTile(info.positionx+x, info.positiony+y)
                 tile.cityid = cityid
+                updated_tiles.append(tile)
         
         container = proto.Container()
         container.newCityResponse.type = 1
-        messenger.send("sendData", [peer, container])
-        print info.name, "founded!"
+        #messenger.send("sendData", [peer, container])
+        print info.name, "founded with", newcity.funds
         
-        container = proto.Container()
+        #container = proto.Container()
         container.newCity.id = cityid
         container.newCity.name = info.name
         container.newCity.mayor = user
         container.newCity.population = newcity.population
-        container.newCity.money = newcity.money
+        container.newCity.funds = newcity.funds
+        #messenger.send("broadcastData", [container])
+        
+        #container = proto.Container()
+        for tile in updated_tiles:
+            t = container.updatedTiles.add()
+            t.id = tile.id
+            t.positionx = tile.coords[0]
+            t.positiony = tile.coords[1]
+            t.cityid = tile.cityid
         messenger.send("broadcastData", [container])

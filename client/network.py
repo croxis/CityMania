@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Network stuffs
+Network stuffs for the panda client.
 """
 
 import sys
@@ -129,7 +129,18 @@ class ServerSocket(DirectObject.DirectObject):
             else:
                 # Direct PM
                 print "<" + container.sender + "> " + container.message
-        if container.HasField("serverState"):
+        # Chunk A #
+        if container.HasField("newCityResponse"):
+            messenger.send("newCityResponse", [container.newCityResponse])
+            print "sending new city response"
+        if container.HasField("newCity"):
+            messenger.send("newCity", [container.newCity])
+            print "sending new city"
+        if len(container.updatedTiles):
+            messenger.send("updatedTiles", [container.updatedTiles])
+            print "sending updated tiles"
+        # End Chunk A #
+        elif container.HasField("serverState"):
             if container.serverState is 0:
                 # Nothing running?! Lets get us some maps!
                 container = proto.Container()
@@ -159,9 +170,7 @@ class ServerSocket(DirectObject.DirectObject):
                 # Got to think of an error message process for here
                 messenger.send("loginError", container.loginResponse.message)
         elif container.HasField("gameState"):
-            messenger.send("generateRegion", [container.gameState])
-        elif container.HasField("newCityResponse"):
-            messenger.send("newCityResponse", [container.newCityResponse])
+            messenger.send("loadRegion", [container.gameState])
     
     def send(self, data):
         """

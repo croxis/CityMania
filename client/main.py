@@ -30,18 +30,18 @@ from direct.gui.OnscreenText import OnscreenText,TextNode
 from direct.interval.IntervalGlobal import *
 from direct.fsm import FSM
 from direct.gui.DirectGui import *
+from panda3d.core import NodePath, CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, VBase3D
+from direct.task.Task import Task    
 
 #import python modules
 import sys, subprocess, math
 sys.path.append("..")
 #import logging
 
-#import custom modules
 import gui
 import network
 from common.tile import Tile
-from panda3d.core import NodePath, CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage
-#from direct.task.Task import Task    
+import region
 
 class World(DirectObject.DirectObject):
     def __init__(self):
@@ -88,7 +88,6 @@ class World(DirectObject.DirectObject):
         base.toggleTexture()
 
     def exit(self):
-        print "Exit"
         messenger.send("sendData", ['killServerRequest'])
         #base.closeWindow(base.win)
         sys.exit()
@@ -103,11 +102,14 @@ class TerrainManager(DirectObject.DirectObject):
         self.accept("regionView_normal", self.regionViewNormal)
         self.accept("regionView_owners", self.regionViewOwners)
         self.accept("regionView_foundNew", self.regionViewFound)
+        self.accept("updateRegion", self.updateRegion)
         self.terrains=[]   
+        
         base.cTrav = CollisionTraverser()
-        self.createRay(self,base.camera,name="mouseRay",show=True)
+        self.createRay(self, base.camera,name="mouseRay",show=True)
+        self.accept("mouse1", self.lclick, [self.queue])
     
-    def generateWorld(self, container):
+    def generateWorld(self, heightmap, tiles, cities, container):
         terrain = GeoMipTerrain("surface")
         self.regionTerrain = GeoMipTerrain("region_surface")
         root = terrain.getRoot()
@@ -118,12 +120,6 @@ class TerrainManager(DirectObject.DirectObject):
         messenger.send('makePickable', [root])
         messenger.send("makePickable", [self.regionTerrain.getRoot()])
         self.active_terrain = terrain
-        
-        import base64
-        heightmap = PNMImage()
-        imageString = base64.b64decode(container.heightmap)
-        heightmap.read(StringStream(imageString))
-        
         terrain.setHeightfield(heightmap)
         terrain.setBruteforce(True)
         #terrain.setFocalPoint(base.camera)
@@ -135,29 +131,7 @@ class TerrainManager(DirectObject.DirectObject):
         
         self.terrains.append(terrain)
         
-        colormap = PNMImage(heightmap.getXSize(), heightmap.getYSize())
-        colormap.addAlpha()
-        slopemap = terrain.makeSlopeImage()
-        
-        # Iterate through every pix of color map. This will be very slow so until faster method is developed, use sparingly
-        # getXSize returns pixles length starting with 1, subtract 1 for obvious reasons
-        for x in range(0, colormap.getXSize()-1):
-            for y in range(0, colormap.getYSize()-1):
-                # Else if statements used to make sure one channel is used per pixel
-                # Also for some optimization
-                # Snow. We do things funky here as alpha will be 1 already.
-                if heightmap.getGrayVal(x, y) < 200:
-                    colormap.setAlpha(x, y, 0)
-                else:
-                    colormap.setAlpha(x, y, 1)
-                # Beach. Estimations from http://www.simtropolis.com/omnibus/index.cfm/Main.SimCity_4.Custom_Content.Custom_Terrains_and_Using_USGS_Data
-                if heightmap.getGrayVal(x,y) < 62:
-                    colormap.setBlue(x, y, 1)
-                # Rock
-                elif slopemap.getGrayVal(x, y) > 170:
-                    colormap.setRed(x, y, 1)
-                else:
-                    colormap.setGreen(x, y, 1)
+        colormap = self.generateColorMap(heightmap)
         
         colorTexture = Texture()
         colorTexture.load(colormap)
@@ -219,55 +193,9 @@ class TerrainManager(DirectObject.DirectObject):
         terrain.update()
         
         # Getting messy in here eh?
-        citycolors = {}
-        citymap = PNMImage(heightmap.getXSize()-1, heightmap.getYSize()-1)
-        import random
-        #citymap.addAlpha()
+        self.citycolors = {0: VBase3D(1, 1, 1)}
+        citymap = self.generateCityMap(cities, tiles)
         
-        for city in container.cities:
-            citycolors[city.id] = Vec3(random.rand(), random.rand(), random.rand())
-        
-        # List with city id
-        all_tiles = []
-        position = 0
-        tileid = 0
-        print "heightmap sizes:", heightmap.getXSize(), heightmap.getYSize()
-        total_tiles = heightmap.getXSize()-1 * heightmap.getYSize()-1
-        ranges = []
-        # ranges = [(0, 143,0), (144,3294,1)]
-        # ranges = [(start, end, cityid)]
-        tiles = []
-        for tile in container.tiles:
-            tiles.append((tile.id, tile.cityid))
-        
-        for n in range(len(tiles)):
-            try:
-                ranges.append((tiles[n][0], tiles[n+1][0]-1, tiles[n][1]))
-            except:
-                ranges.append((tiles[n][0], total_tiles, tiles[n][1]))
-        
-        for r in ranges:
-            for x in range(r[0], r[1]):
-                all_tiles.append(Tile(tileid, tile.cityid))
-                tileid += 1
-        print "Total Tiles:", total_tiles
-        print "Length of all tiles:", all_tiles
-        position = 0
-        for x in range(heightmap.getXSize()-1):
-            for y in range(heightmap.getYSize()-1):
-                all_tiles[position].coords = (x,y)
-                position += 1
-        
-        for tile in all_tiles:
-            if tile.cityid:                    
-                citymap.setXel(tile.coords[0], tile.coords[1], citycolors[tile.cityid])
-                citymap.setAlpha(tile.coords[0], tile.coords[1], 1)
-                print "Owner detected"
-            else:
-                citymap.setXel(tile.coords[0], tile.coords[1], 1.0)
-        
-        
-
         cityTexture = Texture()
         cityTexture.load(citymap)
         cityTS = TextureStage('citymap')
@@ -282,24 +210,10 @@ class TerrainManager(DirectObject.DirectObject):
         camera = gui.Camera()
         #camera = gui.CameraHandler()
         #camera.setPanLimits(-20, size+20, -20, size+20)
-        #task = taskMgr.add(self.updateTerrain, "updateTerrain")
         messenger.send("finishedTerrainGen")
-    
-    #def updateTerrain(self, task):
-    #    root = self.active_terrain.getRoot()
-    #    position = self.getMouseCell(self.queue)
-    #    if position:
-    #        print "Position:", position
-    #        #root.setTexOffset(self.tileTS, float(position[0])/self.size, float(position[1])/self.size)
-    #        #root.setTexOffset(self.tileTS, float(position[0]), float(position[1]))      
-    #    try:
-    #        #print "Position:", position
-    #        #print root.getTexOffset(self.tileTS)
-    #        pass
-    #    except:
-    #        #print "error", position
-    #        pass
-    #    return Task.cont
+        
+    def lclick(self, queue):
+        print "Cell:", self.getMouseCell(queue)
     
     def getMouseCell(self, queue):
         #print "Mousepick"
@@ -363,7 +277,7 @@ class TerrainManager(DirectObject.DirectObject):
         '''Gui for founding a new city!'''
         root = self.regionTerrain.getRoot()
         task = taskMgr.add(self.newTerrainOverlay, "newTerrainOverlay")
-        tileTexture = loader.loadTexture("Textures/tile2.png")
+        tileTexture = loader.loadTexture("Textures/tile.png")
         tileTexture.setWrapU(Texture.WMClamp)
         tileTexture.setWrapV(Texture.WMClamp)
         self.tileTS = TextureStage('tile')
@@ -379,7 +293,7 @@ class TerrainManager(DirectObject.DirectObject):
         root = self.active_terrain.getRoot()
         position = self.getMouseCell(self.queue)
         if position:
-            # Check to make sure we do not og out of bounds
+            # Check to make sure we do not go out of bounds
             if position[0] < 16:
                 position = (16, position[1])
             elif position[0] > self.size-16:
@@ -402,8 +316,79 @@ class TerrainManager(DirectObject.DirectObject):
         print "Position of new city is:", position
         print "The bounds are:", position[0], position[0]+32, position[1]+32, position[1]
         taskMgr.remove("newTerrainOverlay")
+        root.clearTexture(self.tileTS)
         messenger.send("found_city_name", [position])
-            
+    
+    def generateColorMap(self, heightmap):
+        colormap = PNMImage(heightmap.getXSize(), heightmap.getYSize())
+        colormap.addAlpha()
+        slopemap = self.terrains[0].makeSlopeImage()
+        
+        # Iterate through every pix of color map. This will be very slow so until faster method is developed, use sparingly
+        # getXSize returns pixles length starting with 1, subtract 1 for obvious reasons
+        for x in range(0, heightmap.getXSize()-1):
+            for y in range(0, colormap.getYSize()-1):
+                # Else if statements used to make sure one channel is used per pixel
+                # Also for some optimization
+                # Snow. We do things funky here as alpha will be 1 already.
+                if heightmap.getGrayVal(x, y) < 200:
+                    colormap.setAlpha(x, y, 0)
+                else:
+                    colormap.setAlpha(x, y, 1)
+                # Beach. Estimations from http://www.simtropolis.com/omnibus/index.cfm/Main.SimCity_4.Custom_Content.Custom_Terrains_and_Using_USGS_Data
+                if heightmap.getGrayVal(x,y) < 62:
+                    colormap.setBlue(x, y, 1)
+                # Rock
+                elif slopemap.getGrayVal(x, y) > 170:
+                    colormap.setRed(x, y, 1)
+                else:
+                    colormap.setGreen(x, y, 1)
+        return colormap
+    
+    def generateCityMap(self, cities, tiles):
+        '''Generates a simple colored texture to be applied to the city info region overlay.
+        Due to different coordinate systems (terrain org bottom left, texture top left)
+        some conversions are needed,
+        '''
+        citymap = PNMImage(self.size, self.size)
+        #citymap.addAlpha()
+        import random
+        
+        # conversion for y axis
+        ycon = []
+        s = self.size - 1
+        for y in range(self.size):
+            ycon.append(s)
+            s -= 1
+        for ident, city in cities.items():
+            if ident not in self.citycolors:
+                self.citycolors[ident] = VBase3D(random.random(), random.random(), random.random())
+        for tile in tiles:
+            # X Y is flipped with a converter. Too tired to figure out why,
+            citymap.setXel(tile.coords[1], ycon[tile.coords[0]], self.citycolors[tile.cityid])
+        return citymap
+    
+    def updateRegion(self, heightmap, tiles, cities):
+        #colormap = self.generateColorMap(heightmap)
+        #colorTexture = Texture()
+        #colorTexture.load(colormap)
+        #colorTS = TextureStage('color')
+        #colorTS.setSort(0)
+        #colorTS.setPriority(1)
+        
+        #self.terrains[0].getRoot().setTexture( colorTS, colorTexture ) 
+        #self.terrains[0].update()
+        
+        citymap = self.generateCityMap(cities, tiles)
+        
+        cityTexture = Texture()
+        cityTexture.load(citymap)
+        cityTS = TextureStage('citymap')
+        cityTS.setSort(0)
+        
+        self.regionTerrain.getRoot().setTexture(cityTS, cityTexture)
+        self.regionTerrain.update()
+
 
 class Logger(object):
     def __init__(self):
@@ -447,7 +432,7 @@ def main(var = None):
     guiController.mainMenu()
     serverHost = 'localhost'
     serverPort = 52003
-
+    reg = region.Region()
     run()
 
 if __name__ == '__main__':

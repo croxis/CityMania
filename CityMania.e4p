@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-4.6.dtd">
 <!-- eric4 project file for project CityMania -->
-<!-- Saved: 2010-01-19, 10:55:44 -->
+<!-- Saved: 2010-01-23, 19:28:28 -->
 <!-- Copyright (C) 2010 ,  -->
 <Project version="4.6">
   <Language></Language>
@@ -13,16 +13,13 @@
   <Email></Email>
   <Sources>
     <Source>Protocol/protocol_pb2.py</Source>
-    <Source>common/protocol_pb2.py</Source>
     <Source>server/server.py</Source>
     <Source>server/engine.py</Source>
     <Source>server/users.py</Source>
     <Source>server/simulator.py</Source>
     <Source>server/city.py</Source>
-    <Source>server/client.py</Source>
     <Source>server/region.py</Source>
     <Source>server/chat.py</Source>
-    <Source>server/protocol_pb2.py</Source>
     <Source>server/filesystem.py</Source>
     <Source>server/conf.py</Source>
     <Source>client/directWindow.py</Source>
@@ -31,6 +28,13 @@
     <Source>client/layout.py</Source>
     <Source>client/pixelwindow.py</Source>
     <Source>client/main.py</Source>
+    <Source>common/tile.py</Source>
+    <Source>common/__init__.py</Source>
+    <Source>__init__.py</Source>
+    <Source>server/__init__.py</Source>
+    <Source>client/region.py</Source>
+    <Source>common/protocol_pb2.py</Source>
+    <Source>server/network.py</Source>
   </Sources>
   <Forms>
   </Forms>
@@ -41,6 +45,7 @@
   <Interfaces>
   </Interfaces>
   <Others>
+    <Other>Protocol/protocol.proto</Other>
   </Others>
   <Vcs>
     <VcsType>None</VcsType>
@@ -51,4 +56,119 @@
     <FiletypeAssociation pattern="*.py" type="SOURCES" />
     <FiletypeAssociation pattern="*.ptl" type="SOURCES" />
   </FiletypeAssociations>
+  <Checkers>
+    <CheckersParams>
+      <dict>
+        <key>
+          <string>PYLINT</string>
+        </key>
+        <value>
+          <dict>
+            <key>
+              <string>configFile</string>
+            </key>
+            <value>
+              <unicode>/home/croxis/src/CityMania/standard.rc</unicode>
+            </value>
+            <key>
+              <string>dialogReport</string>
+            </key>
+            <value>
+              <bool>False</bool>
+            </value>
+            <key>
+              <string>enableBasic</string>
+            </key>
+            <value>
+              <bool>True</bool>
+            </value>
+            <key>
+              <string>enableClasses</string>
+            </key>
+            <value>
+              <bool>True</bool>
+            </value>
+            <key>
+              <string>enableDesign</string>
+            </key>
+            <value>
+              <bool>True</bool>
+            </value>
+            <key>
+              <string>enableExceptions</string>
+            </key>
+            <value>
+              <bool>True</bool>
+            </value>
+            <key>
+              <string>enableFormat</string>
+            </key>
+            <value>
+              <bool>True</bool>
+            </value>
+            <key>
+              <string>enableImports</string>
+            </key>
+            <value>
+              <bool>True</bool>
+            </value>
+            <key>
+              <string>enableMetrics</string>
+            </key>
+            <value>
+              <bool>True</bool>
+            </value>
+            <key>
+              <string>enableMiscellaneous</string>
+            </key>
+            <value>
+              <bool>True</bool>
+            </value>
+            <key>
+              <string>enableNewstyle</string>
+            </key>
+            <value>
+              <bool>False</bool>
+            </value>
+            <key>
+              <string>enableRPython</string>
+            </key>
+            <value>
+              <bool>False</bool>
+            </value>
+            <key>
+              <string>enableSimilarities</string>
+            </key>
+            <value>
+              <bool>True</bool>
+            </value>
+            <key>
+              <string>enableTypecheck</string>
+            </key>
+            <value>
+              <bool>True</bool>
+            </value>
+            <key>
+              <string>enableVariables</string>
+            </key>
+            <value>
+              <bool>True</bool>
+            </value>
+            <key>
+              <string>htmlReport</string>
+            </key>
+            <value>
+              <bool>True</bool>
+            </value>
+            <key>
+              <string>txtReport</string>
+            </key>
+            <value>
+              <bool>False</bool>
+            </value>
+          </dict>
+        </value>
+      </dict>
+    </CheckersParams>
+  </Checkers>
 </Project>
