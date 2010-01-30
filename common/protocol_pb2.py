@@ -214,6 +214,13 @@ _CONTAINER = descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    descriptor.FieldDescriptor(
+      name='updatedTiles', full_name='Container.updatedTiles', index=17,
+      number=204, type=11, cpp_type=10, label=3,
+      default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -630,7 +637,7 @@ _CITY = descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     descriptor.FieldDescriptor(
-      name='money', full_name='City.money', index=4,
+      name='funds', full_name='City.funds', index=4,
       number=5, type=5, cpp_type=1, label=1,
       default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -657,6 +664,7 @@ _CONTAINER.fields_by_name['newCityResponse'].message_type = _NEWCITYRESPONSE
 _CONTAINER.fields_by_name['gamestate'].message_type = _GAMESTATE
 _CONTAINER.fields_by_name['mapSelectError'].message_type = _MAPSELECTERROR
 _CONTAINER.fields_by_name['newCity'].message_type = _CITY
+_CONTAINER.fields_by_name['updatedTiles'].message_type = _TILE
 _LOGINRESPONSE.fields_by_name['type'].enum_type = _LOGINRESPONSE_TYPE
 _LOGINRESPONSE.fields_by_name['usertype'].enum_type = _LOGINRESPONSE_USERTYPE
 _SELECTCITYRESPONSE.fields_by_name['type'].enum_type = _SELECTCITYRESPONSE_TYPE
