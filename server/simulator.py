@@ -1,4 +1,5 @@
 import engine
+import time
 
 threads = {}
 active_tiles = []
@@ -57,7 +58,7 @@ class Simulation(engine.Entity, threading.Thread):
     
     def run(self):
         while self.running:
-            pass
+            time.sleep(0.1)
     
     def pause(self):
         pass

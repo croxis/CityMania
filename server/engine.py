@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
- 
 """
 CityMania Engine
 Contains message system, task manager, and the like
 """
+import time
 
 class EventManager(object):
     def __init__ (self):
@@ -47,6 +47,7 @@ class EventManager(object):
     def start(self):
         self.running = True
         while self.running:
+            time.sleep(0.1)
             try:
                 #print "Tickstep"
                 self.step()
