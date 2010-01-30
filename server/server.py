@@ -129,22 +129,30 @@ class CommandProcessor(engine.Entity):
         if login.regionPassword != self.password:
             container.loginResponse.type = 0
             container.loginResponse.message = "Region password incorrect"
-        if not users.login(login.name, login.password, peer):
+        if login.name not in users.userdb:
             users.addUser(login.name, login.password)
-        if users.login(login.name, login.password, peer) is 1:
+        loginType = users.login(login.name, login.password, peer)
+        if not loginType:
             container.loginResponse.type = 0
             container.loginResponse.message = "Player password incorrect"
+            print "Login incorrect"
         if container.loginResponse.type:
             container.loginResponse.usertype = users.getType(login.name)
             messenger.send("loggedIn", [peer, login.name])
             self.peers.append(peer)
+            print peer, "logged in."
+            print self.peers
         messenger.send("sendData", [peer, container])
 
     def logout(self, peer):
+        print peer, "logging out."
+        print self.peers
         index = self.peers.index(peer)
         del self.peers[index]
         user_name = users.getNameFromPeer(peer)
         users.logout(user_name)
+        print peer, "logged out."
+        print self.peers
     
 
 # We initialize the CityMania engine

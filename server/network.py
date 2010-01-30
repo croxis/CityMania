@@ -58,10 +58,11 @@ class ClientSocket(engine.Entity, threading.Thread):
             print "Sending:", str(data)[0:100]
             self.s.sendall(data.SerializeToString()+"[!]")
         except:
-            print "Object is not a protocol buffer object:", data[0:100]
+            print "Object is not a protocol buffer object:", str(data)[0:100]
         self.sendLock.release()
         
     def exit(self):
+        print "Socket error, exicting logout for", self.peer
         self.s.close()
         self.running = False
         messenger.send("logout", [self.peer])

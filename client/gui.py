@@ -21,19 +21,13 @@ from pandac.PandaModules import LineSegs, NodePath
 from pandac.PandaModules import WindowProperties
 from pandac.PandaModules import VBase3, GeomVertexReader
 
-from direct.fsm import FSM
-
+#from direct.fsm import FSM
 from direct.task import Task
+from direct.gui.OnscreenText import OnscreenText
 
-#import math
-#import Meshes
-#import Menu
 import pixelwindow as pw
-sys.path.append("..")
-import common.protocol_pb2 as proto
-import layout
-
-
+sys.path.append("../..")
+import CityMania.common.protocol_pb2 as proto
 
 class Picker(DirectObject.DirectObject):
     '''
@@ -172,21 +166,17 @@ class GUIController(DirectObject.DirectObject):
         self.accept("finishedTerrainGen", self.regionGUI)
         self.accept("found_city_name", self.foundCityName)
         self.accept("newCityResponse", self.newCityResponse)
+        self.accept("updateCityLabels", self.cityLabels)
+        self.cityLabels = []
         
     def mainMenu(self):
         """
         Creates main menu
         """
-        #self.mainMenu = pw.StandardWindow(title = "Open Outpost", size=(100, 100), center = True)
         self.mainMenu = pw.StandardWindow(title = self.script.getText("TXT_UI_MAINMENUTITLE"), center = True)
-        #newGame = DirectButton(text= self.script.getText('TXT_UI_NEWGAME', self.language), command=self.newGame)
         login = DirectButton(text= self.script.getText('TXT_UI_LOGINMP', self.language), command=self.loginMP)
-        #loadMod = DirectButton(text = "Load Mod", command = self.loadModScreen)
         closeButton = DirectButton( text='Quit',  command=self.quit)
-        #self.mainMenu.addVertical([newGame, loadMod, closeButton])
         self.mainMenu.addVertical([login, closeButton])
-        #self.mainMenu.box["frameColor"] = (0,0,0,1)
-        #self.mainMenu.box["borderWidth"] = (1,1)
 
     def newGame(self):
         self.mainMenu.destroy()
@@ -195,8 +185,7 @@ class GUIController(DirectObject.DirectObject):
     def loginMP(self):
         self.mainMenu.destroy()
         self.loginDialog = pw.StandardWindow(title = self.script.getText("TXT_UI_LOGINTITLE"), center = True)
-        #hostEntry = DirectEntry(initialText="croxis.dyndns.org")
-        hostEntry = DirectEntry(initialText="127.0.0.1")
+        hostEntry = DirectEntry(initialText="croxis.dyndns.org")
         userNameEntry = DirectEntry(initialText = "Name")
         userPasswordEntry = DirectEntry(initialText="Password", obscured=True)
         okButton = DirectButton(text = self.script.getText('TXT_UI_OK', self.language), command = self.login)
@@ -261,14 +250,21 @@ class GUIController(DirectObject.DirectObject):
         #self.loginDialog = pw.StandardWindow(title = self.script.getText("TXT_UI_REGIONTITLE"), center = True)
         self.regionWindow = pw.StandardWindow(title = "Region_Name", center = True)
         self.v = [0]
-        buttons = [
-            DirectRadioButton(text = "Normal View", variable=self.v, value=[0], command=self.sendRegionMessage),
-            DirectRadioButton(text = "Ownership View", variable=self.v, value=[1], command=self.sendRegionMessage)]
-        for button in buttons:
-            button.setOthers(buttons)
+        #buttons = [
+        #    DirectRadioButton(text = "Normal View", variable=self.v, value=[0], command=self.sendRegionMessage),
+        #    DirectRadioButton(text = "Ownership View", variable=self.v, value=[1], command=self.sendRegionMessage)]
+        buttons = [DirectButton(text = "Normal View", command=self.n),
+            DirectButton(text = "Ownership View", command=self.o)]
+        #for button in buttons:
+        #    button.setOthers(buttons)
         newCityButton = closeButton = DirectButton(text='Incorperate New City', command=self.sendRegionMessage, extraArgs=[True])
         self.regionWindow.addVertical(buttons + [newCityButton])
-        
+    
+    def n(self):
+        messenger.send("regionView_normal")
+    def o(self):
+        messenger.send("regionView_owners")
+
     def sendRegionMessage(self, status=None):
         '''Send messages for region view'''
         print "Status", status
@@ -310,6 +306,15 @@ class GUIController(DirectObject.DirectObject):
     def makeChatWindow(self):
         pass
     
+    def cityLabels(self, citylabels):
+        for item in self.cityLabels:
+            item.destroy()
+        for ident, city in citylabels.items():
+            print "City label", city
+            text = city['name'] + "\n" + city["mayor"] + "\n" + "Population: " + str(city['population']) + '\n'
+            label = OnscreenText(text = text, pos = (city['position'][0], city["position"][1], 0.6 ), parent = render)
+            label.setBillboardPointEye()
+            self.cityLabels.append(label)
 
 class Lights:
     def __init__(self,ancestor,lightsOn=True,showLights=False):

@@ -38,17 +38,22 @@ def addUser(name, password, access="normal"):
 
 def login(name, password, peer):
     '''Adds new user to db. Does not auto logon. Returns 0 if not in db, 1 if password does not match, 2 if success'''
-    if name in userdb:
-        if password == userdb[name]["password"]:
-            userdb[name]["loggedin"] = True
-            userdb[name]["peer"] = peer
-            return 2
+    if password == userdb[name]["password"]:
+        userdb[name]["loggedin"] = True
+        if userdb[name]["peer"]:
+            # This user is already logged in, so we need to log out the old ip
+            # container = error message telling old connection new one has been made
+            #messenger.send("sendData", [peer, container])
+            print "Kicking out", name, peer
+            messenger.send("logout", [userdb[name]["peer"]])
+        userdb[name]["peer"] = peer
         return 1
     return 0
 
 def logout(name):
     userdb[name]["loggedin"] = False
     userdb[name]["peer"] = None
+    print "In users module, logged out", name, userdb
 
 def getType(name):
     '''Returns the user type'''

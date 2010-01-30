@@ -30,7 +30,8 @@ from direct.gui.OnscreenText import OnscreenText,TextNode
 from direct.interval.IntervalGlobal import *
 from direct.fsm import FSM
 from direct.gui.DirectGui import *
-from panda3d.core import NodePath, CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, VBase3D
+#from panda3d.core import NodePath, CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, VBase3D
+from pandac.PandaModules import NodePath, CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, VBase3D
 from direct.task.Task import Task    
 
 #import python modules
@@ -40,7 +41,8 @@ sys.path.append("..")
 
 import gui
 import network
-from common.tile import Tile
+#from common.tile import Tile
+from tile import Tile
 import region
 
 class World(DirectObject.DirectObject):
@@ -194,7 +196,7 @@ class TerrainManager(DirectObject.DirectObject):
         
         # Getting messy in here eh?
         self.citycolors = {0: VBase3D(1, 1, 1)}
-        citymap = self.generateCityMap(cities, tiles)
+        citymap, citylabels = self.generateCityMap(cities, tiles)
         
         cityTexture = Texture()
         cityTexture.load(citymap)
@@ -211,6 +213,7 @@ class TerrainManager(DirectObject.DirectObject):
         #camera = gui.CameraHandler()
         #camera.setPanLimits(-20, size+20, -20, size+20)
         messenger.send("finishedTerrainGen")
+        messenger.send("updateCityLabels", [citylabels])
         
     def lclick(self, queue):
         print "Cell:", self.getMouseCell(queue)
@@ -226,6 +229,7 @@ class TerrainManager(DirectObject.DirectObject):
         #get collision: picked obj and point
         pickedObj,pickedPoint=self.getCollision(queue)
         if pickedObj==None:  return
+        print "pciked point", pickedPoint
         cell=(int(math.floor(pickedPoint[0])),int(math.floor(pickedPoint[1])))
         return cell
         
@@ -349,10 +353,18 @@ class TerrainManager(DirectObject.DirectObject):
         '''Generates a simple colored texture to be applied to the city info region overlay.
         Due to different coordinate systems (terrain org bottom left, texture top left)
         some conversions are needed,
+        
+        Also creates a citylabels dict for the region view
         '''
         citymap = PNMImage(self.size, self.size)
+        citylabels = cities
+        scratch = {}
         #citymap.addAlpha()
         import random
+        
+        # Setup for city labels
+        for ident in cities:
+            scratch[ident] = []
         
         # conversion for y axis
         ycon = []
@@ -366,7 +378,21 @@ class TerrainManager(DirectObject.DirectObject):
         for tile in tiles:
             # X Y is flipped with a converter. Too tired to figure out why,
             citymap.setXel(tile.coords[1], ycon[tile.coords[0]], self.citycolors[tile.cityid])
-        return citymap
+            # Scratch for labeling
+            if tile.cityid:
+                scratch[tile.cityid].append((tile.coords[0], tile.coords[1]))
+        for ident, values in scratch.items():
+            xsum = 0
+            ysum = 0
+            n = 0
+            for coords in values:
+                xsum += coords[0]
+                ysum += coords[1]
+                n += 1
+            xavg = xsum/n
+            yavg = ysum/n
+            citylabels[ident]["position"] = (xavg, yavg)
+        return citymap, citylabels
     
     def updateRegion(self, heightmap, tiles, cities):
         #colormap = self.generateColorMap(heightmap)
@@ -379,7 +405,7 @@ class TerrainManager(DirectObject.DirectObject):
         #self.terrains[0].getRoot().setTexture( colorTS, colorTexture ) 
         #self.terrains[0].update()
         
-        citymap = self.generateCityMap(cities, tiles)
+        citymap, citylabels = self.generateCityMap(cities, tiles)
         
         cityTexture = Texture()
         cityTexture.load(citymap)
