@@ -150,7 +150,10 @@ class CommandProcessor(engine.Entity):
         index = self.peers.index(peer)
         del self.peers[index]
         user_name = users.getNameFromPeer(peer)
-        users.logout(user_name)
+        print "User", user_name, "exiting."
+        # Temporary fix.
+        if user_name:
+            users.logout(user_name)
         print peer, "logged out."
         print self.peers
     
