@@ -1,8 +1,8 @@
 from pandac.PandaModules import TextNode, Vec3
 from direct.gui.DirectGui import DirectFrame,DirectButton,DirectScrolledFrame,DGG
 
-import direct.directbase.DirectStart
-
+#import direct.directbase.DirectStart
+import layout
 # a task that keeps a node at the position of the mouse-cursor
 def mouseNodeTask( task ):
   if base.mouseWatcherNode.hasMouse():
@@ -119,7 +119,8 @@ class DirectWindow( DirectFrame ):
     self.maxVirtualSize = maxSize
     self.minVirtualSize = minSize
     self.resizeSize     = borderSize
-    self.contentWindow = DirectScrolledFrame(
+    #self.contentWindow = DirectScrolledFrame(
+    self.contentWindow = layout.VBox(
         parent                                  = self,
         pos                                     = ( 0, 0, -self.headerHeight ),
         canvasSize                              = ( 0, self.maxVirtualSize[0], 0, self.maxVirtualSize[1] ),
@@ -160,6 +161,7 @@ class DirectWindow( DirectFrame ):
         horizontalScroll_decButton_frameColor   = borderColor,
         horizontalScroll_thumb_frameColor       = borderColor,
       )
+    #self.contentWindow = layout.VBox()
     self.contentWindow.setTransparency(True)
     
     # background color
@@ -253,6 +255,25 @@ class DirectWindow( DirectFrame ):
     taskMgr.remove( self.taskName )
     # get the window to the front
     self.wrtReparentTo( aspect2d )
+  def addHorizontal(self, widgets):
+    """Accepts a list of directgui objects which are added to a horizontal box, which is then added to the vertical stack.
+    """
+    hbox = layout.HBox(parent = self)
+    for widget in widgets:
+      #self.processWidget(widget)
+      hbox.pack(widget)
+      #self.widgets.append(widget)
+    self.contentWindow.pack(hbox)
+  def addVertical(self, widgets):
+    """Accepts a list of directgui objects which are added to a vertical box, which is then added to the vertical stack.
+    May cause funky layout results.
+    """
+    vbox = layout.VBox(parent=self)
+    for widget in widgets:
+      #self.processWidget(widget)
+       vbox.pack(widget)
+       #self.widgets.append(widget)
+    self.contentWindow.pack(vbox)
 
 
 
@@ -308,6 +329,6 @@ if __name__ == '__main__':
       scale      = 0.5,
     )
   
-  base.accept('1', window3.destroy)
+  #base.accept('1', window3.destroy)
   
-  run()
+  #run()

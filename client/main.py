@@ -56,7 +56,7 @@ class World(DirectObject.DirectObject):
         base.disableMouse()
         
         base.setFrameRateMeter(True)
-        render.setShaderAuto()
+        #render.setShaderAuto()
         self.keys()
         
         # Initialize classes
@@ -118,7 +118,7 @@ class TerrainManager(DirectObject.DirectObject):
         root.reparentTo(render)
         root.setSz(100)
         self.regionTerrain.getRoot().setSz(100)
-        root.setShaderAuto()
+        #root.setShaderAuto()
         messenger.send('makePickable', [root])
         messenger.send("makePickable", [self.regionTerrain.getRoot()])
         self.active_terrain = terrain
@@ -213,7 +213,7 @@ class TerrainManager(DirectObject.DirectObject):
         #camera = gui.CameraHandler()
         #camera.setPanLimits(-20, size+20, -20, size+20)
         messenger.send("finishedTerrainGen")
-        messenger.send("updateCityLabels", [citylabels])
+        messenger.send("updateCityLabels", [citylabels, terrain])
         
     def lclick(self, queue):
         print "Cell:", self.getMouseCell(queue)

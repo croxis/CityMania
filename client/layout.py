@@ -127,6 +127,7 @@ mixin(DirectButton,Mixin_DirectGuiFix)
 # this will require some refactoring work. (In theory Box shouldn't need
 # to maintain its own bounds as NodePath does this correctly.)
 class Box(DirectFrame):
+#class Box(DirectScrolledFrame):
     """
     Base class for HBox and VBox. Not meant to be instantiated itself.
    
@@ -138,6 +139,7 @@ class Box(DirectFrame):
        
         """
         DirectFrame.__init__(self, **args)
+        #DirectScrolledFrame.__init__(self, **args)
         self.initialiseoptions(Box)
 
         # We maintain our own list of objects packed into this box,

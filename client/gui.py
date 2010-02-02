@@ -2,7 +2,6 @@
 '''
 Classes and functions for the user interface
 '''
-
 from pandac.PandaModules import CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode, Texture, PNMImage, StringStream
 from direct.showbase import DirectObject
 from direct.gui.DirectGui import *
@@ -24,6 +23,7 @@ from pandac.PandaModules import VBase3, GeomVertexReader
 #from direct.fsm import FSM
 from direct.task import Task
 from direct.gui.OnscreenText import OnscreenText
+from panda3d.core import TextNode
 
 import pixelwindow as pw
 sys.path.append("../..")
@@ -306,15 +306,23 @@ class GUIController(DirectObject.DirectObject):
     def makeChatWindow(self):
         pass
     
-    def cityLabels(self, citylabels):
-        for item in self.cityLabels:
-            item.destroy()
+    def cityLabels(self, citylabels, terrain):
+        #for item in self.cityLabels:
+        #    item.destroy()
         for ident, city in citylabels.items():
             print "City label", city
-            text = city['name'] + "\n" + city["mayor"] + "\n" + "Population: " + str(city['population']) + '\n'
-            label = OnscreenText(text = text, pos = (city['position'][0], city["position"][1], 0.6 ), parent = render)
-            label.setBillboardPointEye()
+            text = city['name'] + "\n" + city["mayor"] + "\n" + "Population: " + str(city['population'])
+            label = TextNode(str(ident) + " label")
+            label.setText(text)
+            label.setTextColor(1, 1, 0, 1)
+            label.setCardColor(0.5,1,1,1)
+            label.setCardDecal(True)
+            textNodePath = render.attachNewNode(label)
+            textNodePath.setPos(city['position'][1], city["position"][0], 70)
+            #textNodePath.setLightOff()
+            textNodePath.setBillboardPointEye()
             self.cityLabels.append(label)
+            
 
 class Lights:
     def __init__(self,ancestor,lightsOn=True,showLights=False):
@@ -322,7 +330,7 @@ class Lights:
         
         #Initialize bg colour
         colour = (0,0,0)
-        base.setBackgroundColor(*colour)
+        #base.setBackgroundColor(*colour)
         
         if lightsOn==False: return
         

@@ -2,10 +2,12 @@
 Simplified region class for client
 '''
 from direct.showbase import DirectObject
-from panda3d.core import PNMImage, StringStream
+#from panda3d.core import PNMImage, StringStream
+from pandac.PandaModules import PNMImage, StringStream
 import sys
-sys.path.append("..")
-from common.tile import Tile
+#sys.path.append("..")
+#from common.tile import Tile
+from tile import Tile
 
 class Region(DirectObject.DirectObject):
     '''Stuff'''
