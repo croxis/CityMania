@@ -26,6 +26,7 @@ void vshader( in float4 vtx_position  : POSITION,
      l_detail3 = vtx_texcoord0 * k_size/2;// * 11.5;  //22.389999 in EarthSculptor
      l_detail4 = vtx_texcoord0 * k_size/2;// * 11.5;  //22.389999 in EarthSculptor
      l_detail5 = vtx_texcoord0 * k_size;// * 0.5;
+     //l_detail6 = vtx_texcoord0 * k_size;
 }
 
 void fshader( in float4 l_position  : POSITION,
@@ -47,17 +48,12 @@ void fshader( in float4 l_position  : POSITION,
 {
     //add 4 detail colors
     float4 alpha = tex2D(tex_0, l_texcoord0.xy);
+    // Grass, rock, sand, snow, in that order
     o_color = tex2D(tex_1, l_detail1.xy) * alpha.y
             + tex2D(tex_2, l_detail2.xy) * alpha.x
             + tex2D(tex_3, l_detail3.xy) * alpha.z
             + tex2D(tex_4, l_detail4.xy) * alpha.w;
-    o_color *= tex2D(tex_5, l_detail5.xy);
-           
-    //color map, there are 3 Color Modes in EarthSculptor
-    //o_color = o_color + tex2D(tex_5, l_detail5.xy);
-   
-    //light map
-    //o_color = o_color * tex2D(tex_6, l_texcoord0.xy);
+    o_color *= tex2D(tex_5, l_detail5.xy); // Grid
    
     o_color.a = 1.0;
 }

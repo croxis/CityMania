@@ -1,0 +1,75 @@
+//Cg
+//Cg profile arbvp1 arbfp1
+
+// shader loosely based on pro-rsoft's from the panda3d forums
+// shader assumes 6 texture stages:
+// 0-2 textures
+// 3-5 alpha maps
+// vertex shader accepts unit 0 and 3 texture coords as input 
+// and outputs unit 0 scaled and unit 3 unchanged
+// fragment shader uses unit 0 coordinates to access textures
+// and unit 3 coordinates (un-scaled) to access alpha maps
+// gsk, june-2008
+
+void vshader( in float4 vtx_position : POSITION,
+              in float3 vtx_normal : NORMAL,
+              in float2 vtx_texcoord0 : TEXCOORD0,
+              in float2 vtx_texcoord3 : TEXCOORD3,
+              in uniform float4x4 mat_modelproj,
+              in uniform float4x4 trans_model_to_world,
+              in uniform float4 k_lightvec,
+              in uniform float4 k_lightcolor,
+              in uniform float4 k_ambientlight,
+              in uniform float4 k_tscale, 
+              out float l_brightness,
+              out float4 l_mpos,
+              out float2 l_texcoord0 : TEXCOORD0,
+              out float2 l_texcoord3 : TEXCOORD3,
+              out float4 l_position : POSITION)
+{
+
+  // worldspace position, for clipping in the fragment shader
+  l_mpos = mul(trans_model_to_world, vtx_position);
+
+  l_position=mul(mat_modelproj,vtx_position);
+  l_texcoord0=vtx_texcoord0*k_tscale;
+  l_texcoord3=vtx_texcoord3;
+
+  // lighting
+  float3 N = normalize( vtx_normal );
+  float3 L = normalize( k_lightvec.xyz );
+  l_brightness = (max( dot( -N, L ), 0.0f )*k_lightcolor)+k_ambientlight;
+
+
+}
+
+void fshader( in float4 l_position : POSITION,
+              in float2 l_texcoord0 : TEXCOORD0,
+              in float2 l_texcoord3 : TEXCOORD3,
+              in float  l_brightness,
+              in float4 l_mpos,
+              in uniform float4 k_waterlevel,
+              in uniform sampler2D tex_0 : TEXUNIT0,
+              in uniform sampler2D tex_1 : TEXUNIT1,
+              in uniform sampler2D tex_2 : TEXUNIT2,
+              in uniform sampler2D tex_3 : TEXUNIT3,
+              in uniform sampler2D tex_4 : TEXUNIT4,
+              in uniform sampler2D tex_5 : TEXUNIT5,
+              out float4 o_color : COLOR )
+{
+  // clipping
+  if ( l_mpos.z < k_waterlevel.z) discard;
+
+  // alpha splatting and lighting
+  float4 tex1=tex2D(tex_0,l_texcoord0);
+  float4 tex2=tex2D(tex_1,l_texcoord0);
+  float4 tex3=tex2D(tex_2,l_texcoord0);
+  float alpha1=tex2D(tex_3,l_texcoord3).z;
+  float alpha2=tex2D(tex_4,l_texcoord3).z;
+  float alpha3=tex2D(tex_5,l_texcoord3).z;
+  o_color =tex1*alpha1;
+  o_color+=tex2*alpha2;
+  o_color+=tex3*alpha3;
+  o_color=o_color*(l_brightness);
+  o_color.a=1.0;
+}

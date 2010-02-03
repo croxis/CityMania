@@ -31,6 +31,7 @@ from direct.interval.IntervalGlobal import *
 from direct.fsm import FSM
 from direct.gui.DirectGui import *
 #from panda3d.core import NodePath, CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, VBase3D
+from panda3d.core import CardMaker, TransparencyAttrib, BitMask32, Plane, Point3, PlaneNode, CullFaceAttrib
 from pandac.PandaModules import NodePath, CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, VBase3D
 from direct.task.Task import Task    
 
@@ -44,6 +45,7 @@ import network
 #from common.tile import Tile
 from tile import Tile
 import region
+import water
 
 class World(DirectObject.DirectObject):
     def __init__(self):
@@ -113,6 +115,7 @@ class TerrainManager(DirectObject.DirectObject):
     
     def generateWorld(self, heightmap, tiles, cities, container):
         terrain = GeoMipTerrain("surface")
+        terrain.setFocalPoint(base.camera)
         self.regionTerrain = GeoMipTerrain("region_surface")
         root = terrain.getRoot()
         root.reparentTo(render)
@@ -212,8 +215,67 @@ class TerrainManager(DirectObject.DirectObject):
         camera = gui.Camera()
         #camera = gui.CameraHandler()
         #camera.setPanLimits(-20, size+20, -20, size+20)
+        
+        # From Prosoft's super awesome terrain demo
+        #cm = CardMaker("water")
+        #cm.setFrame(-1, 1, -1, 1)
+        #self.water = render.attachNewNode(cm.generate())
+        #self.water.setScale(512)
+        #self.water.lookAt(0, 0, -1)
+        #self.water.setZ(22)
+        #self.water.setShaderOff(1)
+        #self.water.setLightOff(1)
+        #self.water.setAlphaScale(0.5)
+        #self.water.setTransparency(TransparencyAttrib.MAlpha)
+        #wbuffer = base.win.makeTextureBuffer("water", 512, 512)
+        #wbuffer.setClearColorActive(True)
+        #wbuffer.setClearColor(base.win.getClearColor())
+        #self.wcamera = base.makeCamera(wbuffer)
+        #self.wcamera.reparentTo(render)
+        #self.wcamera.node().setLens(base.camLens)
+        #self.wcamera.node().setCameraMask(BitMask32.bit(1))
+        #self.water.hide(BitMask32.bit(1))
+        #wtexture = wbuffer.getTexture()
+        #wtexture.setWrapU(Texture.WMClamp)
+        #wtexture.setWrapV(Texture.WMClamp)
+        #wtexture.setMinfilter(Texture.FTLinearMipmapLinear)
+        #self.wplane = Plane(Vec3(0, 0, 1), Point3(0, 0, self.water.getZ()))
+        #wplanenp = render.attachNewNode(PlaneNode("water", self.wplane))
+        #tmpnp = NodePath("StateInitializer")
+        #tmpnp.setClipPlane(wplanenp)
+        #tmpnp.setAttrib(CullFaceAttrib.makeReverse())
+        #self.wcamera.node().setInitialState(tmpnp.getState())
+        #self.water.projectTexture(TextureStage("reflection"), wtexture, self.wcamera)
+        
+        # From Clcheung just as super awesome demomaster
+        self._water_level = Vec4(0.0, 0.0, 22.0, 1.0)
+        self.att_water = water.WaterNode(0, 0, 512, 512, self._water_level.getZ())
+        self.att_water.setStandardControl()
+        self.att_water.changeParams(None)
+        wl=self._water_level
+        wl.setZ(wl.getZ()-0.05)
+        root.setShaderInput('waterlevel', self._water_level)
+        render.setShaderInput('time', 0)
+        
+        # Skybox
+        self.att_skybox = water.SkyDome2(render)
+        self.att_skybox.setStandardControl()
+        
+        taskMgr.add(self.updateTerrain, "updateTerrain")
         messenger.send("finishedTerrainGen")
         messenger.send("updateCityLabels", [citylabels, terrain])
+        
+    def updateTerrain(self, task):
+        '''Updates terrain and water'''
+        self.terrains[0].update()
+        # Water
+        pos = base.camera.getPos()
+        render.setShaderInput('time', task.time)
+        mc = base.camera.getMat( )
+        self.att_water.changeCameraPos(pos,mc)
+        self.att_water.changeCameraPos(pos,mc)
+        
+        return task.cont        
         
     def lclick(self, queue):
         print "Cell:", self.getMouseCell(queue)

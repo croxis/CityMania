@@ -1,0 +1,47 @@
+//Cg
+//Cg profile arbvp1 arbfp1
+
+void vshader( in float4 vtx_position : POSITION,
+              in uniform float4x4 mat_modelproj,
+              in uniform float4 k_time,
+              in uniform float4 k_clouds,
+              in uniform float4 k_sky,
+
+              out float l_intensity,
+              out float l_intensitySqrd,
+              out float4 l_newUV : TEXCOORD0,
+              out float4 l_position : POSITION )
+{
+    // position
+    l_position = mul( mat_modelproj, vtx_position );
+
+    // texture coordinates
+    l_newUV.xy = ( vtx_position.xy * 0.4 + k_clouds.xy * k_time.x ) * 2.0;
+    l_newUV.zw = ( vtx_position.xy * 0.4 + k_clouds.zw * k_time.x ) * 3.0;
+
+    // intensity
+    l_intensity     = vtx_position.z;
+    l_intensity     = exp( clamp( l_intensity, 0.0, 1.0 ) ) / 2.8;
+    l_intensitySqrd = l_intensity * l_intensity;
+}
+
+void fshader( in float4 l_position : POSITION,
+              in float4 l_newUV : TEXCOORD0,
+              in float l_intensity,
+              in float l_intensitySqrd,
+              in uniform float4 k_sky,
+			  in uniform float4 k_ts,
+              in uniform sampler2D tex_0 : TEXUNIT0,
+
+              out float4 o_color : COLOR )
+{
+    float4 layer1 = tex2D( tex_0, l_newUV.xy * k_ts.xy );
+    float4 layer2 = tex2D( tex_0, l_newUV.zw * k_ts.zw );
+
+    float4 cloudFrag = ( layer1 + layer2 ) * l_intensitySqrd;
+    float4 cloudColor = float4( ( 1.0 - l_intensity ) * k_sky.x,
+                                ( 1.0 - l_intensity ) * k_sky.y,
+                                l_intensity * k_sky.z, 0.0 );
+    o_color = cloudColor * ( 1.0 - cloudFrag.x ) + cloudFrag;
+}
+

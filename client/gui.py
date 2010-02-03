@@ -227,11 +227,9 @@ class GUIController(DirectObject.DirectObject):
             thumbnail.gaussianFilterFrom(1, image)
             heightTexture = Texture()
             heightTexture.load(image)
-            
-            #label = DirectLabel(text=mapName, image=heightTexture)
             label = DirectRadioButton(text=mapName, image=heightTexture, variable=m, value=[mapName])
             mapList.append(label)
-            #mapScrollList.addItem(label)
+        print "Label", mapList
         for button in mapList:
             button.setOthers(mapList)
         self.mapDialog.addScrolledList(mapList)
@@ -330,7 +328,7 @@ class Lights:
         
         #Initialize bg colour
         colour = (0,0,0)
-        #base.setBackgroundColor(*colour)
+        base.setBackgroundColor(*colour)
         
         if lightsOn==False: return
         
