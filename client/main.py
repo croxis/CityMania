@@ -126,8 +126,8 @@ class TerrainManager(DirectObject.DirectObject):
         messenger.send("makePickable", [self.regionTerrain.getRoot()])
         self.active_terrain = terrain
         terrain.setHeightfield(heightmap)
-        terrain.setBruteforce(True)
-        #terrain.setFocalPoint(base.camera)
+        #terrain.setBruteforce(True)
+        terrain.setFocalPoint(base.camera)
         self.regionTerrain.setHeightfield(heightmap)
         self.regionTerrain.setBruteforce(True)
         
@@ -476,6 +476,7 @@ class TerrainManager(DirectObject.DirectObject):
         
         self.regionTerrain.getRoot().setTexture(cityTS, cityTexture)
         self.regionTerrain.update()
+        messenger.send("updateCityLabels", [citylabels, self.terrains[0]])
 
 
 class Logger(object):

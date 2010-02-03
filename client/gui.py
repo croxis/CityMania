@@ -308,11 +308,11 @@ class GUIController(DirectObject.DirectObject):
         #for item in self.cityLabels:
         #    item.destroy()
         for ident, city in citylabels.items():
-            print "City label", city
+            
             text = city['name'] + "\n" + city["mayor"] + "\n" + "Population: " + str(city['population'])
             label = TextNode(str(ident) + " label")
             label.setText(text)
-            label.setTextColor(1, 1, 0, 1)
+            label.setTextColor(1, 1, 0.75, 1)
             label.setCardColor(0.5,1,1,1)
             label.setCardDecal(True)
             textNodePath = render.attachNewNode(label)
@@ -320,6 +320,38 @@ class GUIController(DirectObject.DirectObject):
             #textNodePath.setLightOff()
             textNodePath.setBillboardPointEye()
             self.cityLabels.append(label)
+            
+            #print "City:", city
+            #node = NodePath("Label " + city['name'])
+            #node.reparentTo(render)
+            #node.setPos(city['position'][1], city["position"][0], 70)
+            
+            #label1 = TextNode(str(ident) + " label1")
+            #label1.setText(city['name'])
+            #label1.setTextColor(1, 1, 0, 1)
+            #label1.setCardColor(0.5,1,1,1)
+            #label1.setCardDecal(True)
+            #textNodePath1 = node.attachNewNode(label1)
+            #textNodePath1.setPos(0,0,0)
+            
+            #label2 = TextNode(str(ident) + " label2")
+            #label2.setText(city["mayor"])
+            #label2.setTextColor(1, 1, 0, 1)
+            #label2.setCardColor(0.5,1,1,1)
+            #label2.setCardDecal(True)
+            #textNodePath2 = node.attachNewNode(label2)
+            #textNodePath2.setPos(0,0,-2)
+            
+            #label3 = TextNode(str(ident) + " label3")
+            #label3.setText("Population: " + str(city['population']))
+            #label3.setTextColor(1, 1, 0, 1)
+            #label3.setCardColor(0.5,1,1,1)
+            #label3.setCardDecal(True)
+            #textNodePath3 = node.attachNewNode(label3)
+            #textNodePath3.setPos(0,0,-4)
+            
+            #node.setBillboardPointEye()
+            #self.cityLabels.append(node)
             
 
 class Lights:
@@ -373,18 +405,17 @@ class Camera(DirectObject.DirectObject):
             base.cam.node().setLens(lens)
         
         self.isPanning = False
-        self.accept('mouse2', self.middleMouseDown, [])
-        self.accept('mouse2-up', self.middleMouseUp, [])
+        #self.accept('mouse2', self.middleMouseDown, [])
+        #self.accept('mouse2-up', self.middleMouseUp, [])
+        self.accept('mouse3', self.rightMouseDown, [])
+        self.accept('mouse3-up', self.rightMouseUp, [])
         taskMgr.add(self.update,"updateCameraTask")
         
-    
-    def middleMouseDown(self):
-        #print "middleMouseDown"
+    def rightMouseDown(self):
         self.mousePosition0=[base.win.getPointer(0).getX(),base.win.getPointer(0).getY()]
         self.isPanning = True
         
-    def middleMouseUp(self):
-        #print "middleMouseUp"
+    def rightMouseUp(self):
         self.isPanning = False
     
     def update(self, task):

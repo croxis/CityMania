@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Filesystem class and supporting functions
 Combines program files and userspace files into one filesystem.
@@ -43,12 +44,9 @@ class FileSystem(engine.Entity):
         #os.chdir("Maps/")
         for dir in os.listdir("Maps/"):
             heightMap = open("Maps/"+dir+"/heightmap.png")
-            #bitMap = open("Maps/"+dir+"/config.bmp")
             # Convert to base64 for transmission over wire
-            #maps[dir] = (base64.b64encode(heightMap.read()), base64.b64encode(bitMap.read()))
             maps[dir] = base64.b64encode(heightMap.read())
             heightMap.close()
-            #bitMap.close()
         
         # Now for a good question, how to send over wire with pb?
         container = proto.Container()

@@ -79,6 +79,10 @@ class Region(engine.Entity):
         for ident, city in self.cities.items():
             c = container.gameState.cities.add()
             c.id = ident
+            c.name = city.name
+            c.mayor = city.mayor
+            c.population = city.population
+            c.funds = city.funds
         
         messenger.send("broadcastData", [container])
         # TODO: Create method to return to previous server state after we finished sending
