@@ -8,7 +8,7 @@ from direct.gui.DirectGui import *
 from direct.interval.IntervalGlobal import *
 
 import sys
-#import yaml
+import yaml
 import glob
 import random
 
@@ -126,10 +126,10 @@ class Script(object):
     Imports external language yaml docs into internal dict
     '''
     def __init__(self):
-        #self.database = {}
-        self.database = {'TXT_UI_ONLINE': {'english': 'Online'}, 'TXT_UI_QUIT': {'english': 'Quit'}, 'TXT_UI_LOGINMP': {'english': 'Multiplayer'}, 'TXT_UI_LOGINTITLE': {'english': 'Multiplayer'}, 'TXT_UI_NEWGAME': {'english': 'New Game'}, 'TXT_UI_OFFLINE': {'english': 'Offline'}, 'TXT_UI_OK': {'english': 'Ok'}, 'TXT_UI_MAINMENUTITLE': {'english': 'City Mania'}}
+        self.database = {}
+        #self.database = {'TXT_UI_ONLINE': {'english': 'Online'}, 'TXT_UI_QUIT': {'english': 'Quit'}, 'TXT_UI_LOGINMP': {'english': 'Multiplayer'}, 'TXT_UI_LOGINTITLE': {'english': 'Multiplayer'}, 'TXT_UI_NEWGAME': {'english': 'New Game'}, 'TXT_UI_OFFLINE': {'english': 'Offline'}, 'TXT_UI_OK': {'english': 'Ok'}, 'TXT_UI_MAINMENUTITLE': {'english': 'City Mania'}}
         
-        #self.loadText()
+        self.loadText()
     
     def loadText(self):
         # Load database
@@ -142,6 +142,7 @@ class Script(object):
             textDictionary = yaml.load(stream)
             for key in textDictionary:
                 self.database[key] = textDictionary[key]
+    
     def getText(self, key, language="english"):
         # If the entry doesn't exist then the key name is returned as the text.
         if key not in self.database: return key
@@ -321,38 +322,6 @@ class GUIController(DirectObject.DirectObject):
             textNodePath.setBillboardPointEye()
             self.cityLabels.append(label)
             
-            #print "City:", city
-            #node = NodePath("Label " + city['name'])
-            #node.reparentTo(render)
-            #node.setPos(city['position'][1], city["position"][0], 70)
-            
-            #label1 = TextNode(str(ident) + " label1")
-            #label1.setText(city['name'])
-            #label1.setTextColor(1, 1, 0, 1)
-            #label1.setCardColor(0.5,1,1,1)
-            #label1.setCardDecal(True)
-            #textNodePath1 = node.attachNewNode(label1)
-            #textNodePath1.setPos(0,0,0)
-            
-            #label2 = TextNode(str(ident) + " label2")
-            #label2.setText(city["mayor"])
-            #label2.setTextColor(1, 1, 0, 1)
-            #label2.setCardColor(0.5,1,1,1)
-            #label2.setCardDecal(True)
-            #textNodePath2 = node.attachNewNode(label2)
-            #textNodePath2.setPos(0,0,-2)
-            
-            #label3 = TextNode(str(ident) + " label3")
-            #label3.setText("Population: " + str(city['population']))
-            #label3.setTextColor(1, 1, 0, 1)
-            #label3.setCardColor(0.5,1,1,1)
-            #label3.setCardDecal(True)
-            #textNodePath3 = node.attachNewNode(label3)
-            #textNodePath3.setPos(0,0,-4)
-            
-            #node.setBillboardPointEye()
-            #self.cityLabels.append(node)
-            
 
 class Lights:
     def __init__(self,ancestor,lightsOn=True,showLights=False):
@@ -376,7 +345,8 @@ class Lights:
         self.dlnp.setHpr(45, -45, 32)
         render.setLight(self.dlnp)
 
-    
+from pandac.PandaModules import Vec3,Vec2
+import math    
 class Camera(DirectObject.DirectObject):
     '''
     Camera Object which will be used.
@@ -403,14 +373,40 @@ class Camera(DirectObject.DirectObject):
             lens = OrthographicLens()
             lens.setFilmSize(6)
             base.cam.node().setLens(lens)
+            
+        self.camDist = 40
+        # A variable that will determine how far the camera is from it's target focus
+        # TODO: Panlimit based on map size
+        self.panLimitsX = Vec2(-20, 520)
+        self.panLimitsY = Vec2(-20, 520)
+        # These two vairables will serve as limits for how far the camera can pan, so you don't scroll away from the map.
+        
+        self.target=Vec3()
         
         self.isPanning = False
-        #self.accept('mouse2', self.middleMouseDown, [])
-        #self.accept('mouse2-up', self.middleMouseUp, [])
+        self.isOrbiting = False
+        self.accept('mouse2', self.middleMouseDown, [])
+        self.accept('mouse2-up', self.middleMouseUp, [])
         self.accept('mouse3', self.rightMouseDown, [])
         self.accept('mouse3-up', self.rightMouseUp, [])
-        taskMgr.add(self.update,"updateCameraTask")
         
+        self.createRay(self,base.camera,name="mouseRay",show=True)
+        
+        taskMgr.add(self.update,"updateCameraTask")
+    
+    def middleMouseDown(self):
+        # This function puts the camera into orbiting mode.
+        # test
+        self.mousePosition0=[base.win.getPointer(0).getX(),base.win.getPointer(0).getY()]
+        self.setTarget()
+        self.isOrbiting=True
+        # Sets the orbiting variable to true to designate orbiting mode as on.
+        
+    def middleMouseUp(self):
+        # This function takes the camera out of orbiting mode.
+        self.isOrbiting=False
+        # Sets the orbiting variable to false to designate orbiting mode as off.
+    
     def rightMouseDown(self):
         self.mousePosition0=[base.win.getPointer(0).getX(),base.win.getPointer(0).getY()]
         self.isPanning = True
@@ -419,46 +415,128 @@ class Camera(DirectObject.DirectObject):
         self.isPanning = False
     
     def update(self, task):
-        if self.isPanning:
+        #print "Old Camera:", base.win.getPointer(0).getX(), base.win.getPointer(0).getY()
+        #print "New camera:", base.mouseWatcherNode.getMouse()
+        if self.isOrbiting:
+            # Checks to see if the camera is in orbiting mode. Orbiting mode overrides panning, because it would be problematic if, while
+            # orbiting the camera the mouse came close to the screen edge and started panning the camera at the same time.
+            #mpos = base.mouseWatcherNode.getMouse()
+            #self.turnCameraAroundPoint((self.mx-mpos.getX())*100,(self.my-mpos.getY())*100)  
+            mousePosition1=[base.win.getPointer(0).getX(),base.win.getPointer(0).getY()]
+            delta = [(mousePosition1[0]- self.mousePosition0[0])*0.005, (mousePosition1[1] - self.mousePosition0[1]) * 0.005]
+            self.turnCameraAroundPoint(delta[0], delta[1])
+        elif self.isPanning:
             mousePosition1 = [base.win.getPointer(0).getX(),base.win.getPointer(0).getY()]
             delta = [(mousePosition1[0]- self.mousePosition0[0])*0.005, (mousePosition1[1] - self.mousePosition0[1]) * 0.005]
             #print delta
             base.camera.setPos(base.camera.getPos()[0] + delta[0], base.camera.getPos()[1] - delta[1], base.camera.getPos()[2])
-            
         return Task.cont
     
-    def zoomIn(self):
-        # We don't want to zoom in tooooo far!
-        print "Zooming"
-        if self.zoom < 0:
-            return
-        self.zoom -= 1
-        lens = base.cam.node().getLens()
-        print "Lens pre:", lens.getFilmSize()
-        print "Lens pre:", lens.getFilmSize()[0]
-        #lens.setFov(lens.getFov()/2)
-        lens.setFilmSize(lens.getFilmSize()[0]/2)
-        #print "Lens post:", lens.getFilmSize()
-        base.cam.node().setLens(lens)
-        print "Zoomed!"
+    def turnCameraAroundPoint(self,deltaX,deltaY):
+        # This function performs two important tasks. First, it is used for the camera orbital movement that occurs when the
+        # right mouse button is held down. It is also called with 0s for the rotation inputs to reposition the camera during the
+        # panning and zooming movements.
+        # The delta inputs represent the change in rotation of the camera, which is also used to determine how far the camera
+        # actually moves along the orbit.
+        newCamHpr = Vec3()
+        newCamPos = Vec3()
+        # Creates temporary containers for the new rotation and position values of the camera.
+        
+        camHpr=base.camera.getHpr()
+        # Creates a container for the current HPR of the camera and stores those values.
+        
+        newCamHpr.setX(camHpr.getX()+deltaX)
+        newCamHpr.setY(self.clamp(camHpr.getY()-deltaY, -85, -10))
+        newCamHpr.setZ(camHpr.getZ())
+        # Adjusts the newCamHpr values according to the inputs given to the function. The Y value is clamped to prevent
+        # the camera from orbiting beneath the ground plane and to prevent it from reaching the apex of the orbit, which
+        # can cause a disturbing fast-rotation glitch.
+        
+        base.camera.setHpr(newCamHpr)
+        # Sets the camera's rotation to the new values.
+        
+        angleradiansX = newCamHpr.getX() * (math.pi / 180.0)
+        angleradiansY = newCamHpr.getY() * (math.pi / 180.0)
+        # Generates values to be used in the math that will calculate the new position of the camera.
+        
+        newCamPos.setX(self.camDist*math.sin(angleradiansX)*math.cos(angleradiansY)+self.target.getX())
+        newCamPos.setY(-self.camDist*math.cos(angleradiansX)*math.cos(angleradiansY)+self.target.getY())
+        newCamPos.setZ(-self.camDist*math.sin(angleradiansY)+self.target.getZ())
+        base.camera.setPos(newCamPos.getX(),newCamPos.getY(),newCamPos.getZ())
+        # Performs the actual math to calculate the camera's new position and sets the camera to that position.
+        #Unfortunately, this math is over my head, so I can't fully explain it.
+        
+        base.camera.lookAt(self.target.getX(),self.target.getY(),self.target.getZ() )
+        # Points the camera at the target location.
+        
+    def clamp(self, val, minVal, maxVal):
+        # This function constrains a value such that it is always within or equal to the minimum and maximum bounds.
+        
+        val = min( max(val, minVal), maxVal)
+        # This line first finds the larger of the val or the minVal, and then compares that to the maxVal, taking the smaller. This ensures
+        # that the result you get will be the maxVal if val is higher than it, the minVal if val is lower than it, or the val itself if it's
+        # between the two.
+        
+        return val
+        # returns the clamped value
     
-    def zoomOut(self):
-        # We don't want to zoom out tooooo far!
-        print "Zooming"
-        if self.zoom > 9:
-            return
-        self.zoom += 1
-        lens = base.cam.node().getLens()
-        #lens.setFilmSize(lens.getFilmSize()*2)
-        #lens.setFov(lens.getFov()*2)
+    def setTarget(self):
+        target = self.centerPick(self.queue)
+        if target:
+            x, y, z = target
+            #This function is used to give the camera a new target position.
+            x = self.clamp(x, self.panLimitsX.getX(), self.panLimitsX.getY())
+            self.target.setX(x)
+            y = self.clamp(y, self.panLimitsY.getX(), self.panLimitsY.getY())
+            self.target.setY(y)
+            self.target.setZ(z*100)
+            # Stores the new target position values in the target variable. The x and y values are clamped to the pan limits.
+    
+    def createRay(self,obj,ent,name,show=False,x=0,y=0,z=0,dx=0,dy=0,dz=-1):
+        #create queue
+        obj.queue=CollisionHandlerQueue()
+        #create ray  
+        obj.rayNP=ent.attachNewNode(CollisionNode(name))
+        obj.ray=CollisionRay(x,y,z,dx,dy,dz)
+        obj.rayNP.node().addSolid(obj.ray)
+        obj.rayNP.node().setFromCollideMask(GeomNode.getDefaultCollideMask())
+        base.cTrav.addCollider(obj.rayNP, obj.queue) 
+        if show: obj.rayNP.show()
+    
+    def centerPick(self, queue):
+        #print "Mousepick"
+        #get mouse coords
+        if base.mouseWatcherNode.hasMouse()==False: return
+        #mpos=base.mouseWatcherNode.getMouse()
+        #locate ray from camera lens to mouse coords
+        self.ray.setFromLens(base.camNode, 0, 0)
+        #get collision: picked obj and point
+        pickedObj,pickedPoint=self.getCollision(queue)
+        return pickedPoint
+    
+    def getCollision(self, queue):
+        #do the traverse
+        base.cTrav.traverse(render)
+        #process collision entries in queue
+        if queue.getNumEntries() > 0:
+            queue.sortEntries()
+            for i in range(queue.getNumEntries()):
+                collisionEntry=queue.getEntry(i)
+                pickedObj=collisionEntry.getIntoNodePath()
+                #iterate up in model hierarchy to found a pickable tag
+                parent=pickedObj.getParent()
+                for n in range(1):
+                    if parent.getTag('pickable')!="" or parent==render: break
+                    parent=parent.getParent()
+                #return appropiate picked object
+                if parent.getTag('pickable')!="":
+                    pickedObj=parent
+                    pickedPoint = collisionEntry.getSurfacePoint(pickedObj)
+                    #pickedNormal = collisionEntry.getSurfaceNormal(self.ancestor.worldNode)
+                    #pickedDistance=pickedPoint.lengthSquared()#distance between your object and the collision
+                    return pickedObj,pickedPoint         
+        return None,None
 
-
-        base.cam.node().setLens(lens)
-        print "Zoomed!"
-
-from direct.showbase import DirectObject
-from pandac.PandaModules import Vec3,Vec2
-import math
 
 # Last modified: 10/2/2009
 # This class takes over control of the camera and sets up a Real Time Strategy game type camera control system. The user can move the camera three
@@ -548,53 +626,6 @@ class CameraHandler(DirectObject.DirectObject):
         taskMgr.add(self.camMoveTask,'camMoveTask')
         # sets the camMoveTask to be run every frame
         
-    def turnCameraAroundPoint(self,deltaX,deltaY):
-        # This function performs two important tasks. First, it is used for the camera orbital movement that occurs when the
-        # right mouse button is held down. It is also called with 0s for the rotation inputs to reposition the camera during the
-        # panning and zooming movements.
-        # The delta inputs represent the change in rotation of the camera, which is also used to determine how far the camera
-            # actually moves along the orbit.
-        
-            newCamHpr = Vec3()
-            newCamPos = Vec3()
-            # Creates temporary containers for the new rotation and position values of the camera.
-            
-            camHpr=base.camera.getHpr()
-            # Creates a container for the current HPR of the camera and stores those values.
-            
-            newCamHpr.setX(camHpr.getX()+deltaX)
-            newCamHpr.setY(self.clamp(camHpr.getY()-deltaY, -85, -10))
-            newCamHpr.setZ(camHpr.getZ())
-            # Adjusts the newCamHpr values according to the inputs given to the function. The Y value is clamped to prevent
-            # the camera from orbiting beneath the ground plane and to prevent it from reaching the apex of the orbit, which
-            # can cause a disturbing fast-rotation glitch.
-            
-            base.camera.setHpr(newCamHpr)
-            # Sets the camera's rotation to the new values.
-            
-            angleradiansX = newCamHpr.getX() * (math.pi / 180.0)
-            angleradiansY = newCamHpr.getY() * (math.pi / 180.0)
-            # Generates values to be used in the math that will calculate the new position of the camera.
-            
-            newCamPos.setX(self.camDist*math.sin(angleradiansX)*math.cos(angleradiansY)+self.target.getX())
-            newCamPos.setY(-self.camDist*math.cos(angleradiansX)*math.cos(angleradiansY)+self.target.getY())
-            newCamPos.setZ(-self.camDist*math.sin(angleradiansY)+self.target.getZ())
-            base.camera.setPos(newCamPos.getX(),newCamPos.getY(),newCamPos.getZ())
-            # Performs the actual math to calculate the camera's new position and sets the camera to that position.
-            #Unfortunately, this math is over my head, so I can't fully explain it.
-                        
-            base.camera.lookAt(self.target.getX(),self.target.getY(),self.target.getZ() )
-            # Points the camera at the target location.
-            
-    def setTarget(self,x,y,z):
-        #This function is used to give the camera a new target position.
-        x = self.clamp(x, self.panLimitsX.getX(), self.panLimitsX.getY())
-        self.target.setX(x)
-        y = self.clamp(y, self.panLimitsY.getX(), self.panLimitsY.getY())
-        self.target.setY(y)
-        self.target.setZ(z)
-        # Stores the new target position values in the target variable. The x and y values are clamped to the pan limits.
-        
     def setPanLimits(self,xMin, xMax, yMin, yMax):
         # This function is used to set the limitations of the panning movement.
         
@@ -602,29 +633,6 @@ class CameraHandler(DirectObject.DirectObject):
         self.panLimitsY = Vec2(yMin, yMax)
         # Sets the inputs into the limit variables.
         
-    def clamp(self, val, minVal, maxVal):
-        # This function constrains a value such that it is always within or equal to the minimum and maximum bounds.
-        
-        val = min( max(val, minVal), maxVal)
-        # This line first finds the larger of the val or the minVal, and then compares that to the maxVal, taking the smaller. This ensures
-        # that the result you get will be the maxVal if val is higher than it, the minVal if val is lower than it, or the val itself if it's
-        # between the two.
-        
-        return val
-        # returns the clamped value
-      
-    def startOrbit(self):
-        # This function puts the camera into orbiting mode.
-        
-        self.orbiting=True
-        # Sets the orbiting variable to true to designate orbiting mode as on.
-        
-    def stopOrbit(self):
-        # This function takes the camera out of orbiting mode.
-        
-        self.orbiting=False
-        # Sets the orbiting variable to false to designate orbiting mode as off.
-      
     def adjustCamDist(self,distFactor):
         # This function increases or decreases the distance between the camera and the target position to simulate zooming in and out.
         # The distFactor input controls the amount of camera movement.
@@ -709,73 +717,3 @@ class CameraHandler(DirectObject.DirectObject):
             # The old mouse positions are updated to the current mouse position as the final step.
             
         return task.cont 
-        
-    
-    def mouseLeft(self,pickedObj,pickedPoint):
-        if pickedObj==None:  return
-        #print "mouseLeft", pickedObj, pickedPoint
-        cell=(int(math.floor(pickedPoint[0])),int(math.floor(pickedPoint[1])))
-        #messenger.send('cellCoords', [cell,])
-        print cell  
-    
-    def mouse_pick(self, queue):
-        #print "Mousepick"
-        #get mouse coords
-        if base.mouseWatcherNode.hasMouse()==False: return
-        mpos=base.mouseWatcherNode.getMouse()
-        #locate ray from camera lens to mouse coords
-        self.ray.setFromLens(base.camNode, mpos.getX(),mpos.getY())
-        #get collision: picked obj and point
-        pickedObj,pickedPoint=self.getCollision(queue)
-        self.mouseLeft(pickedObj,pickedPoint)
-        
-    def getCoords(self):
-        '''Returns coords of terrain under cursor'''
-        if base.mouseWatcherNode.hasMouse()==False: return
-        mpos=base.mouseWatcherNode.getMouse()
-        self.ray.setFromLens(base.camNode, mpos.getX(),mpos.getY())
-        pickedObj,pickedPoint=self.getCollision(self.queue)
-        if pickedObj==None:  return Vec3D(0, 0, 0)
-        #print "mouseLeft", pickedObj, pickedPoint
-        #messenger.send('cellCoords', [cell,])
-        return pickedPoint
-        
-    def createRay(self,obj,ent,name,show=False,x=0,y=0,z=0,dx=0,dy=0,dz=-1):
-        #create queue
-        obj.queue=CollisionHandlerQueue()
-        #create ray  
-        obj.rayNP=ent.attachNewNode(CollisionNode(name))
-        obj.ray=CollisionRay(x,y,z,dx,dy,dz)
-        obj.rayNP.node().addSolid(obj.ray)
-        obj.rayNP.node().setFromCollideMask(GeomNode.getDefaultCollideMask())
-        base.cTrav.addCollider(obj.rayNP, obj.queue) 
-        if show: obj.rayNP.show()
-        
-    """Returns the picked nodepath and the picked 3d point"""
-    def getCollision(self, queue):
-        #do the traverse
-        base.cTrav.traverse(render)
-        #process collision entries in queue
-        if queue.getNumEntries() > 0:
-            queue.sortEntries()
-            for i in range(queue.getNumEntries()):
-                collisionEntry=queue.getEntry(i)
-                pickedObj=collisionEntry.getIntoNodePath()
-                #iterate up in model hierarchy to found a pickable tag
-                parent=pickedObj.getParent()
-                for n in range(1):
-                    if parent.getTag('pickable')!="" or parent==render: break
-                    parent=parent.getParent()
-                #return appropiate picked object
-                if parent.getTag('pickable')!="":
-                    pickedObj=parent
-                    pickedPoint = collisionEntry.getSurfacePoint(pickedObj)
-                    #pickedNormal = collisionEntry.getSurfaceNormal(self.ancestor.worldNode)
-                    #pickedDistance=pickedPoint.lengthSquared()#distance between your object and the collision
-                    return pickedObj,pickedPoint         
-        return None,None
-    
-    def makePickable(self,newObj,tag='true'):
-        """sets nodepath pickable state"""
-        newObj.setTag('pickable',tag)
-        #print "Pickable: ",newObj,"as",tag
