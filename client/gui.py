@@ -324,7 +324,8 @@ class GUIController(DirectObject.DirectObject):
     
     def regionCityWindow(self, city):
         '''Generates window displaying city stats and options.'''
-        print city
+        self.name_city_window = pw.StandardWindow(title = city['name'], center = True)
+        
             
 
 class Lights:
@@ -415,6 +416,7 @@ class Camera(DirectObject.DirectObject):
         self.isPanning = True
         
     def rightMouseUp(self):
+        self.setTarget()
         self.isPanning = False
     
     def update(self, task):
