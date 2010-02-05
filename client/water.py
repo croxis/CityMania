@@ -87,7 +87,12 @@ class WaterNode(Att_base):
         tex1 = loader.loadTexture('Textures/water.png')
         ts1 = TextureStage('distortion')
         self.waterNP.setTexture(ts1, tex1)
-
+    
+    def removeNode(self):
+        self.cam.setInitialState(RenderState.makeEmpty())
+        self.watercamNP.removeNode()
+        self.waterNP.clearShader()
+        self.waterNP.removeNode()
 
     def Destroy(self):
         base.graphicsEngine.removeWindow(self.buffer)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Simplified region class for client
 '''
@@ -17,6 +18,7 @@ class Region(DirectObject.DirectObject):
         self.accept('loadRegion', self.load)
         self.accept("updatedTiles", self.updateTiles)
         self.accept("newCity", self.newCity)
+        self.accept("clickForCity", self.checkCity)
         
     def load(self, container, name="New Region"):
         '''Loads a new region, usually from connecting to a server
@@ -68,3 +70,17 @@ class Region(DirectObject.DirectObject):
     
     def newCity(self, city):
         self.cities[city.id] = {"name": city.name, "mayor": city.mayor, "funds": city.funds, "population": city.population}
+    
+    def checkCity(self, cell):
+        '''Checks for city in given cell for region gui display'''
+        if not cell: return
+        tile = self.getTile(cell[0], cell[1])
+        if tile.cityid:
+            messenger.send("showRegionCityWindow", [self.cities[tile.cityid]])
+        
+    def getTile(self, x, y):
+        '''Returns tile by coordinate. 
+        Thankfully smart enough to find a way to not iterate
+        '''
+        value = y * self.region_size[0] + x
+        return self.tiles[value]

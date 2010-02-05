@@ -16,9 +16,11 @@ loadPrcFileData( '', 'want-pstats 1')
 loadPrcFileData( '', 'task-timer-verbose 1')
 loadPrcFileData( '', 'pstats-tasks 1')
 
-loadPrcFileData("", "interpolate-frames 1")
-loadPrcFileData("", "clock-mode limited")
-loadPrcFileData("", "clock-frame-rate 25")
+#loadPrcFileData("", "interpolate-frames 1")
+#loadPrcFileData("", "clock-mode limited")
+#loadPrcFileData("", "clock-frame-rate 25")
+
+loadPrcFileData("", "sync-video 0")
 
 loadPrcFileData("", "audio-library-name p3openal_audio")
 
@@ -47,6 +49,8 @@ from tile import Tile
 import region
 import water
 
+picker = gui.getPicker()
+
 class World(DirectObject.DirectObject):
     def __init__(self):
         """initialize"""
@@ -58,12 +62,9 @@ class World(DirectObject.DirectObject):
         base.disableMouse()
         
         base.setFrameRateMeter(True)
-        #render.setShaderAuto()
         self.keys()
         
         # Initialize classes
-        #base.camera.node().clearEffects()
-        #self.camera = gui.Camera()
         self.lights = gui.Lights(self, lightsOn = True, showLights = True)
         
         self.root = NodePath('rootMain')
@@ -72,12 +73,6 @@ class World(DirectObject.DirectObject):
         #self.picker = Picker(self)
         
         self.terrainManager = TerrainManager()
-        self.accept('makePickable', self.makePickable)
-    
-    def makePickable(self,newObj,tag='true'):
-        """sets nodepath pickable state"""
-        newObj.setTag('pickable',tag)
-        #print "Pickable: ",newObj,"as",tag
     
     def keys(self):
         """keys"""
@@ -109,27 +104,39 @@ class TerrainManager(DirectObject.DirectObject):
         self.accept("updateRegion", self.updateRegion)
         self.terrains=[]   
         
-        base.cTrav = CollisionTraverser()
-        self.createRay(self, base.camera,name="mouseRay",show=True)
-        self.accept("mouse1", self.lclick, [self.queue])
+        self.accept("mouse1", self.lclick)
+        self.waterType = 2
+        self.water = None
+        self.accept("h", self.switchWater)
+        
+        # view 0: region view
+        # view #: cityid view
+        self.view = 0
     
     def generateWorld(self, heightmap, tiles, cities, container):
         terrain = GeoMipTerrain("surface")
         terrain.setFocalPoint(base.camera)
-        self.regionTerrain = GeoMipTerrain("region_surface")
+        
         root = terrain.getRoot()
         root.reparentTo(render)
         root.setSz(100)
-        self.regionTerrain.getRoot().setSz(100)
-        #root.setShaderAuto()
-        messenger.send('makePickable', [root])
-        messenger.send("makePickable", [self.regionTerrain.getRoot()])
+        
+        
         self.active_terrain = terrain
         terrain.setHeightfield(heightmap)
         #terrain.setBruteforce(True)
         terrain.setFocalPoint(base.camera)
+        terrain.setBlockSize(64)
+        #terrain.setNear(40)
+        #terrain.setFar(100)
+        
+        self.regionTerrain = GeoMipTerrain("region_surface")
+        self.regionTerrain.getRoot().setSz(100)
         self.regionTerrain.setHeightfield(heightmap)
         self.regionTerrain.setBruteforce(True)
+        
+        messenger.send('makePickable', [root])
+        messenger.send("makePickable", [self.regionTerrain.getRoot()])
         
         terrain.generate()
         self.regionTerrain.generate()
@@ -216,47 +223,8 @@ class TerrainManager(DirectObject.DirectObject):
         #camera = gui.CameraHandler()
         #camera.setPanLimits(-20, size+20, -20, size+20)
         
-        # From Prosoft's super awesome terrain demo
-        #cm = CardMaker("water")
-        #cm.setFrame(-1, 1, -1, 1)
-        #self.water = render.attachNewNode(cm.generate())
-        #self.water.setScale(512)
-        #self.water.lookAt(0, 0, -1)
-        #self.water.setZ(22)
-        #self.water.setShaderOff(1)
-        #self.water.setLightOff(1)
-        #self.water.setAlphaScale(0.5)
-        #self.water.setTransparency(TransparencyAttrib.MAlpha)
-        #wbuffer = base.win.makeTextureBuffer("water", 512, 512)
-        #wbuffer.setClearColorActive(True)
-        #wbuffer.setClearColor(base.win.getClearColor())
-        #self.wcamera = base.makeCamera(wbuffer)
-        #self.wcamera.reparentTo(render)
-        #self.wcamera.node().setLens(base.camLens)
-        #self.wcamera.node().setCameraMask(BitMask32.bit(1))
-        #self.water.hide(BitMask32.bit(1))
-        #wtexture = wbuffer.getTexture()
-        #wtexture.setWrapU(Texture.WMClamp)
-        #wtexture.setWrapV(Texture.WMClamp)
-        #wtexture.setMinfilter(Texture.FTLinearMipmapLinear)
-        #self.wplane = Plane(Vec3(0, 0, 1), Point3(0, 0, self.water.getZ()))
-        #wplanenp = render.attachNewNode(PlaneNode("water", self.wplane))
-        #tmpnp = NodePath("StateInitializer")
-        #tmpnp.setClipPlane(wplanenp)
-        #tmpnp.setAttrib(CullFaceAttrib.makeReverse())
-        #self.wcamera.node().setInitialState(tmpnp.getState())
-        #self.water.projectTexture(TextureStage("reflection"), wtexture, self.wcamera)
-        
-        # From Clcheung just as super awesome demomaster
-        self._water_level = Vec4(0.0, 0.0, 22.0, 1.0)
-        self.att_water = water.WaterNode(0, 0, 512, 512, self._water_level.getZ())
-        self.att_water.setStandardControl()
-        self.att_water.changeParams(None)
-        wl=self._water_level
-        wl.setZ(wl.getZ()-0.05)
-        root.setShaderInput('waterlevel', self._water_level)
-        render.setShaderInput('time', 0)
-        
+        self.generateWater(2)
+                
         # Skybox
         self.att_skybox = water.SkyDome2(render)
         self.att_skybox.setStandardControl()
@@ -264,70 +232,94 @@ class TerrainManager(DirectObject.DirectObject):
         taskMgr.add(self.updateTerrain, "updateTerrain")
         messenger.send("finishedTerrainGen")
         messenger.send("updateCityLabels", [citylabels, terrain])
+    
+    def generateWater(self, style):
+        '''Generates water
+        style 0: blue card
+        style 1: reflective card
+        style 2: reflective card with shaders
+        '''
+        if self.water:
+            self.water.removeNode()
+        if style is 0:
+            cm = CardMaker("water")
+            cm.setFrame(-1, 1, -1, 1)
+            cm.setColor(0, 0, 1, 0.9)
+            self.water = render.attachNewNode(cm.generate())
+            self.water.setScale(512)
+            self.water.lookAt(0, 0, -1)
+            self.water.setZ(22)
+            messenger.send('makePickable', [self.water])
+        elif style is 1:
+            # From Prosoft's super awesome terrain demo
+            cm = CardMaker("water")
+            cm.setFrame(-1, 1, -1, 1)
+            self.water = render.attachNewNode(cm.generate())
+            self.water.setScale(512)
+            self.water.lookAt(0, 0, -1)
+            self.water.setZ(22)
+            self.water.setShaderOff(1)
+            self.water.setLightOff(1)
+            self.water.setAlphaScale(0.5)
+            self.water.setTransparency(TransparencyAttrib.MAlpha)
+            wbuffer = base.win.makeTextureBuffer("water", 512, 512)
+            wbuffer.setClearColorActive(True)
+            wbuffer.setClearColor(base.win.getClearColor())
+            self.wcamera = base.makeCamera(wbuffer)
+            self.wcamera.reparentTo(render)
+            self.wcamera.node().setLens(base.camLens)
+            self.wcamera.node().setCameraMask(BitMask32.bit(1))
+            self.water.hide(BitMask32.bit(1))
+            wtexture = wbuffer.getTexture()
+            wtexture.setWrapU(Texture.WMClamp)
+            wtexture.setWrapV(Texture.WMClamp)
+            wtexture.setMinfilter(Texture.FTLinearMipmapLinear)
+            self.wplane = Plane(Vec3(0, 0, 1), Point3(0, 0, self.water.getZ()))
+            wplanenp = render.attachNewNode(PlaneNode("water", self.wplane))
+            tmpnp = NodePath("StateInitializer")
+            tmpnp.setClipPlane(wplanenp)
+            tmpnp.setAttrib(CullFaceAttrib.makeReverse())
+            self.wcamera.node().setInitialState(tmpnp.getState())
+            self.water.projectTexture(TextureStage("reflection"), wtexture, self.wcamera)
+            messenger.send('makePickable', [self.water])
+        elif style is 2:
+            # From Clcheung just as super awesome demomaster
+            self.water_level = Vec4(0.0, 0.0, 22.0, 1.0)
+            self.water = water.WaterNode(0, 0, 512, 512, self.water_level.getZ())
+            self.water.setStandardControl()
+            self.water.changeParams(None)
+            wl=self.water_level
+            wl.setZ(wl.getZ()-0.05)
+            #root.setShaderInput('waterlevel', self.water_level)
+            render.setShaderInput('time', 0)
+            messenger.send('makePickable', [self.water.waterNP])
+    
+    def switchWater(self):
+        self.waterType += 1
+        if self.waterType > 2:
+            self.waterType = 0
+        self.generateWater(self.waterType)
         
     def updateTerrain(self, task):
         '''Updates terrain and water'''
         self.terrains[0].update()
         # Water
-        pos = base.camera.getPos()
-        render.setShaderInput('time', task.time)
-        mc = base.camera.getMat( )
-        self.att_water.changeCameraPos(pos,mc)
-        self.att_water.changeCameraPos(pos,mc)
-        
+        if self.waterType is 2:
+            pos = base.camera.getPos()
+            render.setShaderInput('time', task.time)
+            mc = base.camera.getMat( )
+            self.water.changeCameraPos(pos,mc)
+            self.water.changeCameraPos(pos,mc)
+        #print "Render diagnostics"
+        #render.analyze()
+        #base.cTrav.showCollisions(render)
         return task.cont        
         
-    def lclick(self, queue):
-        print "Cell:", self.getMouseCell(queue)
-    
-    def getMouseCell(self, queue):
-        #print "Mousepick"
-        #get mouse coords
-        #if base.mouseWatcherNode.hasMouse()==False: return "Mouse is theved"
-        if base.mouseWatcherNode.hasMouse()==False: return
-        mpos=base.mouseWatcherNode.getMouse()
-        #locate ray from camera lens to mouse coords
-        self.ray.setFromLens(base.camNode, mpos.getX(),mpos.getY())
-        #get collision: picked obj and point
-        pickedObj,pickedPoint=self.getCollision(queue)
-        if pickedObj==None:  return
-        print "pciked point", pickedPoint
-        cell=(int(math.floor(pickedPoint[0])),int(math.floor(pickedPoint[1])))
-        return cell
-        
-    def createRay(self,obj,ent,name,show=False,x=0,y=0,z=0,dx=0,dy=0,dz=-1):
-        #create queue
-        obj.queue=CollisionHandlerQueue()
-        #create ray  
-        obj.rayNP=ent.attachNewNode(CollisionNode(name))
-        obj.ray=CollisionRay(x,y,z,dx,dy,dz)
-        obj.rayNP.node().addSolid(obj.ray)
-        obj.rayNP.node().setFromCollideMask(GeomNode.getDefaultCollideMask())
-        base.cTrav.addCollider(obj.rayNP, obj.queue) 
-        if show: obj.rayNP.show()
-    """Returns the picked nodepath and the picked 3d point"""
-    def getCollision(self, queue):
-        #do the traverse
-        base.cTrav.traverse(render)
-        #process collision entries in queue
-        if queue.getNumEntries() > 0:
-            queue.sortEntries()
-            for i in range(queue.getNumEntries()):
-                collisionEntry=queue.getEntry(i)
-                pickedObj=collisionEntry.getIntoNodePath()
-                #iterate up in model hierarchy to found a pickable tag
-                parent=pickedObj.getParent()
-                for n in range(1):
-                    if parent.getTag('pickable')!="" or parent==render: break
-                    parent=parent.getParent()
-                #return appropiate picked object
-                if parent.getTag('pickable')!="":
-                    pickedObj=parent
-                    pickedPoint = collisionEntry.getSurfacePoint(pickedObj)
-                    #pickedNormal = collisionEntry.getSurfaceNormal(self.ancestor.worldNode)
-                    #pickedDistance=pickedPoint.lengthSquared()#distance between your object and the collision
-                    return pickedObj,pickedPoint         
-        return None,None
+    def lclick(self):
+        cell = picker.getMouseCell()
+        print "Cell:", cell
+        if not self.view:
+            messenger.send("clickForCity", [cell])
     
     def regionViewNormal(self):
         self.regionTerrain.getRoot().detachNode()
@@ -357,7 +349,7 @@ class TerrainManager(DirectObject.DirectObject):
     
     def newTerrainOverlay(self, task):
         root = self.active_terrain.getRoot()
-        position = self.getMouseCell(self.queue)
+        position = picker.getMouseCell()
         if position:
             # Check to make sure we do not go out of bounds
             if position[0] < 16:
@@ -477,6 +469,9 @@ class TerrainManager(DirectObject.DirectObject):
         self.regionTerrain.getRoot().setTexture(cityTS, cityTexture)
         self.regionTerrain.update()
         messenger.send("updateCityLabels", [citylabels, self.terrains[0]])
+        
+        
+        
 
 
 class Logger(object):
@@ -508,7 +503,6 @@ def main(var = None):
     connection = network.ServerSocket()
     
     script = gui.Script()
-    
     #messenger.toggleVerbose()
 
     #aiVoice = Audio.AIVoice()

@@ -33,39 +33,14 @@ class Picker(DirectObject.DirectObject):
     '''
     Mouse controller. 
     '''
-    def __init__(self,ancestor=None):
+    def __init__(self):
         self.accept('makePickable', self.makePickable)
-        self.ancestor=ancestor
         #create traverser
         base.cTrav = CollisionTraverser()
         #create collision ray
         self.createRay(self,base.camera,name="mouseRay",show=True)
-        #initialize mousePick
-        #self.accept('mouse1-up', self.mousePick, [1,self.queue])
-        self.accept('mouse1', self.mousePick, [1,self.queue])
-        #initialize mouseRightPick
-        #self.accept('mouse3', self.mousePick, [3,self.queue])
 
-    def mouseRight(self,pickedObj,pickedPoint):
-        contextDict = {}
-        if pickedObj==None: 
-            pass
-        else:
-            #get cell from pickedpoint
-            cell=(int(math.floor(pickedPoint[0])),int(math.floor(pickedPoint[1])), self.ancestor.level)
-            contextDict['cell'] = cell
-        messenger.send('buildContextMenu', [contextDict])
-
-    def mouseLeft(self,pickedObj,pickedPoint):
-        if pickedObj==None:  return
-        #print "mouseLeft", pickedObj, pickedPoint
-        cell=(int(math.floor(pickedPoint[0])),int(math.floor(pickedPoint[1])), self.ancestor.level)
-        #messenger.send('cellCoords', [cell,])
-        print cell  
-        if self.ancestor.terrainManager.terrains[cell[2]][0].data[cell[0]][cell[1]]['structure']:
-            messenger.send('structureClick', [cell,])
-
-    def mousePick(self, but, queue):
+    def getMouseCell(self):
         """mouse pick""" 
         #print "Mousepick"
         #get mouse coords
@@ -74,10 +49,30 @@ class Picker(DirectObject.DirectObject):
         #locate ray from camera lens to mouse coords
         self.ray.setFromLens(base.camNode, mpos.getX(),mpos.getY())
         #get collision: picked obj and point
-        pickedObj,pickedPoint=self.getCollision(queue)
+        pickedObj,pickedPoint=self.getCollision(self.queue)
         #call appropiate mouse function (left or right)
-        if but==1:self.mouseLeft(pickedObj,pickedPoint)
-        if but==3:self.mouseRight(pickedObj,pickedPoint)
+        if pickedObj==None:  return
+        #print "mouseLeft", pickedObj, pickedPoint
+        cell=(int(math.floor(pickedPoint[0])),int(math.floor(pickedPoint[1])))
+        #messenger.send('cellCoords', [cell,])
+        return cell  
+    
+    def getCenterCoords(self):
+        self.ray.setFromLens(base.camNode, 0, 0)
+        #get collision: picked obj and point
+        pickedObj,pickedPoint=self.getCollision(self.queue)
+        return pickedPoint
+    
+    def getCoords(self):
+        #get mouse coords
+        if base.mouseWatcherNode.hasMouse()==False: return
+        mpos=base.mouseWatcherNode.getMouse()
+        #locate ray from camera lens to mouse coords
+        self.ray.setFromLens(base.camNode, mpos.getX(),mpos.getY())
+        #get collision: picked obj and point
+        pickedObj,pickedPoint=self.getCollision(self.queue)
+        #call appropiate mouse function (left or right)
+        return pickedPoint
 
     """Returns the picked nodepath and the picked 3d point"""
     def getCollision(self, queue):
@@ -98,8 +93,6 @@ class Picker(DirectObject.DirectObject):
                 if parent.getTag('pickable')!="":
                     pickedObj=parent
                     pickedPoint = collisionEntry.getSurfacePoint(pickedObj)
-                    #pickedNormal = collisionEntry.getSurfaceNormal(self.ancestor.worldNode)
-                    #pickedDistance=pickedPoint.lengthSquared()#distance between your object and the collision
                     return pickedObj,pickedPoint         
         return None,None
 
@@ -168,7 +161,9 @@ class GUIController(DirectObject.DirectObject):
         self.accept("found_city_name", self.foundCityName)
         self.accept("newCityResponse", self.newCityResponse)
         self.accept("updateCityLabels", self.cityLabels)
+        self.accept("showRegionCityWindow", self.regionCityWindow)
         self.cityLabels = []
+        self.debug()
         
     def mainMenu(self):
         """
@@ -321,6 +316,15 @@ class GUIController(DirectObject.DirectObject):
             #textNodePath.setLightOff()
             textNodePath.setBillboardPointEye()
             self.cityLabels.append(label)
+    
+    def debug(self):
+        '''Generates on screen text for debug functions.'''
+        text = "w: toggles wireframe\nt: toggles texture\ns: take snapshot\nh: switch water"
+        OnscreenText(text = text, pos = (-1.0, 0.9), scale = 0.07)
+    
+    def regionCityWindow(self, city):
+        '''Generates window displaying city stats and options.'''
+        print city
             
 
 class Lights:
@@ -344,6 +348,7 @@ class Lights:
         self.dlnp = render.attachNewNode(self.dlight)
         self.dlnp.setHpr(45, -45, 32)
         render.setLight(self.dlnp)
+
 
 from pandac.PandaModules import Vec3,Vec2
 import math    
@@ -389,8 +394,6 @@ class Camera(DirectObject.DirectObject):
         self.accept('mouse2-up', self.middleMouseUp, [])
         self.accept('mouse3', self.rightMouseDown, [])
         self.accept('mouse3-up', self.rightMouseUp, [])
-        
-        self.createRay(self,base.camera,name="mouseRay",show=True)
         
         taskMgr.add(self.update,"updateCameraTask")
     
@@ -481,7 +484,7 @@ class Camera(DirectObject.DirectObject):
         # returns the clamped value
     
     def setTarget(self):
-        target = self.centerPick(self.queue)
+        target = picker.getCenterCoords()
         if target:
             x, y, z = target
             #This function is used to give the camera a new target position.
@@ -491,51 +494,6 @@ class Camera(DirectObject.DirectObject):
             self.target.setY(y)
             self.target.setZ(z*100)
             # Stores the new target position values in the target variable. The x and y values are clamped to the pan limits.
-    
-    def createRay(self,obj,ent,name,show=False,x=0,y=0,z=0,dx=0,dy=0,dz=-1):
-        #create queue
-        obj.queue=CollisionHandlerQueue()
-        #create ray  
-        obj.rayNP=ent.attachNewNode(CollisionNode(name))
-        obj.ray=CollisionRay(x,y,z,dx,dy,dz)
-        obj.rayNP.node().addSolid(obj.ray)
-        obj.rayNP.node().setFromCollideMask(GeomNode.getDefaultCollideMask())
-        base.cTrav.addCollider(obj.rayNP, obj.queue) 
-        if show: obj.rayNP.show()
-    
-    def centerPick(self, queue):
-        #print "Mousepick"
-        #get mouse coords
-        if base.mouseWatcherNode.hasMouse()==False: return
-        #mpos=base.mouseWatcherNode.getMouse()
-        #locate ray from camera lens to mouse coords
-        self.ray.setFromLens(base.camNode, 0, 0)
-        #get collision: picked obj and point
-        pickedObj,pickedPoint=self.getCollision(queue)
-        return pickedPoint
-    
-    def getCollision(self, queue):
-        #do the traverse
-        base.cTrav.traverse(render)
-        #process collision entries in queue
-        if queue.getNumEntries() > 0:
-            queue.sortEntries()
-            for i in range(queue.getNumEntries()):
-                collisionEntry=queue.getEntry(i)
-                pickedObj=collisionEntry.getIntoNodePath()
-                #iterate up in model hierarchy to found a pickable tag
-                parent=pickedObj.getParent()
-                for n in range(1):
-                    if parent.getTag('pickable')!="" or parent==render: break
-                    parent=parent.getParent()
-                #return appropiate picked object
-                if parent.getTag('pickable')!="":
-                    pickedObj=parent
-                    pickedPoint = collisionEntry.getSurfacePoint(pickedObj)
-                    #pickedNormal = collisionEntry.getSurfaceNormal(self.ancestor.worldNode)
-                    #pickedDistance=pickedPoint.lengthSquared()#distance between your object and the collision
-                    return pickedObj,pickedPoint         
-        return None,None
 
 
 # Last modified: 10/2/2009
@@ -717,3 +675,7 @@ class CameraHandler(DirectObject.DirectObject):
             # The old mouse positions are updated to the current mouse position as the final step.
             
         return task.cont 
+
+picker = Picker()
+def getPicker():
+    return picker
