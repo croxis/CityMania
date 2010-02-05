@@ -23,6 +23,7 @@ message Container {
     optional GameState gamestate = 201;
     optional MapSelectError mapSelectError = 202;
     optional City newCity = 203; // Broadcasted to let clients know new city is founded
+    repeated Tile updatedTiles = 204; //Tiles were updated and client needs to know about it
 }
 
 message Chat {
@@ -55,6 +56,7 @@ message LoginResponse {
     required Type type = 1;
     optional string message = 2 [default=""];
     required Usertype usertype = 3;
+    required string username = 4;
 }
 
 message SelectCity {
