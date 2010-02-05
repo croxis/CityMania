@@ -138,6 +138,7 @@ class CommandProcessor(engine.Entity):
             print "Login incorrect"
         if container.loginResponse.type:
             container.loginResponse.usertype = users.getType(login.name)
+            container.loginResponse.username = login.name
             messenger.send("loggedIn", [peer, login.name])
             self.peers.append(peer)
             print peer, "logged in."
