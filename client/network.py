@@ -122,7 +122,7 @@ class ServerSocket(DirectObject.DirectObject):
         """
         container = proto.Container()
         container.ParseFromString(data)
-        #print "Recieved Data:", str(container)[0:100]
+        print "Recieved Data:", str(container)[0:100]
         if container.HasField("chat"):
             if container.chat.to.startswith("#"):
                 # Chat room

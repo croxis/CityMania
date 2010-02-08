@@ -2,7 +2,7 @@
 '''
 Classes and functions for the user interface
 '''
-from pandac.PandaModules import CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode, Texture, PNMImage, StringStream
+from pandac.PandaModules import *
 from direct.showbase import DirectObject
 from direct.gui.DirectGui import *
 from direct.interval.IntervalGlobal import *
@@ -12,18 +12,18 @@ import sys
 import glob
 import random
 
-from pandac.PandaModules import Vec2,Vec3,Vec3D,VBase4
+#from pandac.PandaModules import Vec2,Vec3,Vec3D,VBase4
 #from pandac.PandaModules import Spotlight,PerspectiveLens,Fog,OrthographicLens
 #from pandac.PandaModules import PointLight
 #from pandac.PandaModules import TextNode, LineSegs, NodePath
-from pandac.PandaModules import LineSegs, NodePath
-from pandac.PandaModules import WindowProperties
-from pandac.PandaModules import VBase3, GeomVertexReader
+#from pandac.PandaModules import LineSegs, NodePath
+#from pandac.PandaModules import WindowProperties
+#from pandac.PandaModules import VBase3, GeomVertexReader
 
 #from direct.fsm import FSM
 from direct.task import Task
 from direct.gui.OnscreenText import OnscreenText
-from panda3d.core import TextNode
+#from panda3d.core import TextNode
 
 import pixelwindow as pw
 sys.path.append("../..")
@@ -174,6 +174,7 @@ class GUIController(DirectObject.DirectObject):
         """
         Creates main menu
         """
+        print "Generating main menu"
         self.mainMenu = pw.StandardWindow(title = self.script.getText("TXT_UI_MAINMENUTITLE"), center = True)
         login = DirectButton(text= self.script.getText('TXT_UI_LOGINMP', self.language), command=self.loginMP)
         closeButton = DirectButton( text='Quit',  command=self.quit)

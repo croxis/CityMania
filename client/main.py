@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-title="City Mania"
+title="CityMania"
 #setup config file
 import panda3d
 from pandac.PandaModules import loadPrcFileData
@@ -13,9 +13,9 @@ loadPrcFileData( '', 'show-frame-rate-meter 1' )
 loadPrcFileData( '', 'notify-level-util error' )
 loadPrcFileData( '', 'window-title '+title )
 
-loadPrcFileData( '', 'want-pstats 1')
-loadPrcFileData( '', 'task-timer-verbose 1')
-loadPrcFileData( '', 'pstats-tasks 1')
+#loadPrcFileData( '', 'want-pstats 1')
+#loadPrcFileData( '', 'task-timer-verbose 1')
+#loadPrcFileData( '', 'pstats-tasks 1')
 
 #loadPrcFileData("", "interpolate-frames 1")
 #loadPrcFileData("", "clock-mode limited")
@@ -31,7 +31,6 @@ from direct.showbase import DirectObject
 from direct.interval.IntervalGlobal import *
 from direct.fsm import FSM
 from direct.gui.DirectGui import *
-#from panda3d.core import CardMaker, TransparencyAttrib, BitMask32, Plane, Point3, PlaneNode, CullFaceAttrib
 from direct.task.Task import Task    
 
 #import python modules
@@ -66,9 +65,9 @@ class World(DirectObject.DirectObject):
         self.keys()
         
         # Initialize classes
-        self.lights = environment.Lights(lightsOn = True, showLights = True)
+        lights = environment.Lights(lightsOn = True, showLights = True)
         
-        self.terrainManager = environment.TerrainManager()
+        terrainManager = environment.TerrainManager()
     
     def keys(self):
         """keys"""
@@ -144,8 +143,8 @@ def main(var = None):
 if __name__ == '__main__':
     main()
 
-if __name__ == 'main':
-    main()
+#if __name__ == 'main':
+#    main()
 
 def getWorld():
     return world

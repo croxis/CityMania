@@ -3,10 +3,12 @@
 Classes responsible for environment such as terrain, lighting, skyboxes, etc.
 '''
 from direct.showbase import DirectObject
-from panda3d.core import AmbientLight, DirectionalLight, VBase4
+#from panda3d.core import AmbientLight, DirectionalLight, VBase4
 # For TerrainManager
-from panda3d.core import CardMaker, NodePath, GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, Vec4, VBase3D, Texture
-from panda3d.core import CardMaker, TransparencyAttrib, BitMask32, Plane, Point3, PlaneNode, CullFaceAttrib
+#from panda3d.core import CardMaker, NodePath, GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, Vec4, VBase3D, Texture
+#from panda3d.core import CardMaker, TransparencyAttrib, BitMask32, Plane, Point3, PlaneNode, CullFaceAttrib
+
+from pandac.PandaModules import AmbientLight, DirectionalLight, VBase4, CardMaker, NodePath, GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, Vec4, VBase3D, Texture, CardMaker, TransparencyAttrib, BitMask32, Plane, Point3, PlaneNode, CullFaceAttrib
 
 import gui
 import water

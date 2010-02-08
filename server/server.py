@@ -11,7 +11,7 @@ sys.path.append("..")
 import common.protocol_pb2 as proto
 import chat
 import filesystem
-
+from threading import Lock
 import users
 import simulator
 from network import Network
@@ -67,25 +67,29 @@ class CommandProcessor(engine.Entity):
         self.accept("logout", self.logout)
         self.accept("tick", self.step)
         self.commandQueue = []
-        self.lock = False
+        self.lock = Lock()
         # Simple list to make sure people who are here should be here
         self.peers =[]
         self.password = ""
     
     def lockQueue(self):
-        self.lock = True
+        #self.lock.aquire()
+        pass
     
     def unlockQueue(self):
-        self.lock = False
+        #self.lock.release()
+        pass
     
     def queue(self, peer, data):
         self.commandQueue.append((peer, data))
     
     def step(self):
         #print "Step1"
-        if not self.lock and self.commandQueue:
+        if self.commandQueue:
+            #self.lock.acquire()
             peer, data = self.commandQueue.pop()
             self.processData(peer, data)
+            #self.lock.release()
     
     def processData(self, peer, data):
         """
@@ -126,6 +130,7 @@ class CommandProcessor(engine.Entity):
         """
         Logs in player to the server
         """
+        self.lock.acquire()
         container = proto.Container()
         container.loginResponse.type = 1
         if login.regionPassword != self.password:
@@ -146,8 +151,10 @@ class CommandProcessor(engine.Entity):
             print peer, "logged in."
             print self.peers
         messenger.send("sendData", [peer, container])
+        self.lock.release()
 
     def logout(self, peer):
+        self.lock.acquire()
         print peer, "logging out."
         print self.peers
         user_name = users.getNameFromPeer(peer)
@@ -159,6 +166,7 @@ class CommandProcessor(engine.Entity):
         del self.peers[index]
         print peer, "logged out."
         print self.peers
+        self.lock.release()
     
 
 # We initialize the CityMania engine
