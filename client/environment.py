@@ -191,7 +191,8 @@ class TerrainManager(DirectObject.DirectObject):
                 n += 1
             xavg = xsum/n
             yavg = ysum/n
-            citylabels[ident]["position"] = (xavg, yavg)
+            z = self.terrain.getElevation(xavg, yavg)*100
+            citylabels[ident]["position"] = (xavg, yavg, z+30)
         messenger.send("updateCityLabels", [citylabels, self.terrain])
     
     def generateSurfaceTextures(self):

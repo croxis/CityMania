@@ -327,7 +327,7 @@ class GUIController(DirectObject.DirectObject):
             label.setShadowColor(0, 0, 0, 1)
             label.setCardDecal(True)
             textNodePath = self.cityLabels.attachNewNode(label)
-            textNodePath.setPos(city['position'][1], city["position"][0], 70)
+            textNodePath.setPos(city['position'][1], city["position"][0], city['position'][2])
             textNodePath.setLightOff()
             textNodePath.setBillboardPointEye()
     
