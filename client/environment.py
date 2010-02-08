@@ -279,13 +279,12 @@ class TerrainManager(DirectObject.DirectObject):
         messenger.send("found_city_name", [position])
     
     def cancelRegionViewFound(self):
-        print "CancelRegionViewFound"
         taskMgr.remove("newTerrainOverlay")
         root = self.terrain.getRoot()
         root.clearTexture(self.tileTS)
         # Restore original mouse function
         self.accept("mouse1", self.lclick)
-        #messenger.send("showRegionGUI")
+        messenger.send("showRegionGUI")
     
     def setSurfaceTextures(self):
         self.ownerview = False
@@ -317,7 +316,6 @@ class TerrainManager(DirectObject.DirectObject):
         cityTS.setSort(0)
         root.setTexture( self.gridTS, self.gridTexture ) 
         root.setTexScale(self.gridTS, self.size, self.size)
-        print "Updating ownership graphics"
         root.setTexture(cityTS, cityTexture, 1)
     
     def updateRegion(self, heightmap, tiles, cities):

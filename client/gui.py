@@ -172,6 +172,7 @@ class GUIController(DirectObject.DirectObject):
         self.accept("showRegionGUI", self.regionGUI)
         self.cityLabels = NodePath("cityLabels")
         self.cityLabels.reparentTo(render)
+        self.text = OnscreenText()
         self.debug()
     
     def getText(self, text):
@@ -254,6 +255,7 @@ class GUIController(DirectObject.DirectObject):
         
     def regionGUI(self):
         '''Generates GUI for region view interface'''
+        self.text.destroy()
         #self.loginDialog = pw.StandardWindow(title = self.script.getText("TXT_UI_REGIONTITLE"), center = True)
         self.regionWindow = pw.StandardWindow(title = "Region_Name", center = True)
         self.v = [0]
@@ -309,7 +311,6 @@ class GUIController(DirectObject.DirectObject):
         else:
             message = pw.MessageWindow(text="Your city has been founded! Awesome!")
             messenger.send("regionView_normal")
-            self.regionGUI()
     
     def makeChatWindow(self):
         pass
