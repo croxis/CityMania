@@ -78,7 +78,6 @@ class Region(engine.Entity):
                 t.cityid = tile.cityid
         
         for ident, city in self.cities.items():
-            print "Server city", city
             c = container.gameState.cities.add()
             c.id = ident
             c.name = city.name

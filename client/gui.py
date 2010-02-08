@@ -36,10 +36,15 @@ class Picker(DirectObject.DirectObject):
     '''
     def __init__(self, show=False):
         self.accept('makePickable', self.makePickable)
+        #self.accept('mouse1', self.castRay)
         #create traverser
-        base.cTrav = CollisionTraverser()
+        #base.cTrav = CollisionTraverser()
+        self.cTrav = CollisionTraverser()
         #create collision ray
         self.createRay(self,base.camera,name="mouseRay",show=show)
+    
+    def castRay(self):
+        self.cTrav.traverse(render)
 
     def getMouseCell(self):
         """mouse pick""" 
@@ -77,7 +82,8 @@ class Picker(DirectObject.DirectObject):
     """Returns the picked nodepath and the picked 3d point"""
     def getCollision(self, queue):
         #do the traverse
-        base.cTrav.traverse(render)
+        #base.cTrav.traverse(render)
+        self.cTrav.traverse(render)
         #process collision entries in queue
         if queue.getNumEntries() > 0:
             queue.sortEntries()
@@ -110,7 +116,8 @@ class Picker(DirectObject.DirectObject):
         obj.ray=CollisionRay(x,y,z,dx,dy,dz)
         obj.rayNP.node().addSolid(obj.ray)
         obj.rayNP.node().setFromCollideMask(GeomNode.getDefaultCollideMask())
-        base.cTrav.addCollider(obj.rayNP, obj.queue) 
+        #base.cTrav.addCollider(obj.rayNP, obj.queue)
+        self.cTrav.addCollider(obj.rayNP, obj.queue) 
         if show: obj.rayNP.show()
         
 

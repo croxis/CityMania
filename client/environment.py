@@ -79,9 +79,9 @@ class TerrainManager(DirectObject.DirectObject):
     def generateWorld(self, heightmap, tiles, cities, container):
         self.heightmap = heightmap
         self.terrain = GeoMipTerrain("surface")
-        self.terrain.setFocalPoint(base.camera)
         self.terrain.setHeightfield(self.heightmap)
-        self.terrain.setFocalPoint(base.camera)
+        #self.terrain.setFocalPoint(base.camera)
+        self.terrain.setBruteforce(True)
         self.terrain.setBlockSize(64)
         self.terrain.generate()
 
@@ -107,13 +107,16 @@ class TerrainManager(DirectObject.DirectObject):
         messenger.send("finishedTerrainGen")
     
     def generateColorMap(self):
+        ''' Iterate through every pix of color map. This will be very slow so until faster method is developed, use sparingly
+        getXSize returns pixels length starting with 1, subtract 1 for obvious reasons
+        We also slip in checking for the water card size, which should only change when the color map does
+        '''
         print "GenerateColorMap"
         colormap = PNMImage(self.heightmap.getXSize(), self.heightmap.getYSize())
         colormap.addAlpha()
         slopemap = self.terrain.makeSlopeImage()
+        self.waterXMin, self.waterXMax, self.waterYMin, self.waterYMax = 0,0,0,0
         
-        # Iterate through every pix of color map. This will be very slow so until faster method is developed, use sparingly
-        # getXSize returns pixles length starting with 1, subtract 1 for obvious reasons
         for x in range(0, self.heightmap.getXSize()-1):
             for y in range(0, colormap.getYSize()-1):
                 # Else if statements used to make sure one channel is used per pixel
@@ -126,11 +129,26 @@ class TerrainManager(DirectObject.DirectObject):
                 # Beach. Estimations from http://www.simtropolis.com/omnibus/index.cfm/Main.SimCity_4.Custom_Content.Custom_Terrains_and_Using_USGS_Data
                 if self.heightmap.getGrayVal(x,y) < 62:
                     colormap.setBlue(x, y, 1)
+                    # Water card dimensions here
+                    # Y axis flipped from texture space to world space
+                    if not self.waterXMin:
+                        self.waterXMin = x
+                    if not self.waterYMax:
+                        self.waterYMax = y
+                    if y < self.waterYMax:
+                        self.waterYMax = y
+                    if x > self.waterXMax:
+                        self.waterXMax = x
+                    if y > self.waterYMin:
+                        self.waterYMin = y
                 # Rock
                 elif slopemap.getGrayVal(x, y) > 170:
                     colormap.setRed(x, y, 1)
                 else:
                     colormap.setGreen(x, y, 1)
+        # Transform y coords
+        self.waterYMin = self.size - self.waterYMin
+        self.waterYMax = self.size - self.waterYMax
         return colormap
     
     def generateOwnerTexture(self, tiles, cities):
@@ -329,23 +347,34 @@ class TerrainManager(DirectObject.DirectObject):
         style 1: reflective card
         style 2: reflective card with shaders
         '''
+        print "Water dimensions:", self.waterXMin, self.waterYMin, self.waterXMax, self.waterYMax
         if self.water:
             self.water.removeNode()
         if style is 0:
             cm = CardMaker("water")
-            cm.setFrame(-1, 1, -1, 1)
+            #cm.setFrame(-1, 1, -1, 1)
+            cm.setFrame(self.waterXMin, self.waterXMax, self.waterYMin,  self.waterYMax)
             cm.setColor(0, 0, 1, 0.9)
             self.water = render.attachNewNode(cm.generate())
-            self.water.setScale(self.size)
+            if self.waterYMax > self.waterXMax:
+                size = self.waterYMax
+            else:
+                size = self.waterXMax
+            #self.water.setScale(size)
             self.water.lookAt(0, 0, -1)
             self.water.setZ(22)
             messenger.send('makePickable', [self.water])
         elif style is 1:
             # From Prosoft's super awesome terrain demo
             cm = CardMaker("water")
-            cm.setFrame(-1, 1, -1, 1)
+            #cm.setFrame(-1, 1, -1, 1)
+            cm.setFrame(self.waterXMin, self.waterXMax, self.waterYMin,  self.waterYMax)
             self.water = render.attachNewNode(cm.generate())
-            self.water.setScale(self.size)
+            if self.waterYMax > self.waterXMax:
+                size = self.waterYMax
+            else:
+                size = self.waterXMax
+            #self.water.setScale(size)
             self.water.lookAt(0, 0, -1)
             self.water.setZ(22)
             self.water.setShaderOff(1)
@@ -375,7 +404,8 @@ class TerrainManager(DirectObject.DirectObject):
         elif style is 2:
             # From Clcheung just as super awesome demomaster
             self.water_level = Vec4(0.0, 0.0, 22.0, 1.0)
-            self.water = water.WaterNode(0, 0, self.size, self.size, self.water_level.getZ())
+            #self.water = water.WaterNode(10, 300, self.size, self.size, self.water_level.getZ())
+            self.water = water.WaterNode(self.waterXMin, self.waterYMin, self.waterXMax, self.waterYMax, self.water_level.getZ())
             self.water.setStandardControl()
             self.water.changeParams(None)
             wl=self.water_level
