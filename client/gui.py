@@ -8,7 +8,7 @@ from direct.gui.DirectGui import *
 from direct.interval.IntervalGlobal import *
 
 import sys
-import yaml
+#import yaml
 import glob
 import random
 
@@ -120,7 +120,7 @@ class Script(object):
     '''
     def __init__(self):
         #self.database = {}
-        {'TXT_UI_ONLINE': {'english': 'Online'}, 'TXT_UI_QUIT': {'english': 'Quit'}, 'TXT_BUTTON_CLOSE': {'english': 'Close'}, 'TXT_UI_MAINMENUTITLE': {'english': 'City Mania'}, 'TXT_UI_LOGINMP': {'english': 'Multiplayer'}, 'TXT_TITLE_COFIRM_UNFOUND': {'english': 'Confirm City Unfounding'}, 'TXT_BUTTON_CONFIRM_UNFOUND': {'english': 'Confirm Unfounding'}, 'TXT_DELETE_CITY': {'english': 'Delete City'}, 'TXT_MAYOR_NAME': {'english': 'Mayor Name'}, 'TXT_UI_LOGINTITLE': {'english': 'Multiplayer'}, 'TXT_UI_NEWGAME': {'english': 'New Game'}, 'TXT_UI_OFFLINE': {'english': 'Offline'}, 'TXT_UI_OK': {'english': 'Ok'}, 'TXT_UNFOUND_CITY': {'english': 'Unfound City'}, 'TXT_ENTER_CITY': {'english': 'Enter City'}}
+        self.database = {'TXT_UI_ONLINE': {'english': 'Online'}, 'TXT_UI_QUIT': {'english': 'Quit'}, 'TXT_BUTTON_CLOSE': {'english': 'Close'}, 'TXT_UI_MAINMENUTITLE': {'english': 'City Mania'}, 'TXT_UI_LOGINMP': {'english': 'Multiplayer'}, 'TXT_TITLE_COFIRM_UNFOUND': {'english': 'Confirm City Unfounding'}, 'TXT_BUTTON_CONFIRM_UNFOUND': {'english': 'Confirm Unfounding'}, 'TXT_DELETE_CITY': {'english': 'Delete City'}, 'TXT_MAYOR_NAME': {'english': 'Mayor Name'}, 'TXT_UI_LOGINTITLE': {'english': 'Multiplayer'}, 'TXT_UI_NEWGAME': {'english': 'New Game'}, 'TXT_UI_OFFLINE': {'english': 'Offline'}, 'TXT_UI_OK': {'english': 'Ok'}, 'TXT_UNFOUND_CITY': {'english': 'Unfound City'}, 'TXT_ENTER_CITY': {'english': 'Enter City'}}
                 
         #self.loadText()
     

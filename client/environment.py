@@ -6,6 +6,7 @@ from direct.showbase import DirectObject
 from panda3d.core import AmbientLight, DirectionalLight, VBase4
 # For TerrainManager
 from panda3d.core import CardMaker, NodePath, GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, Vec4, VBase3D, Texture
+from panda3d.core import CardMaker, TransparencyAttrib, BitMask32, Plane, Point3, PlaneNode, CullFaceAttrib
 
 import gui
 import water
@@ -99,6 +100,7 @@ class TerrainManager(DirectObject.DirectObject):
                 
         self.setSurfaceTextures()
         self.generateWater(2)
+        taskMgr.add(self.updateTerrain, "updateTerrain")
         print "Done with terrain generation"
         messenger.send("finishedTerrainGen")
     
@@ -302,6 +304,21 @@ class TerrainManager(DirectObject.DirectObject):
         self.generateOwnerTexture(tiles, cities)
         if self.ownerview:
             self.setOwnerTextures()
+    
+    def updateTerrain(self, task):
+        '''Updates terrain and water'''
+        self.terrain.update()
+        # Water
+        if self.waterType is 2:
+            pos = base.camera.getPos()
+            render.setShaderInput('time', task.time)
+            mc = base.camera.getMat( )
+            self.water.changeCameraPos(pos,mc)
+            self.water.changeCameraPos(pos,mc)
+        #print "Render diagnostics"
+        #render.analyze()
+        #base.cTrav.showCollisions(render)
+        return task.cont 
     
     def generateWater(self, style):
         print "Generate Water"
