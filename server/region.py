@@ -20,6 +20,7 @@ class Region(engine.Entity):
         self.accept("generateRegion", self.generate)
         self.accept("newCityRequest", self.newCity)
         self.accept("sendGameState", self.sendGameState)
+        self.accept("requestUnfoundCity", self.unfoundCity)
         self.name = "Region"
         # Dict to use cityid as quick lookup
         self.cities = {}
@@ -164,9 +165,40 @@ class Region(engine.Entity):
         
         #container = proto.Container()
         for tile in updated_tiles:
-            t = container.updatedTiles.add()
-            t.id = tile.id
-            t.positionx = tile.coords[0]
-            t.positiony = tile.coords[1]
-            t.cityid = tile.cityid
+            self.updateTile(container, tile)
         messenger.send("broadcastData", [container])
+    
+    def unfoundCity(self, peer, ident):
+        '''Checks permissions and, if all good, unfounds city.'''
+        # Can't unfound the region or a city that doesn't exist
+        print peer, "requesting to unfound city", ident
+        container = proto.Container()
+        if not ident or ident not in self.cities:
+            container.response = "Can not unfound imaginary city."
+            messenger.send("sendData", [peer, container])
+            return
+        
+        user = users.getNameFromPeer(peer)
+        access = users.getType(user)
+        
+        if access > 1 or self.cities[ident]['mayor'] == user:
+            for tile in self.tiles:
+                if tile.cityid is ident:
+                    tile.cityid = 0
+                    self.updateTile(container, tile)
+            del self.cities[ident]
+            container.unfoundCity = ident
+            messenger.send("broadcastData", [container])
+        else:
+            container.response = "Lack permissions for unfounding this city."
+            messenger.send("sendData", [peer, container])
+        print "City", ident, "unfounded. New city db:", self.cities
+    
+    def updateTile(self, container, tile):
+        t = container.updatedTiles.add()
+        t.id = tile.id
+        t.positionx = tile.coords[0]
+        t.positiony = tile.coords[1]
+        t.cityid = tile.cityid
+    
+    

@@ -13,8 +13,8 @@ import glob
 import random
 
 from pandac.PandaModules import Vec2,Vec3,Vec3D,VBase4
-from pandac.PandaModules import Spotlight,PerspectiveLens,Fog,OrthographicLens
-from pandac.PandaModules import PointLight, AmbientLight, DirectionalLight
+#from pandac.PandaModules import Spotlight,PerspectiveLens,Fog,OrthographicLens
+#from pandac.PandaModules import PointLight
 #from pandac.PandaModules import TextNode, LineSegs, NodePath
 from pandac.PandaModules import LineSegs, NodePath
 from pandac.PandaModules import WindowProperties
@@ -28,21 +28,21 @@ from panda3d.core import TextNode
 import pixelwindow as pw
 sys.path.append("../..")
 import CityMania.common.protocol_pb2 as proto
+import access
 
 class Picker(DirectObject.DirectObject):
     '''
     Mouse controller. 
     '''
-    def __init__(self):
+    def __init__(self, show=False):
         self.accept('makePickable', self.makePickable)
         #create traverser
         base.cTrav = CollisionTraverser()
         #create collision ray
-        self.createRay(self,base.camera,name="mouseRay",show=True)
+        self.createRay(self,base.camera,name="mouseRay",show=show)
 
     def getMouseCell(self):
         """mouse pick""" 
-        #print "Mousepick"
         #get mouse coords
         if base.mouseWatcherNode.hasMouse()==False: return
         mpos=base.mouseWatcherNode.getMouse()
@@ -112,17 +112,17 @@ class Picker(DirectObject.DirectObject):
         obj.rayNP.node().setFromCollideMask(GeomNode.getDefaultCollideMask())
         base.cTrav.addCollider(obj.rayNP, obj.queue) 
         if show: obj.rayNP.show()
-
+        
 
 class Script(object):
     '''
     Imports external language yaml docs into internal dict
     '''
     def __init__(self):
-        self.database = {}
-        #self.database = {'TXT_UI_ONLINE': {'english': 'Online'}, 'TXT_UI_QUIT': {'english': 'Quit'}, 'TXT_UI_LOGINMP': {'english': 'Multiplayer'}, 'TXT_UI_LOGINTITLE': {'english': 'Multiplayer'}, 'TXT_UI_NEWGAME': {'english': 'New Game'}, 'TXT_UI_OFFLINE': {'english': 'Offline'}, 'TXT_UI_OK': {'english': 'Ok'}, 'TXT_UI_MAINMENUTITLE': {'english': 'City Mania'}}
-        
-        self.loadText()
+        #self.database = {}
+        {'TXT_UI_ONLINE': {'english': 'Online'}, 'TXT_UI_QUIT': {'english': 'Quit'}, 'TXT_BUTTON_CLOSE': {'english': 'Close'}, 'TXT_UI_MAINMENUTITLE': {'english': 'City Mania'}, 'TXT_UI_LOGINMP': {'english': 'Multiplayer'}, 'TXT_TITLE_COFIRM_UNFOUND': {'english': 'Confirm City Unfounding'}, 'TXT_BUTTON_CONFIRM_UNFOUND': {'english': 'Confirm Unfounding'}, 'TXT_DELETE_CITY': {'english': 'Delete City'}, 'TXT_MAYOR_NAME': {'english': 'Mayor Name'}, 'TXT_UI_LOGINTITLE': {'english': 'Multiplayer'}, 'TXT_UI_NEWGAME': {'english': 'New Game'}, 'TXT_UI_OFFLINE': {'english': 'Offline'}, 'TXT_UI_OK': {'english': 'Ok'}, 'TXT_UNFOUND_CITY': {'english': 'Unfound City'}, 'TXT_ENTER_CITY': {'english': 'Enter City'}}
+                
+        #self.loadText()
     
     def loadText(self):
         # Load database
@@ -162,8 +162,13 @@ class GUIController(DirectObject.DirectObject):
         self.accept("newCityResponse", self.newCityResponse)
         self.accept("updateCityLabels", self.cityLabels)
         self.accept("showRegionCityWindow", self.regionCityWindow)
-        self.cityLabels = []
+        self.accept("showRegionGUI", self.regionGUI)
+        self.cityLabels = NodePath("cityLabels")
+        self.cityLabels.reparentTo(render)
         self.debug()
+    
+    def getText(self, text):
+        return self.script.getText(text, self.language)
         
     def mainMenu(self):
         """
@@ -182,7 +187,7 @@ class GUIController(DirectObject.DirectObject):
         self.mainMenu.destroy()
         self.loginDialog = pw.StandardWindow(title = self.script.getText("TXT_UI_LOGINTITLE"), center = True)
         hostEntry = DirectEntry(initialText="croxis.dyndns.org")
-        userNameEntry = DirectEntry(initialText = "Name")
+        userNameEntry = DirectEntry(initialText = self.script.getText('TXT_MAYOR_NAME', self.language))
         userPasswordEntry = DirectEntry(initialText="Password", obscured=True)
         okButton = DirectButton(text = self.script.getText('TXT_UI_OK', self.language), command = self.login)
         closeButton = DirectButton(text='Back', command=self.loginDialog.destroy)
@@ -267,12 +272,13 @@ class GUIController(DirectObject.DirectObject):
         elif self.v == [1]:
             messenger.send("regionView_owners")
         if status:
-            self.text = OnscreenText(text = "Left click to found city.", pos=(0, 0.75), scale=0.07)
+            self.text = OnscreenText(text = "Left click to found city.\nEsc to cancel", pos=(0, 0.75), scale=0.07)
             self.regionWindow.destroy()
             messenger.send("regionView_owners")
             messenger.send("regionView_foundNew")
     
     def foundCityName(self, position):
+        self.text.destroy()
         self.name_city_window = pw.StandardWindow(title = "name_city", center = True)
         cityNameEntry = DirectEntry(initialText = "city_name")
         okButton = DirectButton(text = self.script.getText('TXT_UI_OK', self.language), command = self.foundCity, extraArgs=[position])
@@ -301,55 +307,65 @@ class GUIController(DirectObject.DirectObject):
         pass
     
     def cityLabels(self, citylabels, terrain):
-        #for item in self.cityLabels:
-        #    item.destroy()
+        children = self.cityLabels.getChildren()
+        for child in children:
+            child.removeNode()
         for ident, city in citylabels.items():
-            
             text = city['name'] + "\n" + city["mayor"] + "\n" + "Population: " + str(city['population'])
             label = TextNode(str(ident) + " label")
             label.setText(text)
-            label.setTextColor(1, 1, 0.75, 1)
-            label.setCardColor(0.5,1,1,1)
+            label.setTextColor(1, 1, 1, 1)
+            label.setShadowColor(0, 0, 0, 1)
             label.setCardDecal(True)
-            textNodePath = render.attachNewNode(label)
+            textNodePath = self.cityLabels.attachNewNode(label)
             textNodePath.setPos(city['position'][1], city["position"][0], 70)
-            #textNodePath.setLightOff()
+            textNodePath.setLightOff()
             textNodePath.setBillboardPointEye()
-            self.cityLabels.append(label)
     
     def debug(self):
         '''Generates on screen text for debug functions.'''
         text = "w: toggles wireframe\nt: toggles texture\ns: take snapshot\nh: switch water"
         OnscreenText(text = text, pos = (-1.0, 0.9), scale = 0.07)
     
-    def regionCityWindow(self, city):
+    def regionCityWindow(self, ident, city):
         '''Generates window displaying city stats and options.'''
-        self.name_city_window = pw.StandardWindow(title = city['name'], center = True)
+        #print "Access username and level", access.username, access.level
+        #TODO: Once the city view is created we need to inform the client if they even have viewing rights
+        cityInfoWindow = pw.StandardWindow(title = city['name'], center = True)
+        buttons =[]
+        enterButton = DirectButton(text = self.script.getText('TXT_ENTER_CITY', self.language), command = self.enterCity, extraArgs=[ident])
+        buttons.append(enterButton)
+        if access.level is 4 or access.username == city['mayor']:
+            unfoundButton = DirectButton(text = self.script.getText('TXT_UNFOUND_CITY', self.language), command = self.confirmUnfoundCity, extraArgs=[ident, cityInfoWindow])
+            buttons.append(unfoundButton)
+            #deleteButton = DirectButton(text = self.script.getText('TXT_DELETE_CITY', self.language), command = self.confirmDeleteCity, extraArgs=[ident])
+            #buttons.append(deleteButton)
+        cityInfoWindow.addHorizontal(buttons)
+        closeButton = DirectButton(text = self.script.getText('TXT_BUTTON_CLOSE', self.language), command = self.closeWindow, extraArgs=[cityInfoWindow])
+        cityInfoWindow.addVertical([closeButton])
+    
+    def enterCity(self, ident):
+        print "Request to enter city", ident
         
-            
-
-class Lights:
-    def __init__(self,ancestor,lightsOn=True,showLights=False):
-        self.ancestor=ancestor
+    def confirmUnfoundCity(self, ident, cityWindow):
+        window = pw.StandardWindow(title = self.getText("TXT_TITLE_COFIRM_UNFOUND"), center=True)
+        okButton = DirectButton(text = self.getText("TXT_BUTTON_CONFIRM_UNFOUND"), command = self.unfoundCity, extraArgs = [ident, window, cityWindow])
+        closeButton = DirectButton(text = self.getText('TXT_BUTTON_CLOSE'), command = self.closeWindow, extraArgs=[window])
+        window.addHorizontal([okButton, closeButton])
+    
+    def unfoundCity(self, ident, window, cityWindow):
+        self.closeWindow(window)
+        self.closeWindow(cityWindow)
+        container = proto.Container()
+        container.requestUnfoundCity = ident
+        messenger.send("sendData", [container])
+    
+    def confirmDeleteCity(self, ident):
+        print "Request to delete city", ident
+    
+    def closeWindow(self, window):
+        window.destroy()
         
-        #Initialize bg colour
-        colour = (0,0,0)
-        base.setBackgroundColor(*colour)
-        
-        if lightsOn==False: return
-        
-        # Initialise lighting
-        self.alight = AmbientLight('alight')
-        self.alight.setColor(VBase4(0.25, 0.25, 0.25, 1))
-        self.alnp = render.attachNewNode(self.alight)
-        render.setLight(self.alnp)
-        
-        self.dlight = DirectionalLight('dlight')
-        self.dlight.setColor(VBase4(1.0, 1.0, 1.0, 1))
-        self.dlnp = render.attachNewNode(self.dlight)
-        self.dlnp.setHpr(45, -45, 32)
-        render.setLight(self.dlnp)
-
 
 from pandac.PandaModules import Vec3,Vec2
 import math    
@@ -451,7 +467,7 @@ class Camera(DirectObject.DirectObject):
         # Creates a container for the current HPR of the camera and stores those values.
         
         newCamHpr.setX(camHpr.getX()+deltaX)
-        newCamHpr.setY(self.clamp(camHpr.getY()-deltaY, -85, -10))
+        newCamHpr.setY(self.clamp(camHpr.getY()-deltaY, -85, 20))
         newCamHpr.setZ(camHpr.getZ())
         # Adjusts the newCamHpr values according to the inputs given to the function. The Y value is clamped to prevent
         # the camera from orbiting beneath the ground plane and to prevent it from reaching the apex of the orbit, which

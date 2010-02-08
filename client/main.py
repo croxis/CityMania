@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 title="City Mania"
 #setup config file
+import panda3d
 from pandac.PandaModules import loadPrcFileData
 loadPrcFileData( '', 'fullscreen 0')
 loadPrcFileData( '', 'win-size 800 600' )
@@ -32,22 +33,24 @@ from direct.gui.OnscreenText import OnscreenText,TextNode
 from direct.interval.IntervalGlobal import *
 from direct.fsm import FSM
 from direct.gui.DirectGui import *
-#from panda3d.core import NodePath, CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, VBase3D
+from panda3d.core import NodePath, CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, VBase3D
 from panda3d.core import CardMaker, TransparencyAttrib, BitMask32, Plane, Point3, PlaneNode, CullFaceAttrib
-from pandac.PandaModules import NodePath, CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, VBase3D
+#from pandac.PandaModules import NodePath, CollisionTraverser,CollisionHandlerQueue,CollisionNode,CollisionRay,GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, VBase3D
 from direct.task.Task import Task    
 
 #import python modules
 import sys, subprocess, math
-sys.path.append("..")
+sys.path.append("../..")
 #import logging
 
 import gui
 import network
-#from common.tile import Tile
-from tile import Tile
+from CityMania.common.tile import Tile
+#from tile import Tile
 import region
 import water
+import access
+import environment
 
 picker = gui.getPicker()
 
@@ -58,6 +61,8 @@ class World(DirectObject.DirectObject):
         self.language = 'english'
         self.singlePlayer = False
         self.accept('exit', self.exit)
+        self.accept('setSelfAccess', self.setSelf)
+        self.accept("finishedTerrainGen", self.setupRig)
         
         base.disableMouse()
         
@@ -65,14 +70,9 @@ class World(DirectObject.DirectObject):
         self.keys()
         
         # Initialize classes
-        self.lights = gui.Lights(self, lightsOn = True, showLights = True)
+        self.lights = environment.Lights(lightsOn = True, showLights = True)
         
-        self.root = NodePath('rootMain')
-        self.root.reparentTo(render)
-        
-        #self.picker = Picker(self)
-        
-        self.terrainManager = TerrainManager()
+        self.terrainManager = environment.TerrainManager()
     
     def keys(self):
         """keys"""
@@ -90,6 +90,15 @@ class World(DirectObject.DirectObject):
         messenger.send("sendData", ['killServerRequest'])
         #base.closeWindow(base.win)
         sys.exit()
+    
+    def setSelf(self, level, name):
+        '''Sets the user access level and name'''
+        access.level = level
+        access.username = name
+    
+    def setupRig(self):
+        camera = gui.Camera()
+        sky = environment.SkyManager()
         
 
 class TerrainManager(DirectObject.DirectObject):
@@ -102,18 +111,16 @@ class TerrainManager(DirectObject.DirectObject):
         self.accept("regionView_owners", self.regionViewOwners)
         self.accept("regionView_foundNew", self.regionViewFound)
         self.accept("updateRegion", self.updateRegion)
+        self.accept("unfoundCity", self.unfoundCity)
         self.terrains=[]   
         
         self.accept("mouse1", self.lclick)
         self.waterType = 2
         self.water = None
         self.accept("h", self.switchWater)
-        
-        # view 0: region view
-        # view #: cityid view
-        self.view = 0
     
     def generateWorld(self, heightmap, tiles, cities, container):
+        print "GenerateWorld"
         terrain = GeoMipTerrain("surface")
         terrain.setFocalPoint(base.camera)
         
@@ -121,25 +128,24 @@ class TerrainManager(DirectObject.DirectObject):
         root.reparentTo(render)
         root.setSz(100)
         
-        
-        self.active_terrain = terrain
         terrain.setHeightfield(heightmap)
         #terrain.setBruteforce(True)
         terrain.setFocalPoint(base.camera)
         terrain.setBlockSize(64)
         #terrain.setNear(40)
         #terrain.setFar(100)
+        self.active_terrain = terrain
         
-        self.regionTerrain = GeoMipTerrain("region_surface")
-        self.regionTerrain.getRoot().setSz(100)
-        self.regionTerrain.setHeightfield(heightmap)
-        self.regionTerrain.setBruteforce(True)
+        self.ownershipTerrain = GeoMipTerrain("region_surface")
+        self.ownershipTerrain.getRoot().setSz(100)
+        self.ownershipTerrain.setHeightfield(heightmap)
+        self.ownershipTerrain.setBruteforce(True)
         
         messenger.send('makePickable', [root])
-        messenger.send("makePickable", [self.regionTerrain.getRoot()])
+        messenger.send("makePickable", [self.ownershipTerrain.getRoot()])
         
         terrain.generate()
-        self.regionTerrain.generate()
+        self.ownershipTerrain.generate()
         
         self.terrains.append(terrain)
         
@@ -206,17 +212,17 @@ class TerrainManager(DirectObject.DirectObject):
         
         # Getting messy in here eh?
         self.citycolors = {0: VBase3D(1, 1, 1)}
-        citymap, citylabels = self.generateCityMap(cities, tiles)
+        #citymap, citylabels = self.generateCityMap(cities, tiles)
+        self.updateRegion(heightmap, tiles, cities)
+        #cityTexture = Texture()
+        #cityTexture.load(citymap)
+        #cityTS = TextureStage('citymap')
+        #cityTS.setSort(0)
         
-        cityTexture = Texture()
-        cityTexture.load(citymap)
-        cityTS = TextureStage('citymap')
-        cityTS.setSort(0)
-        
-        self.regionTerrain.getRoot().setTexture(cityTS, cityTexture)
-        self.regionTerrain.getRoot().setTexture(gridTS, gridTexture)
-        self.regionTerrain.getRoot().setTexScale(gridTS, size, size)
-        self.regionTerrain.update()
+        #self.ownershipTerrain.getRoot().setTexture(cityTS, cityTexture)
+        self.ownershipTerrain.getRoot().setTexture(gridTS, gridTexture)
+        self.ownershipTerrain.getRoot().setTexScale(gridTS, size, size)
+        #self.ownershipTerrain.update()
         
         print "Done with terrain generation"
         camera = gui.Camera()
@@ -231,9 +237,10 @@ class TerrainManager(DirectObject.DirectObject):
         
         taskMgr.add(self.updateTerrain, "updateTerrain")
         messenger.send("finishedTerrainGen")
-        messenger.send("updateCityLabels", [citylabels, terrain])
+        #messenger.send("updateCityLabels", [citylabels, terrain])
     
     def generateWater(self, style):
+        print "Generate Water"
         '''Generates water
         style 0: blue card
         style 1: reflective card
@@ -295,6 +302,7 @@ class TerrainManager(DirectObject.DirectObject):
             messenger.send('makePickable', [self.water.waterNP])
     
     def switchWater(self):
+        print "Switch Water"
         self.waterType += 1
         if self.waterType > 2:
             self.waterType = 0
@@ -322,18 +330,22 @@ class TerrainManager(DirectObject.DirectObject):
             messenger.send("clickForCity", [cell])
     
     def regionViewNormal(self):
-        self.regionTerrain.getRoot().detachNode()
+        print "RegionviewNormal"
+        self.active_terrain.getRoot().detachNode()
         self.terrains[0].getRoot().reparentTo(render)
         self.active_terrain = self.terrains[0]
     
     def regionViewOwners(self):
-        self.terrains[0].getRoot().detachNode()
-        self.regionTerrain.getRoot().reparentTo(render)
-        self.active_terrain = self.regionTerrain
+        print "RegionViewOwners"
+        self.active_terrain.getRoot().detachNode()
+        self.ownershipTerrain.getRoot().reparentTo(render)
+        self.active_terrain = self.ownershipTerrain
     
     def regionViewFound(self):
+        print "RegionViewFound"
         '''Gui for founding a new city!'''
-        root = self.regionTerrain.getRoot()
+        #self.regionViewOwners()
+        root = self.ownershipTerrain.getRoot()
         task = taskMgr.add(self.newTerrainOverlay, "newTerrainOverlay")
         tileTexture = loader.loadTexture("Textures/tile.png")
         tileTexture.setWrapU(Texture.WMClamp)
@@ -346,9 +358,10 @@ class TerrainManager(DirectObject.DirectObject):
         root.setTexture(self.tileTS, tileTexture)
         root.setTexScale(self.tileTS, self.size/32, self.size/32)
         self.acceptOnce("mouse1", self.regionViewFound2)
+        self.acceptOnce("escape", self.cancelRegionViewFound)
     
     def newTerrainOverlay(self, task):
-        root = self.active_terrain.getRoot()
+        root = self.ownershipTerrain.getRoot()
         position = picker.getMouseCell()
         if position:
             # Check to make sure we do not go out of bounds
@@ -367,17 +380,25 @@ class TerrainManager(DirectObject.DirectObject):
         '''Grabs cell location for founding.
         The texture coordinate is used as the mouse may enter an out of bounds area.
         '''
-        root = self.active_terrain.getRoot()
+        print "RegionViewFound2"
+        root = self.ownershipTerrain.getRoot()
         root_position = root.getTexOffset(self.tileTS)
         # We offset the position of the texture, so we will now put the origin of the new city not on mouse cursor but the "bottom left" of it. Just need to add 32 to get other edge
         position = [int(abs(root_position[0]*32)), int(abs(root_position[1]*32))]
-        print "Position of new city is:", position
-        print "The bounds are:", position[0], position[0]+32, position[1]+32, position[1]
-        taskMgr.remove("newTerrainOverlay")
-        root.clearTexture(self.tileTS)
+        self.cancelRegionViewFound()
         messenger.send("found_city_name", [position])
     
+    def cancelRegionViewFound(self):
+        print "CancelRegionViewFound"
+        taskMgr.remove("newTerrainOverlay")
+        root = self.ownershipTerrain.getRoot()
+        root.clearTexture(self.tileTS)
+        # Restore original mouse function
+        self.accept("mouse1", self.lclick)
+        #messenger.send("showRegionGUI")
+    
     def generateColorMap(self, heightmap):
+        print "GenerateColorMap"
         colormap = PNMImage(heightmap.getXSize(), heightmap.getYSize())
         colormap.addAlpha()
         slopemap = self.terrains[0].makeSlopeImage()
@@ -404,6 +425,7 @@ class TerrainManager(DirectObject.DirectObject):
         return colormap
     
     def generateCityMap(self, cities, tiles):
+        print "GenerateCityMap"
         '''Generates a simple colored texture to be applied to the city info region overlay.
         Due to different coordinate systems (terrain org bottom left, texture top left)
         some conversions are needed,
@@ -413,9 +435,7 @@ class TerrainManager(DirectObject.DirectObject):
         citymap = PNMImage(self.size, self.size)
         citylabels = cities
         scratch = {}
-        #citymap.addAlpha()
         import random
-        
         # Setup for city labels
         for ident in cities:
             scratch[ident] = []
@@ -447,8 +467,13 @@ class TerrainManager(DirectObject.DirectObject):
             yavg = ysum/n
             citylabels[ident]["position"] = (xavg, yavg)
         return citymap, citylabels
+        
+    def unfoundCity(self, ident):
+        '''Quick hack to remove color scheme'''
+        del self.citycolors[ident]
     
     def updateRegion(self, heightmap, tiles, cities):
+        print "UpdateRegion", len(tiles), cities
         #colormap = self.generateColorMap(heightmap)
         #colorTexture = Texture()
         #colorTexture.load(colormap)
@@ -458,20 +483,21 @@ class TerrainManager(DirectObject.DirectObject):
         
         #self.terrains[0].getRoot().setTexture( colorTS, colorTexture ) 
         #self.terrains[0].update()
-        
+        #print "Cities:", cities
         citymap, citylabels = self.generateCityMap(cities, tiles)
         
         cityTexture = Texture()
         cityTexture.load(citymap)
         cityTS = TextureStage('citymap')
         cityTS.setSort(0)
-        
-        self.regionTerrain.getRoot().setTexture(cityTS, cityTexture)
-        self.regionTerrain.update()
+        print "Updating ownership graphics"
+        try:
+            print "Pre:", self.ownershipTerrain.getTexture(cityTS)
+        except:
+            pass
+        self.ownershipTerrain.getRoot().setTexture(cityTS, cityTexture, 1)
+        #self.ownershipTerrain.update()
         messenger.send("updateCityLabels", [citylabels, self.terrains[0]])
-        
-        
-        
 
 
 class Logger(object):
@@ -520,3 +546,9 @@ def main(var = None):
 
 if __name__ == '__main__':
     main()
+
+if __name__ == 'main':
+    main()
+
+def getWorld():
+    return world

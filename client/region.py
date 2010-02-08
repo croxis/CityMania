@@ -19,6 +19,7 @@ class Region(DirectObject.DirectObject):
         self.accept("updatedTiles", self.updateTiles)
         self.accept("newCity", self.newCity)
         self.accept("clickForCity", self.checkCity)
+        self.accept("unfoundCity", self.unfoundCity)
         
     def load(self, container, name="New Region"):
         '''Loads a new region, usually from connecting to a server
@@ -76,7 +77,7 @@ class Region(DirectObject.DirectObject):
         if not cell: return
         tile = self.getTile(cell[0], cell[1])
         if tile.cityid:
-            messenger.send("showRegionCityWindow", [self.cities[tile.cityid]])
+            messenger.send("showRegionCityWindow", [tile.cityid, self.cities[tile.cityid]])
         
     def getTile(self, x, y):
         '''Returns tile by coordinate. 
@@ -84,3 +85,7 @@ class Region(DirectObject.DirectObject):
         '''
         value = y * self.region_size[0] + x
         return self.tiles[value]
+    
+    def unfoundCity(self, ident):
+        '''Unfounds a city'''
+        del self.cities[ident]

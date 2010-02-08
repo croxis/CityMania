@@ -8,7 +8,7 @@ message Container {
     optional SelectCityResponse selectCityResponse = 5;
     repeated Map maps = 6;
     optional int32 serverState =7;
-    
+    optional string response = 8; //Generic message from server to appear in a non interactive window.
     optional GameState gameState = 10;
     
     // Client --> Server requests. 100-199
@@ -17,6 +17,7 @@ message Container {
     optional string mapRequest = 102;
     optional NewCityRequest newCityRequest = 103;
     optional int32 requestGameState = 104; //0: Region, Any other value is cityid. This determines what is sent to client
+    optional int32 requestUnfoundCity = 105; //0: Region, Any other value is cityid.
     
     // Server --> Client responses, usually a bool, 200-299
     optional NewCityResponse newCityResponse = 200;
@@ -24,6 +25,7 @@ message Container {
     optional MapSelectError mapSelectError = 202;
     optional City newCity = 203; // Broadcasted to let clients know new city is founded
     repeated Tile updatedTiles = 204; //Tiles were updated and client needs to know about it
+    optional int32 unfoundCity = 205;
 }
 
 message Chat {

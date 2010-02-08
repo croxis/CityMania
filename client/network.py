@@ -4,9 +4,9 @@ Network stuffs for the panda client.
 """
 
 import sys
-sys.path.append("..")
-#import common.protocol_pb2 as proto
-import protocol_pb2 as proto
+sys.path.append("../..")
+import CityMania.common.protocol_pb2 as proto
+#import protocol_pb2 as proto
 from direct.showbase import DirectObject
 from direct.stdpy import threading
 
@@ -122,7 +122,7 @@ class ServerSocket(DirectObject.DirectObject):
         """
         container = proto.Container()
         container.ParseFromString(data)
-        print "Recieved Data:", str(container)[0:100]
+        #print "Recieved Data:", str(container)[0:100]
         if container.HasField("chat"):
             if container.chat.to.startswith("#"):
                 # Chat room
@@ -130,18 +130,21 @@ class ServerSocket(DirectObject.DirectObject):
             else:
                 # Direct PM
                 print "<" + container.sender + "> " + container.message
-        # Chunk A #
+        # Chunk Region City management #
         if container.HasField("newCityResponse"):
             messenger.send("newCityResponse", [container.newCityResponse])
-            print "sending new city response"
         if container.HasField("newCity"):
             messenger.send("newCity", [container.newCity])
-            print "sending new city"
+        elif container.HasField("unfoundCity"):
+            messenger.send("unfoundCity", [container.unfoundCity])
+            # End Chunk Region City management #
+        
+        ## THE POSITION OF THIS IS VERY IMPORTANT ##
         if len(container.updatedTiles):
             messenger.send("updatedTiles", [container.updatedTiles])
-            print "sending updated tiles"
-        # End Chunk A #
-        elif container.HasField("serverState"):
+        ## ##
+        
+        if container.HasField("serverState"):
             if container.serverState is 0:
                 # Nothing running?! Lets get us some maps!
                 container = proto.Container()
@@ -152,7 +155,7 @@ class ServerSocket(DirectObject.DirectObject):
                 container = proto.Container()
                 container.requestGameState = 0
             self.send(container)
-        # Because this is a repeted field we need to check for length as it will always be present
+        # Because this is a repeated field we need to check for length as it will always be present
         elif len(container.maps):
             maps = {}
             import base64
@@ -162,7 +165,7 @@ class ServerSocket(DirectObject.DirectObject):
         elif container.HasField("loginResponse"):
             if container.loginResponse.type is 1:
                 # Awesome, Server returns an int with our user status. We will use this to set up the UI for extra goodies.
-                messenger.send("setSelfAccess", container.loginResponse.usertype)
+                messenger.send("setSelfAccess", [container.loginResponse.usertype, container.loginResponse.username])
                 #now we send a request to the server asking for the game state
                 container = proto.Container()
                 container.requestServerState = True

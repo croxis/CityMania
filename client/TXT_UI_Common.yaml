@@ -15,4 +15,10 @@ TXT_UI_LOGINMP:
     english: Multiplayer
 TXT_UI_LOGINTITLE:
     english: Multiplayer
+TXT_ENTER_CITY:
+    english: Enter City
+TXT_UNFOUND_CITY:
+    english: Unfound City
+TXT_DELETE_CITY:
+    english: Delete City
     

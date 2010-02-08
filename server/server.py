@@ -119,6 +119,8 @@ class CommandProcessor(engine.Entity):
         elif container.HasField("requestGameState"):
             if not container.requestGameState:
                 messenger.send("sendGameState")
+        elif container.HasField("requestUnfoundCity"):
+            messenger.send("requestUnfoundCity", [peer, container.requestUnfoundCity])
     
     def login(self, peer, login):
         """
@@ -148,13 +150,13 @@ class CommandProcessor(engine.Entity):
     def logout(self, peer):
         print peer, "logging out."
         print self.peers
-        index = self.peers.index(peer)
-        del self.peers[index]
         user_name = users.getNameFromPeer(peer)
         print "User", user_name, "exiting."
         # Temporary fix.
         if user_name:
             users.logout(user_name)
+        index = self.peers.index(peer)
+        del self.peers[index]
         print peer, "logged out."
         print self.peers
     
