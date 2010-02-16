@@ -69,7 +69,6 @@ class CommandProcessor(engine.Entity):
         self.commandQueue = []
         self.lock = Lock()
         # Simple list to make sure people who are here should be here
-        self.peers =[]
         self.password = ""
     
     def lockQueue(self):
@@ -97,14 +96,14 @@ class CommandProcessor(engine.Entity):
         """
         container = proto.Container()
         container.ParseFromString(data)
-        print "Data:", str(container)[0:100]
+        logger.debug("Data from: %s\nData: %s" %(peer, container))
         # Parsing chain!
         # Great care will need to be taken on when to use if, else, and elif
         # If the profile for this process takes too long
         if container.HasField("login"):
             self.login(peer, container.login)
         # If the player is not logged in we will not process any other message
-        if peer not in self.peers:
+        if peer not in users.peers:
             print "Unauthorized message from", peer, ". Skipping."
             return
         if container.HasField("chat"):
@@ -122,7 +121,7 @@ class CommandProcessor(engine.Entity):
             messenger.send("newCityRequest", [peer, container.newCityRequest])
         elif container.HasField("requestGameState"):
             if not container.requestGameState:
-                messenger.send("sendGameState")
+                messenger.send("sendGameState", [peer])
         elif container.HasField("requestUnfoundCity"):
             messenger.send("requestUnfoundCity", [peer, container.requestUnfoundCity])
     
@@ -142,55 +141,65 @@ class CommandProcessor(engine.Entity):
         if not loginType:
             container.loginResponse.type = 0
             container.loginResponse.message = "Player password incorrect"
-            print "Login incorrect"
         if container.loginResponse.type:
             container.loginResponse.usertype = users.getType(login.name)
             container.loginResponse.username = login.name
             messenger.send("loggedIn", [peer, login.name])
-            self.peers.append(peer)
-            print peer, "logged in."
-            print self.peers
+            logger.info("Logged in: %s %s" %(login.name, peer) )
         messenger.send("sendData", [peer, container])
         self.lock.release()
 
     def logout(self, peer):
         self.lock.acquire()
-        print peer, "logging out."
-        print self.peers
-        user_name = users.getNameFromPeer(peer)
-        print "User", user_name, "exiting."
+        userName = users.getNameFromPeer(peer)
         # Temporary fix.
-        if user_name:
-            users.logout(user_name)
-        index = self.peers.index(peer)
-        del self.peers[index]
-        print peer, "logged out."
-        print self.peers
+        if userName:
+            users.logout(userName)
+            logger.info("User %s %s exiting." %(userName, peer))
         self.lock.release()
-    
+
 
 # We initialize the CityMania engine
 import __builtin__
 #__builtin__.messenger = engine.EventManager()
 commandProcessor = CommandProcessor()
 
+# Set up logging
+import logging
+logger = logging.getLogger('server')
+logger.setLevel(logging.DEBUG)
+stream = logging.StreamHandler()
+formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+stream.setFormatter(formatter)
+logger.addHandler(stream)
+logger.info('Logging stream handler added.')
+
 def main():
-    network = Network(HOST, PORT)
     vfs = filesystem.FileSystem()
+    # Finish setting up logger
+    logPath = vfs.logs + 'server.log'
+    logFile = logging.FileHandler(logPath)
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    logFile.setFormatter(formatter)
+    logger.addHandler(logFile)
+    logger.info("Logging file handler added. Logging to %s" % logPath)
+    
+    network = Network(HOST, PORT)
     chatServer = chat.ChatServer()
     state = GameState()
     reg = region.Region()
+    
     messenger.start()
 
 if __name__ == "__main__":
     main()
-    import cProfile
-    cProfile.run('main()', 'profile.txt')
-    import pstats
-    p = pstats.Stats('profile.txt')
+    #import cProfile
+    #cProfile.run('main()', 'profile.txt')
+    #import pstats
+    #p = pstats.Stats('profile.txt')
     #p.sort_stats('name').print_stats()
     #p.sort_stats('cumulative').print_stats(10)
-    p.sort_stats('time').print_stats(10)
+    #p.sort_stats('time').print_stats(10)
     #p.sort_stats('file').print_stats('__init__')
     #p.dump_stats("stats.txt")
 

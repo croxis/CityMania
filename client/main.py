@@ -13,9 +13,9 @@ loadPrcFileData( '', 'show-frame-rate-meter 1' )
 loadPrcFileData( '', 'notify-level-util error' )
 loadPrcFileData( '', 'window-title '+title )
 
-#loadPrcFileData( '', 'want-pstats 1')
-#loadPrcFileData( '', 'task-timer-verbose 1')
-#loadPrcFileData( '', 'pstats-tasks 1')
+loadPrcFileData( '', 'want-pstats 1')
+loadPrcFileData( '', 'task-timer-verbose 1')
+loadPrcFileData( '', 'pstats-tasks 1')
 
 #loadPrcFileData("", "interpolate-frames 1")
 #loadPrcFileData("", "clock-mode limited")
@@ -67,7 +67,7 @@ class World(DirectObject.DirectObject):
         # Initialize classes
         lights = environment.Lights(lightsOn = True, showLights = True)
         
-        terrainManager = environment.TerrainManager()
+        self.terrainManager = environment.TerrainManager()
     
     def keys(self):
         """keys"""
@@ -82,7 +82,7 @@ class World(DirectObject.DirectObject):
         base.toggleTexture()
 
     def exit(self):
-        messenger.send("sendData", ['killServerRequest'])
+        #messenger.send("sendData", ['killServerRequest'])
         #base.closeWindow(base.win)
         sys.exit()
     
@@ -91,8 +91,8 @@ class World(DirectObject.DirectObject):
         access.level = level
         access.username = name
     
-    def setupRig(self):
-        camera = gui.Camera()
+    def setupRig(self, size):
+        camera = gui.Camera(size, self.terrainManager.terrain)
         sky = environment.SkyManager()
         
 
@@ -134,7 +134,7 @@ def main(var = None):
     #camera = gui.Camera()
     #camera = gui.CameraHandler()
     guiController = gui.GUIController(script)
-    guiController.mainMenu()
+    guiController.makeMainMenu()
     serverHost = 'localhost'
     serverPort = 52003
     reg = region.Region()

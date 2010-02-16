@@ -58,7 +58,7 @@ class Region(engine.Entity):
         # Other generations such as initial roads, etc, is done here
         self.sendGameState()
     
-    def sendGameState(self):
+    def sendGameState(self, peer=None):
         '''Sends game state. Requires full simulation pause while in progress.
         In this region package tiles are sent by changes in city id. No other data needs to be sent until a city is activated.
         '''
@@ -85,7 +85,10 @@ class Region(engine.Entity):
             c.population = city.population
             c.funds = city.funds
         
-        messenger.send("broadcastData", [container])
+        if peer:
+            messenger.send("sendData", [peer, container])
+        else:
+            messenger.send("broadcastData", [container])
         # TODO: Create method to return to previous server state after we finished sending
     
     def getCityTiles(self, cityid):

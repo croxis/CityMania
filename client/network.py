@@ -10,7 +10,7 @@ import CityMania.common.protocol_pb2 as proto
 from direct.showbase import DirectObject
 from direct.stdpy import threading
 
-from pandac.PandaModules import QueuedConnectionManager, QueuedConnectionReader, ConnectionWriter, QueuedConnectionListener, Thread
+from pandac.PandaModules import Thread
 from direct.task import Task
 
 # Networking
@@ -56,7 +56,11 @@ class ServerSocket(DirectObject.DirectObject):
         """
         This is a function for recieving data in a nonthreaded class
         """
-        inputready,outputready,exceptready = select.select([self.s], [self.s] ,[]) 
+        try:
+            inputready,outputready,exceptready = select.select([self.s], [self.s] ,[]) 
+        except:
+            print "Oh crap2!"
+            return Task.done
         if inputready:
             d = self.s.recv(4096)
             if d:
@@ -67,7 +71,11 @@ class ServerSocket(DirectObject.DirectObject):
         """
         This is a function for sending data in a nonthreaded class
         """
-        inputready,outputready,exceptready = select.select([self.s], [self.s] ,[]) 
+        try:
+            inputready,outputready,exceptready = select.select([self.s], [self.s] ,[]) 
+        except:
+            print "Oh crap!"
+            return Task.done
         # Check if we have any data to send
         if self.sendBuffer and outputready:
             try:
@@ -123,6 +131,14 @@ class ServerSocket(DirectObject.DirectObject):
         container = proto.Container()
         container.ParseFromString(data)
         print "Recieved Data:", str(container)[0:100]
+        ## Server disconnect message ##
+        if container.HasField('disconnect'):
+            messenger.send('disconnected', [container.disconnect])
+            self.running = False
+            self.s.close()
+            # return because nothing else matters!
+            return
+        
         if container.HasField("chat"):
             if container.chat.to.startswith("#"):
                 # Chat room
@@ -188,5 +204,8 @@ class ServerSocket(DirectObject.DirectObject):
     
     def exit(self):
         print "Closing up shop"
+        taskMgr.remove("Poll the connection listener")
+        taskMgr.remove("Poll the connection sender")
+        taskMgr.remove("Poll the buffer manager")
         self.s.close()
         self.running = False

@@ -14,10 +14,11 @@ import os, base64, shutil
 
 class FileSystem(engine.Entity):
     """
-    Temporary class until a suitible replacement can be found.
+    Temporary class until a suitable replacement can be found.
     Uses assets in program directory only
     """
     def __init__(self):
+        '''Initiates VFS.'''
         self.accept("requestMaps", self.sendMaps)
         self.accept("mapRequest", self.generateRegion)
         
@@ -33,6 +34,9 @@ class FileSystem(engine.Entity):
         if "CityMania" not in os.listdir(self.home):
             os.makedirs(self.home + "/CityMania/Maps")
             os.makedirs(self.home + "/CityMania/Regions")
+            os.makedirs(self.home + "/CityMania/Logs")
+        self.path = self.home + '/CityMania/'
+        self.logs = self.path + 'Logs/'
     
     def sendMaps(self, peer):
         """
@@ -42,18 +46,18 @@ class FileSystem(engine.Entity):
         """
         maps = {}
         #os.chdir("Maps/")
-        for dir in os.listdir("Maps/"):
-            heightMap = open("Maps/"+dir+"/heightmap.png")
+        for directory in os.listdir("Maps/"):
+            heightMap = open("Maps/"+directory+"/heightmap.png")
             # Convert to base64 for transmission over wire
-            maps[dir] = base64.b64encode(heightMap.read())
+            maps[directory] = base64.b64encode(heightMap.read())
             heightMap.close()
         
         # Now for a good question, how to send over wire with pb?
         container = proto.Container()
         for mapName in maps:
-            map = container.maps.add()
-            map.name = mapName
-            map.heightmap = maps[mapName]
+            mapContainer = container.maps.add()
+            mapContainer.name = mapName
+            mapContainer.heightmap = maps[mapName]
         messenger.send("sendData", [peer, container])
     
     def generateRegion(self, mapName, regionName="TestRegion"):
@@ -79,7 +83,7 @@ class FileSystem(engine.Entity):
                 except:
                     print "TODO: Add error message for missing map"
                     contrainer = proto.Container()
-                    container.mapSelectError.message = "No suck map name"
+                    container.mapSelectError.message = "No such map name"
                     messenger.send("broadcastData", [container])
                     return
         heightMapFile = open(self.regionPath + "heightmap.png")

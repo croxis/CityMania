@@ -3,10 +3,12 @@
 Chat server engine and interpriter
 TODO: impliment IRC protocol
 """
+import logging
 import engine
 import sys
 sys.path.append("..")
 import common.protocol_pb2 as proto
+logger = logging.getLogger("server.chat")
 
 class ChatServer(engine.Entity):
     """
@@ -23,7 +25,7 @@ class ChatServer(engine.Entity):
         self.users = {}
         # channels = {channel1: [user1, user2]}
         self.channels = {"#region": []}
-        print "Chat server initialized"
+        logger.info("Chat server initialized")
     
     def processChat(self, peer, chat):
         """

@@ -242,6 +242,13 @@ _CONTAINER = descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    descriptor.FieldDescriptor(
+      name='disconnect', full_name='Container.disconnect', index=21,
+      number=300, type=9, cpp_type=9, label=1,
+      default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -429,13 +436,6 @@ _MAP = descriptor.Descriptor(
     descriptor.FieldDescriptor(
       name='heightmap', full_name='Map.heightmap', index=1,
       number=2, type=9, cpp_type=9, label=2,
-      default_value=unicode("", "utf-8"),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    descriptor.FieldDescriptor(
-      name='bitmap', full_name='Map.bitmap', index=2,
-      number=3, type=9, cpp_type=9, label=1,
       default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,

@@ -79,7 +79,7 @@ class EventManager(object):
             method()
         #print "Send2"
         if self.eventQueue:
-            event, extraArgs = self.eventQueue.pop()
+            event, extraArgs = self.eventQueue.pop(0)
             #print "Event:", event, extraArgs
             #print self.listeners
             if event in self.listeners:
@@ -93,7 +93,6 @@ class EventManager(object):
 import __builtin__
 # Messenger is the event communication system
 __builtin__.messenger = EventManager()
-
 
 class Entity(object):
     """

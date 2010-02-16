@@ -26,6 +26,9 @@ message Container {
     optional City newCity = 203; // Broadcasted to let clients know new city is founded
     repeated Tile updatedTiles = 204; //Tiles were updated and client needs to know about it
     optional int32 unfoundCity = 205;
+    
+    // Server --> Client unique error messages, 300-399
+    optional string disconnect = 300; //Server informatin client it is being disconnected and why
 }
 
 message Chat {
@@ -76,8 +79,6 @@ message SelectCityResponse {
 message Map {
     required string name = 1;
     required string heightmap = 2;
-    // Whops! We are changing this. This will be the flag to identify the map as a sc4 map
-    optional string bitmap = 3;
 }
 
 //This is THE incarnation of the game state which a client recieves when it first conects

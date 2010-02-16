@@ -1,7 +1,10 @@
 '''Network related code.'''
 import threading, socket
+import logging
 import engine
 import time
+
+logger = logging.getLogger('server.network')
 
 class ClientSocket(engine.Entity, threading.Thread):
     """
@@ -13,7 +16,7 @@ class ClientSocket(engine.Entity, threading.Thread):
         """
         self.s = clientsock
         self.peer = self.s.getpeername()
-        print "Connection created with:", self.peer
+        logger.info("Connection created with: %(peer)s"  %{'peer': self.peer})
         self.accept("exit", self.exit)
         self.sendCache = []
         self.sendLock = threading.Lock()
@@ -22,27 +25,17 @@ class ClientSocket(engine.Entity, threading.Thread):
     def run(self):
         self.running = True
         while self.running:
-            #print "Thread Pulse", self.peer
             try:
                 data = self.s.recv(4096)
+                messenger.send("gotData", [self.peer, data])
             except socket.timeout:
                 continue
-            except socket.error:
-                # caused by main thread doing a socket.close on this socket
-                # It is a race condition if this exception is raised or not.
-                self.running = False
-                self.exit()
-                break
+            # Normally we'll inform the client why it is being disconnected
+            # But if the socket is foobar, well, duh.
             except:  # some error or connection reset by peer
-                self.running = False
-                self.exit()
-                break
+                messenger.send('logout', [self.peer])
             if not len(data): # a disconnect (socket.close() by client)
-                self.running = False
-                self.exit()
-                break
-            print "Recieved Data from:", self.peer
-            messenger.send("gotData", [self.peer, data])
+                messenger.send('logout', [self.peer])
             time.sleep(0.1)
     
     def send(self, data):
@@ -55,17 +48,16 @@ class ClientSocket(engine.Entity, threading.Thread):
         #print data.SerializeToString()+"[!]"
         self.sendLock.acquire()
         try:
-            print "Sending:", str(data)[0:100]
+            logger.debug("Sending %s: %s" %(self.peer, data))
             self.s.sendall(data.SerializeToString()+"[!]")
         except:
-            print "Object is not a protocol buffer object:", str(data)[0:100]
+            logger.warning("Object is not a protocol buffer object: %s" %data)
         self.sendLock.release()
         
     def exit(self):
-        print "Socket error, exicting logout for", self.peer
+        logger.info("Closing thread for %(peer)s" %{'peer': self.peer})
         self.s.close()
         self.running = False
-        messenger.send("logout", [self.peer])
 
 
 class Network(engine.Entity, threading.Thread):
@@ -109,7 +101,7 @@ class Network(engine.Entity, threading.Thread):
             t.daemon = True
             t.start()
         except:
-            print "Main socket error"    
+            print "Main socket error"
     
     def broadcast(self, data):
         """
@@ -131,10 +123,23 @@ class Network(engine.Entity, threading.Thread):
         Server is shutting down, so let us tidy up
         """
         #self.ignore("tick")
+        container = proto.Container()
+        container.disconnect = "Server is shutting down."
+        self.broadcast(container)
+        for peer, client in self.clients.items():
+            client.exit()
+        self.clients = {}
         self.running = False
         self.s.close()
     
     def logout(self, peer):
         self.lock.acquire()
-        del self.clients[peer]
+        if peer in self.clients:
+            logger.info("Logging out (%s, %s)" %peer)
+            logger.debug("Pre peer list %s" %self.clients)
+            self.clients[peer].exit()
+            del self.clients[peer]
+            logger.debug("Post peer list %s" %self.clients)
+        else:
+            logger.info("%s is not in peer list: %s" %(peer, self.clients))
         self.lock.release()

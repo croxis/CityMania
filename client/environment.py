@@ -104,7 +104,7 @@ class TerrainManager(DirectObject.DirectObject):
         self.generateWater(2)
         taskMgr.add(self.updateTerrain, "updateTerrain")
         print "Done with terrain generation"
-        messenger.send("finishedTerrainGen")
+        messenger.send("finishedTerrainGen", [[self.size, self.size]])
     
     def generateColorMap(self):
         ''' Iterate through every pix of color map. This will be very slow so until faster method is developed, use sparingly
@@ -293,13 +293,13 @@ class TerrainManager(DirectObject.DirectObject):
         root.clearTexture()
         root.setTexture( self.colorTS, self.colorTexture ) 
         root.setTexture( self.grassTS, self.grassTexture )
-        root.setTexScale(self.grassTS, self.size, self.size) 
+        root.setTexScale(self.grassTS, self.size/8, self.size/8) 
         root.setTexture( self.rockTS, self.rockTexture ) 
-        root.setTexScale(self.rockTS, self.size, self.size) 
+        root.setTexScale(self.rockTS, self.size/8, self.size/8) 
         root.setTexture( self.sandTS, self.sandTexture) 
-        root.setTexScale(self.sandTS, self.size, self.size) 
+        root.setTexScale(self.sandTS, self.size/8, self.size/8) 
         root.setTexture( self.snowTS, self.snowTexture ) 
-        root.setTexScale(self.snowTS, self.size, self.size) 
+        root.setTexScale(self.snowTS, self.size/8, self.size/8) 
         root.setTexture( self.gridTS, self.gridTexture ) 
         root.setTexScale(self.gridTS, self.size, self.size)
         
@@ -346,7 +346,7 @@ class TerrainManager(DirectObject.DirectObject):
         style 1: reflective card
         style 2: reflective card with shaders
         '''
-        print "Water dimensions:", self.waterXMin, self.waterYMin, self.waterXMax, self.waterYMax
+        self.waterHeight = 22.0
         if self.water:
             self.water.removeNode()
         if style is 0:
@@ -359,9 +359,8 @@ class TerrainManager(DirectObject.DirectObject):
                 size = self.waterYMax
             else:
                 size = self.waterXMax
-            #self.water.setScale(size)
             self.water.lookAt(0, 0, -1)
-            self.water.setZ(22)
+            self.water.setZ(self.waterHeight)
             messenger.send('makePickable', [self.water])
         elif style is 1:
             # From Prosoft's super awesome terrain demo
@@ -375,7 +374,7 @@ class TerrainManager(DirectObject.DirectObject):
                 size = self.waterXMax
             #self.water.setScale(size)
             self.water.lookAt(0, 0, -1)
-            self.water.setZ(22)
+            self.water.setZ(self.waterHeight)
             self.water.setShaderOff(1)
             self.water.setLightOff(1)
             self.water.setAlphaScale(0.5)
@@ -402,8 +401,7 @@ class TerrainManager(DirectObject.DirectObject):
             messenger.send('makePickable', [self.water])
         elif style is 2:
             # From Clcheung just as super awesome demomaster
-            self.water_level = Vec4(0.0, 0.0, 22.0, 1.0)
-            #self.water = water.WaterNode(10, 300, self.size, self.size, self.water_level.getZ())
+            self.water_level = Vec4(0.0, 0.0, self.waterHeight, 1.0)
             self.water = water.WaterNode(self.waterXMin, self.waterYMin, self.waterXMax, self.waterYMax, self.water_level.getZ())
             self.water.setStandardControl()
             self.water.changeParams(None)
