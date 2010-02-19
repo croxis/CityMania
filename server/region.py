@@ -49,13 +49,11 @@ class Region(engine.Entity):
         self.name = name
         # Generate the simulation tiles
         tileid = 0
-        for x in range(self.width):
-            for y in range(self.height):
+        for y in range(self.height):
+            for x in range(self.width):
                 tile = Tile(tileid, coords=(x,y))
                 self.tiles.append(tile)
                 tileid+= 1
-        print "Region created with", len(self.tiles), "tiles."
-        
         # Other generations such as initial roads, etc, is done here
         self.sendGameState()
     
@@ -147,8 +145,8 @@ class Region(engine.Entity):
         newcity = city.City(info.name, cityid, mayor = user)
         self.cities[cityid] = newcity
         updated_tiles = []
-        for x in range(0, 32):
-            for y in range(0,32):
+        for y in range(0, 32):
+            for x in range(0,32):
                 tile = self.getTile(info.positionx+x, info.positiony+y)
                 tile.cityid = cityid
                 updated_tiles.append(tile)

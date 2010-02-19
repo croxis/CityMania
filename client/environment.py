@@ -58,6 +58,7 @@ class TerrainManager(DirectObject.DirectObject):
         self.accept("regionView_owners", self.setOwnerTextures)
         self.accept("regionView_foundNew", self.regionViewFound)
         self.accept("updateRegion", self.updateRegion)
+        self.accept("enterCityView", self.enterCity)
         
         # View: 0, region, # cityid
         self.view = 0
@@ -82,7 +83,7 @@ class TerrainManager(DirectObject.DirectObject):
         self.terrain.setHeightfield(self.heightmap)
         #self.terrain.setFocalPoint(base.camera)
         self.terrain.setBruteforce(True)
-        self.terrain.setBlockSize(64)
+        self.terrain.setBlockSize(32)
         self.terrain.generate()
 
         root = self.terrain.getRoot()
@@ -105,6 +106,7 @@ class TerrainManager(DirectObject.DirectObject):
         taskMgr.add(self.updateTerrain, "updateTerrain")
         print "Done with terrain generation"
         messenger.send("finishedTerrainGen", [[self.size, self.size]])
+        self.terrain.getRoot().analyze()
     
     def generateColorMap(self):
         ''' Iterate through every pix of color map. This will be very slow so until faster method is developed, use sparingly
@@ -176,8 +178,7 @@ class TerrainManager(DirectObject.DirectObject):
             if ident not in self.citycolors:
                 self.citycolors[ident] = VBase3D(random.random(), random.random(), random.random())
         for tile in tiles:
-            # X Y is flipped with a converter. Too tired to figure out why,
-            self.citymap.setXel(tile.coords[1], ycon[tile.coords[0]], self.citycolors[tile.cityid])
+            self.citymap.setXel(tile.coords[0], ycon[tile.coords[1]], self.citycolors[tile.cityid])
             # Scratch for labeling
             if tile.cityid:
                 scratch[tile.cityid].append((tile.coords[0], tile.coords[1]))
@@ -192,7 +193,7 @@ class TerrainManager(DirectObject.DirectObject):
             xavg = xsum/n
             yavg = ysum/n
             z = self.terrain.getElevation(xavg, yavg)*100
-            citylabels[ident]["position"] = (xavg, yavg, z+30)
+            citylabels[ident]["position"] = (xavg, yavg, z+20)
         messenger.send("updateCityLabels", [citylabels, self.terrain])
     
     def generateSurfaceTextures(self):
@@ -232,6 +233,21 @@ class TerrainManager(DirectObject.DirectObject):
         self.gridTS.setSort(5)
         self.gridTS.setPriority(10)
     
+    def enterCity(self, ident, city, position, tiles):
+        '''Identifies which terrain blocks city belogs to and disables those that are not
+        A lot of uneeded for loops in here. Will need to find a better way later.'''
+        root = self.terrain.getRoot()
+        children = root.getChildren()
+        keepBlocks = []
+        for tile in tiles:
+            blockCoords = self.terrain.getBlockFromPos(tile.coords[0], tile.coords[1])
+            block = self.terrain.getBlockNodePath(blockCoords[0], blockCoords[1])
+            if block not in keepBlocks:
+                keepBlocks.append(block)
+        for child in children:
+            if child not in keepBlocks:
+                child.detachNode()
+    
     def newTerrainOverlay(self, task):
         root = self.terrain.getRoot()
         position = picker.getMouseCell()
@@ -245,11 +261,10 @@ class TerrainManager(DirectObject.DirectObject):
                 position = (position[0], 16)
             elif position [1] > self.size-16:
                 position = (position[0], self.size-16)                
-            root.setTexOffset(self.tileTS, -float(position[0]-16)/32, -float(position[1]-16)/32)
+            root.setTexOffset(self.tileTS, -(position[0]-16)/32, -(position[1]-16)/32)
         return task.cont
     
     def regionViewFound(self):
-        print "RegionViewFound"
         '''Gui for founding a new city!'''
         self.setOwnerTextures()
         root = self.terrain.getRoot()
@@ -271,7 +286,6 @@ class TerrainManager(DirectObject.DirectObject):
         '''Grabs cell location for founding.
         The texture coordinate is used as the mouse may enter an out of bounds area.
         '''
-        print "RegionViewFound2"
         root = self.terrain.getRoot()
         root_position = root.getTexOffset(self.tileTS)
         # We offset the position of the texture, so we will now put the origin of the new city not on mouse cursor but the "bottom left" of it. Just need to add 32 to get other edge

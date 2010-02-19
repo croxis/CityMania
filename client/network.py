@@ -153,6 +153,8 @@ class ServerSocket(DirectObject.DirectObject):
             messenger.send("newCity", [container.newCity])
         elif container.HasField("unfoundCity"):
             messenger.send("unfoundCity", [container.unfoundCity])
+        elif container.HasField("enterCity"):
+            messenger.send("enterCity", [container.enterCity])
             # End Chunk Region City management #
         
         ## THE POSITION OF THIS IS VERY IMPORTANT ##

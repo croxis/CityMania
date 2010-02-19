@@ -20,6 +20,7 @@ class Region(DirectObject.DirectObject):
         self.accept("newCity", self.newCity)
         self.accept("clickForCity", self.checkCity)
         self.accept("unfoundCity", self.unfoundCity)
+        self.accept("enterCity", self.enterCity)
         
     def load(self, container, name="New Region"):
         '''Loads a new region, usually from connecting to a server
@@ -52,11 +53,11 @@ class Region(DirectObject.DirectObject):
                 tileid += 1
         
         position = 0
-        for x in range(self.region_size[0]):
-            for y in range(self.region_size[1]):
+        for y in range(self.region_size[1]):
+            for x in range(self.region_size[0]):
                 self.tiles[position].coords = (x,y)
                 position += 1
-        
+                
         for city in container.cities:
             self.newCity(city)
         messenger.send("generateRegion", [self.heightmap, self.tiles, self.cities, container])
@@ -89,3 +90,24 @@ class Region(DirectObject.DirectObject):
     def unfoundCity(self, ident):
         '''Unfounds a city'''
         del self.cities[ident]
+    
+    def enterCity(self, ident):
+        '''Processess information needed for graphical elements to enter city view.'''
+        # We need to send list of tiles for terrain manager
+        tiles = []
+        xsum = 0
+        ysum = 0
+        n = 0
+        for tile in self.tiles:
+            if tile.cityid is ident:
+                tiles.append(tile)
+                # We need to compute center of city to target camera there
+                xsum += tile.coords[0]
+                ysum += tile.coords[1]
+                n += 1
+        xavg = xsum/n
+        yavg = ysum/n
+        position = (xavg, yavg)
+        # We need to send city info so gui elements can be drawn
+        city = self.cities[ident]
+        messenger.send('enterCityView', [ident, city, position, tiles])

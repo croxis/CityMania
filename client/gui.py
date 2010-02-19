@@ -28,18 +28,14 @@ class Picker(DirectObject.DirectObject):
     '''
     def __init__(self, show=False):
         self.accept('makePickable', self.makePickable)
-        #self.accept('mouse1', self.castRay)
         #create traverser
         #base.cTrav = CollisionTraverser()
         self.cTrav = CollisionTraverser()
         #create collision ray
         self.createRay(self,base.camera,name="mouseRay",show=show)
-    
-    def castRay(self):
-        self.cTrav.traverse(render)
 
     def getMouseCell(self):
-        """mouse pick""" 
+        """Returns terrain cell coordinates (x,y) at mouse pointer""" 
         #get mouse coords
         if base.mouseWatcherNode.hasMouse()==False: return
         mpos=base.mouseWatcherNode.getMouse()
@@ -52,10 +48,11 @@ class Picker(DirectObject.DirectObject):
         cell=(int(math.floor(pickedPoint[0])),int(math.floor(pickedPoint[1])))
         return cell  
     
-    def getCenterCoords(self):
+    def getCenterCoords(self, nodePath = render):
+        '''Returns terrain cell coordinates (x,y) that is at center of camera'''
         self.ray.setFromLens(base.camNode, 0, 0)
         #get collision: picked obj and point
-        pickedObj,pickedPoint=self.getCollision(self.queue)
+        pickedObj,pickedPoint=self.getCollision(self.queue, nodePath)
         return pickedPoint
     
     def getCoords(self):
@@ -66,6 +63,7 @@ class Picker(DirectObject.DirectObject):
         self.ray.setFromLens(base.camNode, mpos.getX(),mpos.getY())
         #get collision: picked obj and point
         pickedObj,pickedPoint=self.getCollision(self.queue)
+        print "Pricked point", pickedPoint
         return pickedPoint
     
     def getMiddle(self):
@@ -79,11 +77,13 @@ class Picker(DirectObject.DirectObject):
         pickedObj,pickedPoint=self.getCollision(self.queue)
         return pickedPoint       
     
-    def getCollision(self, queue):
-        """Returns the picked nodepath and the picked 3d point"""
+    def getCollision(self, queue, nodePath = render):
+        """Returns the picked nodepath and the picked 3d point.
+        This function not inteded to be called directly, use a get*() function instead.
+        """
         #do the traverse
         #base.cTrav.traverse(render)
-        self.cTrav.traverse(render)
+        self.cTrav.traverse(nodePath)
         #process collision entries in queue
         if queue.getNumEntries() > 0:
             queue.sortEntries()
@@ -128,7 +128,6 @@ class Script(object):
     def __init__(self):
         #self.database = {}
         self.database = {'TXT_UI_ONLINE': {'english': 'Online'}, 'TXT_UI_QUIT': {'english': 'Quit'}, 'TXT_BUTTON_CLOSE': {'english': 'Close'}, 'TXT_UI_MAINMENUTITLE': {'english': 'City Mania'}, 'TXT_UI_LOGINMP': {'english': 'Multiplayer'}, 'TXT_TITLE_COFIRM_UNFOUND': {'english': 'Confirm City Unfounding'}, 'TXT_BUTTON_CONFIRM_UNFOUND': {'english': 'Confirm Unfounding'}, 'TXT_DELETE_CITY': {'english': 'Delete City'}, 'TXT_MAYOR_NAME': {'english': 'Mayor Name'}, 'TXT_UI_LOGINTITLE': {'english': 'Multiplayer'}, 'TXT_UI_NEWGAME': {'english': 'New Game'}, 'TXT_UI_OFFLINE': {'english': 'Offline'}, 'TXT_UI_OK': {'english': 'Ok'}, 'TXT_UNFOUND_CITY': {'english': 'Unfound City'}, 'TXT_ENTER_CITY': {'english': 'Enter City'}}
-                
         #self.loadText()
     
     def loadText(self):
@@ -240,7 +239,6 @@ class GUIController(DirectObject.DirectObject):
             heightTexture.load(image)
             label = DirectRadioButton(text=mapName, image=heightTexture, variable=m, value=[mapName])
             mapList.append(label)
-        print "Label", mapList
         for button in mapList:
             button.setOthers(mapList)
         self.mapDialog.addScrolledList(mapList)
@@ -277,7 +275,6 @@ class GUIController(DirectObject.DirectObject):
 
     def sendRegionMessage(self, status=None):
         '''Send messages for region view'''
-        print "Status", status
         if self.v == [0]:
             messenger.send("regionView_normal")
         elif self.v == [1]:
@@ -328,7 +325,7 @@ class GUIController(DirectObject.DirectObject):
             label.setShadowColor(0, 0, 0, 1)
             label.setCardDecal(True)
             textNodePath = self.cityLabels.attachNewNode(label)
-            textNodePath.setPos(city['position'][1], city["position"][0], city['position'][2])
+            textNodePath.setPos(city['position'][0], city["position"][1], city['position'][2])
             textNodePath.setLightOff()
             textNodePath.setBillboardPointEye()
     
@@ -355,7 +352,9 @@ class GUIController(DirectObject.DirectObject):
         cityInfoWindow.addVertical([closeButton])
     
     def enterCity(self, ident):
-        print "Request to enter city", ident
+        container = proto.Container()
+        container.requestEnterCity = ident
+        messenger.send("sendData", [container])
         
     def confirmUnfoundCity(self, ident, cityWindow):
         window = pw.StandardWindow(title = self.getText("TXT_TITLE_COFIRM_UNFOUND"), center=True)
@@ -492,23 +491,23 @@ class Camera(DirectObject.DirectObject):
             delta = [0,0]
             if mousePosition1[0] < self.mousePosition0[0]:
                 #print "Left"
-                angleradiansX2 = base.camera.getH() * (math.pi / 180.0)-math.pi*0.5
-                delta[0] = (mousePosition1[0]- self.mousePosition0[0])*0.0005
+                angleradiansX2 = base.camera.getH() * (math.pi / 180.0)+math.pi*0.5
+                delta[0] = (mousePosition1[0]+ self.mousePosition0[0])*0.00001*self.camDist
                 moveX = True
             if mousePosition1[0] > self.mousePosition0[0]:
                 #print "Right"
-                angleradiansX2 = base.camera.getH() * (math.pi / 180.0)+math.pi*0.5
-                delta[0] = -(mousePosition1[0]- self.mousePosition0[0])*0.0005
+                angleradiansX2 = base.camera.getH() * (math.pi / 180.0)-math.pi*0.5
+                delta[0] = -(mousePosition1[0]+ self.mousePosition0[0])*0.00001*self.camDist
                 moveX = True
             if mousePosition1[1] > self.mousePosition0[1]:
                 #print "Down"
-                angleradiansX1 = base.camera.getH() * (math.pi / 180.0)-math.pi
-                delta[1] = -(mousePosition1[1] - self.mousePosition0[1]) * 0.0005
+                angleradiansX1 = base.camera.getH() * (math.pi / 180.0)+math.pi
+                delta[1] = -(mousePosition1[1] + self.mousePosition0[1]) * 0.00001*self.camDist
                 moveY = True
             if mousePosition1[1] < self.mousePosition0[1]:
                 #print "Up"
                 angleradiansX1 = base.camera.getH() * (math.pi / 180.0)+math.pi
-                delta[1] = (mousePosition1[1] + self.mousePosition0[1]) * 0.0005
+                delta[1] = (mousePosition1[1] + self.mousePosition0[1]) * 0.00001*self.camDist
                 moveY = True
             if moveY:
                 tempX = self.target.getX()+math.sin(angleradiansX1)*delta[1]
