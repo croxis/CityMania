@@ -13,9 +13,9 @@ loadPrcFileData( '', 'show-frame-rate-meter 1' )
 loadPrcFileData( '', 'notify-level-util error' )
 loadPrcFileData( '', 'window-title '+title )
 
-loadPrcFileData( '', 'want-pstats 1')
-loadPrcFileData( '', 'task-timer-verbose 1')
-loadPrcFileData( '', 'pstats-tasks 1')
+#loadPrcFileData( '', 'want-pstats 1')
+#loadPrcFileData( '', 'task-timer-verbose 1')
+#loadPrcFileData( '', 'pstats-tasks 1')
 
 #loadPrcFileData("", "interpolate-frames 1")
 #loadPrcFileData("", "clock-mode limited")

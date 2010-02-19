@@ -499,22 +499,22 @@ class Camera(DirectObject.DirectObject):
             moveY = False
             delta = [0,0]
             if mousePosition1[0] < self.mousePosition0[0]:
-                #print "Left"
+                print "Left"
                 angleradiansX2 = base.camera.getH() * (math.pi / 180.0)+math.pi*0.5
                 delta[0] = (mousePosition1[0]+ self.mousePosition0[0])*0.00001*self.camDist
                 moveX = True
             if mousePosition1[0] > self.mousePosition0[0]:
-                #print "Right"
+                print "Right"
                 angleradiansX2 = base.camera.getH() * (math.pi / 180.0)-math.pi*0.5
-                delta[0] = -(mousePosition1[0]+ self.mousePosition0[0])*0.00001*self.camDist
+                delta[0] = (mousePosition1[0]+ self.mousePosition0[0])*0.00001*self.camDist
                 moveX = True
             if mousePosition1[1] > self.mousePosition0[1]:
-                #print "Down"
+                print "Down"
                 angleradiansX1 = base.camera.getH() * (math.pi / 180.0)+math.pi
                 delta[1] = -(mousePosition1[1] + self.mousePosition0[1]) * 0.00001*self.camDist
                 moveY = True
             if mousePosition1[1] < self.mousePosition0[1]:
-                #print "Up"
+                print "Up"
                 angleradiansX1 = base.camera.getH() * (math.pi / 180.0)+math.pi
                 delta[1] = (mousePosition1[1] + self.mousePosition0[1]) * 0.00001*self.camDist
                 moveY = True
