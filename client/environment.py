@@ -247,6 +247,7 @@ class TerrainManager(DirectObject.DirectObject):
         for child in children:
             if child not in keepBlocks:
                 child.detachNode()
+        self.view = ident
     
     def newTerrainOverlay(self, task):
         root = self.terrain.getRoot()

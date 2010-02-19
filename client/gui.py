@@ -170,6 +170,7 @@ class GUIController(DirectObject.DirectObject):
         self.accept("showRegionCityWindow", self.regionCityWindow)
         self.accept("showRegionGUI", self.regionGUI)
         self.accept("disconnected", self.disconnected)
+        self.accept("enterCityView", self.cityGUI)
         self.cityLabels = NodePath("cityLabels")
         self.cityLabels.reparentTo(render)
         self.text = OnscreenText()
@@ -251,6 +252,14 @@ class GUIController(DirectObject.DirectObject):
         container = proto.Container()
         container.mapRequest = map_name
         messenger.send("sendData", [container])
+    
+    def cityGUI(self, ident, city, position, tiles):
+        self.regionWindow.destroy()
+        self.cityInfoWindow.destroy()
+        children = self.cityLabels.getChildren()
+        for child in children:
+            child.removeNode()
+        text = OnscreenText(text = "Welcome to " + city['name'], pos=(0, 0.75), scale=0.07)
         
     def regionGUI(self, size=[0,0]):
         '''Generates GUI for region view interface'''
@@ -338,18 +347,18 @@ class GUIController(DirectObject.DirectObject):
         '''Generates window displaying city stats and options.'''
         #print "Access username and level", access.username, access.level
         #TODO: Once the city view is created we need to inform the client if they even have viewing rights
-        cityInfoWindow = pw.StandardWindow(title = city['name'], center = True)
+        self.cityInfoWindow = pw.StandardWindow(title = city['name'], center = True)
         buttons =[]
         enterButton = DirectButton(text = self.script.getText('TXT_ENTER_CITY', self.language), command = self.enterCity, extraArgs=[ident])
         buttons.append(enterButton)
         if access.level is 4 or access.username == city['mayor']:
-            unfoundButton = DirectButton(text = self.script.getText('TXT_UNFOUND_CITY', self.language), command = self.confirmUnfoundCity, extraArgs=[ident, cityInfoWindow])
+            unfoundButton = DirectButton(text = self.script.getText('TXT_UNFOUND_CITY', self.language), command = self.confirmUnfoundCity, extraArgs=[ident, self.cityInfoWindow])
             buttons.append(unfoundButton)
             #deleteButton = DirectButton(text = self.script.getText('TXT_DELETE_CITY', self.language), command = self.confirmDeleteCity, extraArgs=[ident])
             #buttons.append(deleteButton)
-        cityInfoWindow.addHorizontal(buttons)
-        closeButton = DirectButton(text = self.script.getText('TXT_BUTTON_CLOSE', self.language), command = self.closeWindow, extraArgs=[cityInfoWindow])
-        cityInfoWindow.addVertical([closeButton])
+        self.cityInfoWindow.addHorizontal(buttons)
+        closeButton = DirectButton(text = self.script.getText('TXT_BUTTON_CLOSE', self.language), command = self.closeWindow, extraArgs=[self.cityInfoWindow])
+        self.cityInfoWindow.addVertical([closeButton])
     
     def enterCity(self, ident):
         container = proto.Container()
@@ -414,7 +423,6 @@ class Camera(DirectObject.DirectObject):
             
         self.camDist = 40
         # A variable that will determine how far the camera is from it's target focus
-        # TODO: Panlimit based on map size
         self.panLimitsX = Vec2(-20, size[0] + 20)
         self.panLimitsY = Vec2(-20, size[1] + 20)
         # These two variables will serve as limits for how far the camera can pan, so you don't scroll away from the map.
@@ -423,6 +431,7 @@ class Camera(DirectObject.DirectObject):
         self.setTarget()
         self.isPanning = False
         self.isOrbiting = False
+        self.accept('enterCityView', self.enterCity)
         self.accept('mouse2', self.middleMouseDown, [])
         self.accept('mouse2-up', self.middleMouseUp, [])
         self.accept('mouse3', self.rightMouseDown, [])
@@ -599,6 +608,29 @@ class Camera(DirectObject.DirectObject):
             self.target.setY(y)
             self.target.setZ(z*100)
             # Stores the new target position values in the target variable. The x and y values are clamped to the pan limits.
+    
+    def enterCity(self, ident, city, position, tiles):
+        '''Adjust camera parameters to city view.'''
+        # Quick calculation for min and max values
+        minX = 0
+        minY = 0
+        maxX = 0
+        maxY = 0
+        minX, minY = tiles[0].coords
+        for tile in tiles:
+            if tile.coords[0] < minX:
+                minX = tile.coords[0]
+            if tile.coords[1] < minY:
+                minY = tile.coords[1]
+            if tile.coords[0] > maxX:
+                maxX = tile.coords[0]
+            if tile.coords[1] > maxY:
+                maxY = tile.coords[1]
+        self.panLimitsX = Vec2(minX-20, maxX + 20)
+        self.panLimitsY = Vec2(minY-20, maxY + 20)
+        base.camera.setPos((minX+maxX)/2-10, (minY+maxY)/2-10, 70)
+        base.camera.setHpr(30,-45,0)
+        self.setTarget()
 
 
 picker = Picker()

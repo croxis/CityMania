@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-4.6.dtd">
 <!-- eric4 project file for project CityMania -->
-<!-- Saved: 2010-01-23, 19:28:28 -->
+<!-- Saved: 2010-02-15, 10:36:18 -->
 <!-- Copyright (C) 2010 ,  -->
 <Project version="4.6">
   <Language></Language>
@@ -35,6 +35,12 @@
     <Source>client/region.py</Source>
     <Source>common/protocol_pb2.py</Source>
     <Source>server/network.py</Source>
+    <Source>pyrate.py</Source>
+    <Source>client/controllers.py</Source>
+    <Source>client/environment.py</Source>
+    <Source>client/tile.py</Source>
+    <Source>client/water.py</Source>
+    <Source>client/access.py</Source>
   </Sources>
   <Forms>
   </Forms>
@@ -128,7 +134,7 @@
               <string>enableNewstyle</string>
             </key>
             <value>
-              <bool>False</bool>
+              <bool>True</bool>
             </value>
             <key>
               <string>enableRPython</string>
