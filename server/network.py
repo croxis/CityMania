@@ -135,11 +135,9 @@ class Network(engine.Entity, threading.Thread):
     def logout(self, peer):
         self.lock.acquire()
         if peer in self.clients:
-            logger.info("Logging out (%s, %s)" %peer)
-            logger.debug("Pre peer list %s" %self.clients)
             self.clients[peer].exit()
             del self.clients[peer]
-            logger.debug("Post peer list %s" %self.clients)
+            logger.info("Logged out (%s, %s)" %peer)
         else:
             logger.info("%s is not in peer list: %s" %(peer, self.clients))
         self.lock.release()

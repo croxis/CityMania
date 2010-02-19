@@ -18,6 +18,7 @@ message Container {
     optional NewCityRequest newCityRequest = 103;
     optional int32 requestGameState = 104; //0: Region, Any other value is cityid. This determines what is sent to client
     optional int32 requestUnfoundCity = 105; //0: Region, Any other value is cityid.
+    optional int32 requestEnterCity = 106;
     
     // Server --> Client responses, usually a bool, 200-299
     optional NewCityResponse newCityResponse = 200;
@@ -26,6 +27,7 @@ message Container {
     optional City newCity = 203; // Broadcasted to let clients know new city is founded
     repeated Tile updatedTiles = 204; //Tiles were updated and client needs to know about it
     optional int32 unfoundCity = 205;
+    optional int32 enterCity = 206;
     
     // Server --> Client unique error messages, 300-399
     optional string disconnect = 300; //Server informatin client it is being disconnected and why

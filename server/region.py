@@ -21,6 +21,7 @@ class Region(engine.Entity):
         self.accept("newCityRequest", self.newCity)
         self.accept("sendGameState", self.sendGameState)
         self.accept("requestUnfoundCity", self.unfoundCity)
+        self.accept("requestEnterCity", self.checkEnterCity)
         self.name = "Region"
         # Dict to use cityid as quick lookup
         self.cities = {}
@@ -196,11 +197,22 @@ class Region(engine.Entity):
             messenger.send("sendData", [peer, container])
         print "City", ident, "unfounded. New city db:", self.cities
     
+    def checkEnterCity(self, peer, ident):
+        '''Checks if user can enter city and if so, what permissions.'''
+        userName = users.getNameFromPeer(peer)
+        city = self.cities[ident]
+        container = proto.Container()
+        if users.isAdmin(userName) or userName == city.mayor:
+            container.enterCity = ident
+        elif users.canUser(ident, 'viewCity'):
+            container.enterCity = ident
+        else:
+            container.response = "You lack permission to enter city."
+        messenger.send("sendData", [peer, container])
+    
     def updateTile(self, container, tile):
         t = container.updatedTiles.add()
         t.id = tile.id
         t.positionx = tile.coords[0]
         t.positiony = tile.coords[1]
         t.cityid = tile.cityid
-    
-    

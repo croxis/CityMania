@@ -124,6 +124,8 @@ class CommandProcessor(engine.Entity):
                 messenger.send("sendGameState", [peer])
         elif container.HasField("requestUnfoundCity"):
             messenger.send("requestUnfoundCity", [peer, container.requestUnfoundCity])
+        elif container.HasField("requestEnterCity"):
+            messenger.send("requestEnterCity", [peer, container.requestEnterCity])
     
     def login(self, peer, login):
         """
@@ -189,22 +191,10 @@ def main():
     state = GameState()
     reg = region.Region()
     
-    messenger.start()
+    try:
+        messenger.start()
+    except Exception, e:
+        logger.exception(e)
 
 if __name__ == "__main__":
     main()
-    #import cProfile
-    #cProfile.run('main()', 'profile.txt')
-    #import pstats
-    #p = pstats.Stats('profile.txt')
-    #p.sort_stats('name').print_stats()
-    #p.sort_stats('cumulative').print_stats(10)
-    #p.sort_stats('time').print_stats(10)
-    #p.sort_stats('file').print_stats('__init__')
-    #p.dump_stats("stats.txt")
-
-
-
-
-
-
