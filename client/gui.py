@@ -423,9 +423,20 @@ class Camera(DirectObject.DirectObject):
             
         self.camDist = 40
         # A variable that will determine how far the camera is from it's target focus
-        self.panLimitsX = Vec2(-20, size[0] + 20)
-        self.panLimitsY = Vec2(-20, size[1] + 20)
+        #self.panLimitsX = Vec2(-20, size[0] + 20)
+        #self.panLimitsY = Vec2(-20, size[1] + 20)
+        self.panLimitsX = Vec2(0, size[0])
+        self.panLimitsY = Vec2(0, size[1])
         # These two variables will serve as limits for how far the camera can pan, so you don't scroll away from the map.
+        self.panRateDivisor = 20
+        # This variable is used as a divisor when calculating how far to move the camera when panning. 
+        # Higher numbers will yield slower panning
+        # and lower numbers will yield faster panning. This must not be set to 0.
+
+        self.panZoneSize = .15
+        # This variable controls how close the mouse cursor needs to be to the edge of the screen to start panning the camera.
+        # It must be less than 1,
+        # and I recommend keeping it less than .2 
         
         self.target=Vec3()
         self.setTarget()
@@ -434,8 +445,9 @@ class Camera(DirectObject.DirectObject):
         self.accept('enterCityView', self.enterCity)
         self.accept('mouse2', self.middleMouseDown, [])
         self.accept('mouse2-up', self.middleMouseUp, [])
-        self.accept('mouse3', self.rightMouseDown, [])
-        self.accept('mouse3-up', self.rightMouseUp, [])
+        # TODO: Consider using mouse 3 to focus on location
+        #self.accept('mouse3', self.rightMouseDown, [])
+        #self.accept('mouse3-up', self.rightMouseUp, [])
         self.accept("wheel_up",lambda : self.adjustCamDist(0.9))
         self.accept("wheel_down",lambda : self.adjustCamDist(1.1))
         
@@ -488,35 +500,33 @@ class Camera(DirectObject.DirectObject):
             mousePosition1=[base.win.getPointer(0).getX(),base.win.getPointer(0).getY()]
             delta = [(mousePosition1[0]- self.mousePosition0[0])*0.005, (mousePosition1[1] - self.mousePosition0[1]) * 0.005]
             self.turnCameraAroundPoint(delta[0], delta[1])
-        elif self.isPanning:
-            # Old code
-            #mousePosition1 = [base.win.getPointer(0).getX(),base.win.getPointer(0).getY()]
-            #delta = [(mousePosition1[0]- self.mousePosition0[0])*0.005, (mousePosition1[1] - self.mousePosition0[1]) * 0.005]
-            #base.camera.setPos(base.camera.getPos()[0] + delta[0], base.camera.getPos()[1] - delta[1], base.camera.getPos()[2])
-            # New code
+        #elif self.isPanning:
+        elif base.mouseWatcherNode.hasMouse():
+            # If the mouse is outside the window, we skip
             mousePosition1 = [base.win.getPointer(0).getX(),base.win.getPointer(0).getY()]
+            mpos = base.mouseWatcherNode.getMouse() 
             moveX = False
             moveY = False
             delta = [0,0]
-            if mousePosition1[0] < self.mousePosition0[0]:
-                print "Left"
-                angleradiansX2 = base.camera.getH() * (math.pi / 180.0)+math.pi*0.5
-                delta[0] = (mousePosition1[0]+ self.mousePosition0[0])*0.00001*self.camDist
+            if mpos[0] < (-1 + self.panZoneSize):
+                #print "Left"
+                angleradiansX2 = base.camera.getH() * (math.pi / 180.0)-math.pi*0.5 
+                delta[0] = (1 + mpos[0] - self.panZoneSize) * (self.camDist / self.panRateDivisor) 
                 moveX = True
-            if mousePosition1[0] > self.mousePosition0[0]:
-                print "Right"
-                angleradiansX2 = base.camera.getH() * (math.pi / 180.0)-math.pi*0.5
-                delta[0] = (mousePosition1[0]+ self.mousePosition0[0])*0.00001*self.camDist
+            if mpos[0] > (1 - self.panZoneSize):
+                #print "Right"
+                angleradiansX2 = base.camera.getH() * (math.pi / 180.0)+math.pi*0.5 
+                delta[0] = (1 - mpos[0] - self.panZoneSize) * (self.camDist / self.panRateDivisor) 
                 moveX = True
-            if mousePosition1[1] > self.mousePosition0[1]:
-                print "Down"
-                angleradiansX1 = base.camera.getH() * (math.pi / 180.0)+math.pi
-                delta[1] = -(mousePosition1[1] + self.mousePosition0[1]) * 0.00001*self.camDist
+            if mpos[1] < (-1 + self.panZoneSize):
+                #print "Down"
+                angleradiansX1 = base.camera.getH() * (math.pi / 180.0)+math.pi 
+                delta[1] = (1 + mpos[1] - self.panZoneSize) * (self.camDist / self.panRateDivisor) 
                 moveY = True
-            if mousePosition1[1] < self.mousePosition0[1]:
-                print "Up"
-                angleradiansX1 = base.camera.getH() * (math.pi / 180.0)+math.pi
-                delta[1] = (mousePosition1[1] + self.mousePosition0[1]) * 0.00001*self.camDist
+            if mpos[1] > (1 - self.panZoneSize):
+                #print "Up"
+                angleradiansX1 = base.camera.getH() * (math.pi / 180.0) 
+                delta[1] = (1 - mpos[1] - self.panZoneSize) * (self.camDist / self.panRateDivisor) 
                 moveY = True
             if moveY:
                 tempX = self.target.getX()+math.sin(angleradiansX1)*delta[1]
@@ -626,8 +636,8 @@ class Camera(DirectObject.DirectObject):
                 maxX = tile.coords[0]
             if tile.coords[1] > maxY:
                 maxY = tile.coords[1]
-        self.panLimitsX = Vec2(minX-20, maxX + 20)
-        self.panLimitsY = Vec2(minY-20, maxY + 20)
+        self.panLimitsX = Vec2(minX, maxX)
+        self.panLimitsY = Vec2(minY, maxY)
         base.camera.setPos((minX+maxX)/2-10, (minY+maxY)/2-10, 70)
         base.camera.setHpr(30,-45,0)
         self.setTarget()
