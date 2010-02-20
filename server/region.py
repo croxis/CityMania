@@ -202,7 +202,7 @@ class Region(engine.Entity):
         container = proto.Container()
         if users.isAdmin(userName) or userName == city.mayor:
             container.enterCity = ident
-        elif users.canUser(ident, 'viewCity'):
+        elif users.canUser(userName, ident, 'viewCity'):
             container.enterCity = ident
         else:
             container.response = "You lack permission to enter city."
