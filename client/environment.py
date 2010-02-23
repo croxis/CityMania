@@ -239,15 +239,39 @@ class TerrainManager(DirectObject.DirectObject):
         root = self.terrain.getRoot()
         children = root.getChildren()
         keepBlocks = []
+        # Reset water dimentions
+        self.waterXMin = 0
+        self.waterXMax = 0
+        self.waterYMin = 0
+        self.waterYMax = 0
+        
         for tile in tiles:
             blockCoords = self.terrain.getBlockFromPos(tile.coords[0], tile.coords[1])
             block = self.terrain.getBlockNodePath(blockCoords[0], blockCoords[1])
             if block not in keepBlocks:
                 keepBlocks.append(block)
+        
+            if self.heightmap.getGrayVal(tile.coords[0], self.size-tile.coords[1]) < 62:
+                # Water card dimensions here
+                # Y axis flipped from texture space to world space
+                if not self.waterXMin:
+                    self.waterXMin = tile.coords[0]
+                if not self.waterYMin:
+                    self.waterYMin = tile.coords[1]
+                if tile.coords[1] > self.waterYMax:
+                    self.waterYMax = tile.coords[1]
+                if tile.coords[0] > self.waterXMax:
+                    self.waterXMax = tile.coords[0]
+                if tile.coords[0] < self.waterXMin:
+                    self.waterXMin = tile.coords[0]
+                if tile.coords[1] < self.waterYMin:
+                    self.waterYMin = tile.coords[1]
+        
         for child in children:
             if child not in keepBlocks:
                 child.detachNode()
         self.view = ident
+        self.generateWater(2)
     
     def newTerrainOverlay(self, task):
         root = self.terrain.getRoot()
@@ -355,7 +379,7 @@ class TerrainManager(DirectObject.DirectObject):
         return task.cont 
     
     def generateWater(self, style):
-        print "Generate Water"
+        print "Generate Water:", self.waterXMin, self.waterXMax, self.waterYMin,  self.waterYMax
         '''Generates water
         style 0: blue card
         style 1: reflective card

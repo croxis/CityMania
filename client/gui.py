@@ -17,9 +17,10 @@ from direct.task import Task
 from direct.gui.OnscreenText import OnscreenText
 #from panda3d.core import TextNode
 
-import pixelwindow as pw
+from directWindow import DirectWindow, MessageWindow
 sys.path.append("../..")
 import CityMania.common.protocol_pb2 as proto
+import CityMania.common.yaml as yaml
 import access
 
 class Picker(DirectObject.DirectObject):
@@ -126,9 +127,8 @@ class Script(object):
     Imports external language yaml docs into internal dict
     '''
     def __init__(self):
-        #self.database = {}
-        self.database = {'TXT_UI_ONLINE': {'english': 'Online'}, 'TXT_UI_QUIT': {'english': 'Quit'}, 'TXT_BUTTON_CLOSE': {'english': 'Close'}, 'TXT_UI_MAINMENUTITLE': {'english': 'City Mania'}, 'TXT_UI_LOGINMP': {'english': 'Multiplayer'}, 'TXT_TITLE_COFIRM_UNFOUND': {'english': 'Confirm City Unfounding'}, 'TXT_BUTTON_CONFIRM_UNFOUND': {'english': 'Confirm Unfounding'}, 'TXT_DELETE_CITY': {'english': 'Delete City'}, 'TXT_MAYOR_NAME': {'english': 'Mayor Name'}, 'TXT_UI_LOGINTITLE': {'english': 'Multiplayer'}, 'TXT_UI_NEWGAME': {'english': 'New Game'}, 'TXT_UI_OFFLINE': {'english': 'Offline'}, 'TXT_UI_OK': {'english': 'Ok'}, 'TXT_UNFOUND_CITY': {'english': 'Unfound City'}, 'TXT_ENTER_CITY': {'english': 'Enter City'}}
-        #self.loadText()
+        self.database = {}
+        self.loadText()
     
     def loadText(self):
         # Load database
@@ -160,7 +160,7 @@ class GUIController(DirectObject.DirectObject):
         """
         self.script = script
         #messenger.send('makePickable', [base.a2dBottomLeft])
-        
+        self.window = None
         self.language = language
         self.accept("onGetMaps", self.mapSelection)
         self.accept("finishedTerrainGen", self.regionGUI)
@@ -183,11 +183,15 @@ class GUIController(DirectObject.DirectObject):
         """
         Creates main menu
         """
-        print "Generating main menu"
-        self.mainMenu = pw.StandardWindow(title = self.script.getText("TXT_UI_MAINMENUTITLE"), center = True)
-        login = DirectButton(text= self.script.getText('TXT_UI_LOGINMP', self.language), command=self.loginMP)
-        closeButton = DirectButton( text='Quit',  command=self.quit)
+        if self.window:
+            self.window.destroy()
+            self.window = None
+        self.mainMenu = DirectWindow(title = self.getText("TXT_UI_MAINMENUTITLE"))
+        login = DirectButton(text= self.getText('TXT_UI_LOGINMP'), command=self.loginMP)
+        closeButton = DirectButton( text='Quit',  command=lambda : messenger.send('exit'))
         self.mainMenu.addVertical([login, closeButton])
+        self.mainMenu.reset()
+        self.mainMenu.center()
 
     def newGame(self):
         self.mainMenu.destroy()
@@ -195,25 +199,21 @@ class GUIController(DirectObject.DirectObject):
     
     def loginMP(self):
         self.mainMenu.destroy()
-        self.loginDialog = pw.StandardWindow(title = self.script.getText("TXT_UI_LOGINTITLE"), center = True)
+        self.window = DirectWindow(title = self.getText("TXT_UI_LOGINTITLE"))
         hostEntry = DirectEntry(initialText="croxis.dyndns.org")
-        userNameEntry = DirectEntry(initialText = self.script.getText('TXT_MAYOR_NAME', self.language))
+        userNameEntry = DirectEntry(initialText = self.getText('TXT_MAYOR_NAME'))
         userPasswordEntry = DirectEntry(initialText="Password", obscured=True)
-        okButton = DirectButton(text = self.script.getText('TXT_UI_OK', self.language), command = self.login)
-        closeButton = DirectButton(text='Back', command=self.loginDialog.destroy)
-        self.loginDialog.addVertical([hostEntry,userNameEntry,userPasswordEntry])
-        self.loginDialog.addHorizontal([okButton, closeButton])
-        
-    def quit(self):
-        self.mainMenu.destroy()
-        messenger.send('exit')
+        okButton = DirectButton(text = self.getText('TXT_UI_OK'), command = self.login)
+        closeButton = DirectButton(text='Back', command=self.makeMainMenu)
+        self.window.addVertical([hostEntry,userNameEntry,userPasswordEntry])
+        self.window.addHorizontal([okButton, closeButton])
     
     def login(self):
         """
         Collects login information from gui and fires message to login
         """
-        info = self.loginDialog.getEntries()
-        self.loginDialog.destroy()
+        info = self.window.getEntries()
+        self.window.destroy()
         # Password will never make it out of here unscrambled!
         import hashlib
         password = info.pop(-1)
@@ -226,7 +226,7 @@ class GUIController(DirectObject.DirectObject):
         Generate a window with list and thumbnails of region maps availiable.
         Provide two options, load map or, if there is no local version, save local version
         """
-        self.mapDialog = pw.StandardWindow(title = "Select Map", center = True)
+        self.mapDialog = DirectWindow(title = "Select Map")
         mapList = []
         m = [""]
         import base64
@@ -265,7 +265,7 @@ class GUIController(DirectObject.DirectObject):
         '''Generates GUI for region view interface'''
         self.text.destroy()
         #self.loginDialog = pw.StandardWindow(title = self.script.getText("TXT_UI_REGIONTITLE"), center = True)
-        self.regionWindow = pw.StandardWindow(title = "Region_Name", center = True)
+        self.regionWindow = DirectWindow(title = "Region_Name")
         self.v = [0]
         #buttons = [
         #    DirectRadioButton(text = "Normal View", variable=self.v, value=[0], command=self.sendRegionMessage),
@@ -296,9 +296,9 @@ class GUIController(DirectObject.DirectObject):
     
     def foundCityName(self, position):
         self.text.destroy()
-        self.name_city_window = pw.StandardWindow(title = "name_city", center = True)
+        self.name_city_window = DirectWindow(title = "name_city")
         cityNameEntry = DirectEntry(initialText = "city_name")
-        okButton = DirectButton(text = self.script.getText('TXT_UI_OK', self.language), command = self.foundCity, extraArgs=[position])
+        okButton = DirectButton(text = self.getText('TXT_UI_OK'), command = self.foundCity, extraArgs=[position])
         self.name_city_window.addVertical([cityNameEntry, okButton])
     
     def foundCity(self, position):
@@ -313,10 +313,10 @@ class GUIController(DirectObject.DirectObject):
     
     def newCityResponse(self, info):
         if not info.type:
-            message = pw.MessageWindow(text="City can not be founded. "+ info.message, title="Oh noes!")
+            message = MessageWindow(text="City can not be founded. "+ info.message, title="Oh noes!")
             messenger.send("regionView_foundNew")
         else:
-            message = pw.MessageWindow(text="Your city has been founded! Awesome!")
+            message = MessageWindow(text="Your city has been founded! Awesome!")
             messenger.send("regionView_normal")
     
     def makeChatWindow(self):
@@ -340,14 +340,14 @@ class GUIController(DirectObject.DirectObject):
     
     def debug(self):
         '''Generates on screen text for debug functions.'''
-        text = "w: toggles wireframe\nt: toggles texture\ns: take snapshot\nh: switch water"
+        text = "f: toggles wireframe\nt: toggles texture\nh: switch water"
         OnscreenText(text = text, pos = (-1.0, 0.9), scale = 0.07)
     
     def regionCityWindow(self, ident, city):
         '''Generates window displaying city stats and options.'''
         #print "Access username and level", access.username, access.level
         #TODO: Once the city view is created we need to inform the client if they even have viewing rights
-        self.cityInfoWindow = pw.StandardWindow(title = city['name'], center = True)
+        self.cityInfoWindow = DirectWindow(title = city['name'])
         buttons =[]
         enterButton = DirectButton(text = self.script.getText('TXT_ENTER_CITY', self.language), command = self.enterCity, extraArgs=[ident])
         buttons.append(enterButton)
@@ -366,7 +366,7 @@ class GUIController(DirectObject.DirectObject):
         messenger.send("sendData", [container])
         
     def confirmUnfoundCity(self, ident, cityWindow):
-        window = pw.StandardWindow(title = self.getText("TXT_TITLE_COFIRM_UNFOUND"), center=True)
+        window = DirectWindow(title = self.getText("TXT_TITLE_COFIRM_UNFOUND"))
         okButton = DirectButton(text = self.getText("TXT_BUTTON_CONFIRM_UNFOUND"), command = self.unfoundCity, extraArgs = [ident, window, cityWindow])
         closeButton = DirectButton(text = self.getText('TXT_BUTTON_CLOSE'), command = self.closeWindow, extraArgs=[window])
         window.addHorizontal([okButton, closeButton])
@@ -450,6 +450,10 @@ class Camera(DirectObject.DirectObject):
         #self.accept('mouse3-up', self.rightMouseUp, [])
         self.accept("wheel_up",lambda : self.adjustCamDist(0.9))
         self.accept("wheel_down",lambda : self.adjustCamDist(1.1))
+        self.accept('camera-up', self.panY, ['up'])
+        self.accept('camera-down', self.panY, ['down'])
+        self.accept('camera-left', self.panX, ['left'])
+        self.accept('camera-right', self.panX, ['right'])
         
         taskMgr.add(self.update,"updateCameraTask")
     
@@ -546,6 +550,38 @@ class Camera(DirectObject.DirectObject):
                 self.turnCameraAroundPoint(0,0)
                 
         return Task.cont
+    
+    def panX(self, direction):
+        delta = 0
+        if direction == 'left':
+            angleradiansX2 = base.camera.getH() * (math.pi / 180.0)-math.pi*0.5 
+            delta =  -self.panZoneSize * (self.camDist / self.panRateDivisor) 
+        if direction == 'right':
+            angleradiansX2 = base.camera.getH() * (math.pi / 180.0)+math.pi*0.5 
+            delta = -self.panZoneSize * (self.camDist / self.panRateDivisor) 
+        tempX = self.target.getX()-math.sin(angleradiansX2)*delta
+        tempX = self.clamp(tempX, self.panLimitsX.getX(), self.panLimitsX.getY())
+        self.target.setX(tempX)
+        tempY = self.target.getY()+math.cos(angleradiansX2)*delta
+        tempY = self.clamp(tempY, self.panLimitsY.getX(), self.panLimitsY.getY())
+        self.target.setY(tempY)
+        self.turnCameraAroundPoint(0,0)
+    
+    def panY(self, direction):
+        delta = 0
+        if direction == 'down':
+            angleradiansX1 = base.camera.getH() * (math.pi / 180.0)+math.pi 
+            delta = -self.panZoneSize * (self.camDist / self.panRateDivisor) 
+        if direction == 'up':
+            angleradiansX1 = base.camera.getH() * (math.pi / 180.0) 
+            delta = -self.panZoneSize * (self.camDist / self.panRateDivisor) 
+        tempX = self.target.getX()+math.sin(angleradiansX1)*delta
+        tempX = self.clamp(tempX, self.panLimitsX.getX(), self.panLimitsX.getY())
+        self.target.setX(tempX)
+        tempY = self.target.getY()-math.cos(angleradiansX1)*delta
+        tempY = self.clamp(tempY, self.panLimitsY.getX(), self.panLimitsY.getY())
+        self.target.setY(tempY)
+        self.turnCameraAroundPoint(0,0)
     
     def turnCameraAroundPoint(self,deltaX,deltaY):
         # This function performs two important tasks. First, it is used for the camera orbital movement.

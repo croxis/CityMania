@@ -46,6 +46,9 @@ import region
 import water
 import access
 import environment
+import controllers
+from direct.directnotify.DirectNotify import DirectNotify
+notify = DirectNotify().newCategory("main")
 
 picker = gui.getPicker()
 
@@ -71,9 +74,9 @@ class World(DirectObject.DirectObject):
     
     def keys(self):
         """keys"""
-        base.accept("w", base.toggleWireframe)
+        base.accept("f", base.toggleWireframe)
         self.accept('t',self.toggleTexture)
-        self.accept('s',self.snapShot)
+        #self.accept('s',self.snapShot)
     
     def snapShot(self):
         base.screenshot("Snapshot")
@@ -100,6 +103,7 @@ class Logger(object):
     def __init__(self):
         self.terminal = sys.stdout
         self.log = open("client.raw", "w")
+        notify.info('Log file initiated')
 
     def write(self, message):
         self.terminal.write(message)
@@ -138,6 +142,7 @@ def main(var = None):
     serverHost = 'localhost'
     serverPort = 52003
     reg = region.Region()
+    kmcontroller = controllers.KMController()
     run()
 
 if __name__ == '__main__':

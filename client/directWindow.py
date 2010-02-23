@@ -1,8 +1,13 @@
+# -*- coding: utf-8 -*-
 from pandac.PandaModules import TextNode, Vec3
-from direct.gui.DirectGui import DirectFrame,DirectButton,DirectScrolledFrame,DGG
+from direct.gui.DirectGui import DirectFrame,DirectButton,DirectScrolledFrame,DGG,DirectLabel, DirectEntry
+import boxes
+import direct.directbase.DirectStart
 
-#import direct.directbase.DirectStart
-import layout
+#from direct.gui.DirectGui import DirectLabel, DirectEntry
+#from panda3d.core import Point3
+
+
 # a task that keeps a node at the position of the mouse-cursor
 def mouseNodeTask( task ):
   if base.mouseWatcherNode.hasMouse():
@@ -37,10 +42,10 @@ class DirectWindow( DirectFrame ):
   def __init__( self,
                 pos              = ( -.5, .5),
                 title            = 'Title',
-                curSize          = ( 1, 1),
+                curSize          = ( 0.5, 0.5),
                 maxSize          = ( 1, 1 ),
                 minSize          = ( .5, .5 ),
-                backgroundColor  = ( 1, 1, 1, 1 ),
+                backgroundColor = ( 0, 0, 1, .6),
                 borderColor      = ( 1, 1, 1, 1 ),
                 titleColor       = ( 1, 1, 1, 1 ),
                 borderSize       = 0.04,
@@ -119,11 +124,10 @@ class DirectWindow( DirectFrame ):
     self.maxVirtualSize = maxSize
     self.minVirtualSize = minSize
     self.resizeSize     = borderSize
-    #self.contentWindow = DirectScrolledFrame(
-    self.contentWindow = layout.VBox(
+    self.contentWindow = DirectScrolledFrame(
         parent                                  = self,
         pos                                     = ( 0, 0, -self.headerHeight ),
-        canvasSize                              = ( 0, self.maxVirtualSize[0], 0, self.maxVirtualSize[1] ),
+        canvasSize                              = ( 0, self.maxVirtualSize[0], -self.maxVirtualSize[1],  0),
         frameColor                              = ( 0, 0, 0, 0), # defines the background color of the resize-button
         relief                                  = DGG.FLAT,
         borderWidth                             = (0, 0),
@@ -161,18 +165,20 @@ class DirectWindow( DirectFrame ):
         horizontalScroll_decButton_frameColor   = borderColor,
         horizontalScroll_thumb_frameColor       = borderColor,
       )
-    #self.contentWindow = layout.VBox()
     self.contentWindow.setTransparency(True)
     
     # background color
     self.backgroundColor = DirectFrame(
         parent       = self.contentWindow.getCanvas(),
-        frameSize    = ( 0, self.maxVirtualSize[0], 0, self.maxVirtualSize[1] ),
+        frameSize    = ( 0, self.maxVirtualSize[0], -self.maxVirtualSize[1], 0 ),
         frameColor   = backgroundColor,
         relief       = DGG.FLAT,
         borderWidth  = ( .01, .01),
       )
     self.backgroundColor.setTransparency(True)
+    
+    # Add a box
+    self.box = boxes.VBox(parent = self.getCanvas())
     
     # is needed for some nicer visuals of the resize button (background)
     self.windowResizeBackground = DirectButton(
@@ -207,6 +213,7 @@ class DirectWindow( DirectFrame ):
     # maximum
     #self.resize( Vec3(100,0,-100), Vec3(0,0,0) )
     self.resize( Vec3(curSize[0], 0, -curSize[1]), Vec3(0,0,0))
+    self.widgets = []
   
   def getCanvas(self):
     return self.contentWindow.getCanvas()
@@ -255,28 +262,81 @@ class DirectWindow( DirectFrame ):
     taskMgr.remove( self.taskName )
     # get the window to the front
     self.wrtReparentTo( aspect2d )
+
   def addHorizontal(self, widgets):
-    """Accepts a list of directgui objects which are added to a horizontal box, which is then added to the vertical stack.
-    """
-    hbox = layout.HBox(parent = self)
-    for widget in widgets:
-      #self.processWidget(widget)
-      hbox.pack(widget)
-      #self.widgets.append(widget)
-    self.contentWindow.pack(hbox)
+      """
+      Accepts a list of directgui objects which are added to a horizontal box, which is then added to the vertical stack.
+      """
+      hbox = boxes.HBox()
+      for widget in widgets:
+          widget.setScale(0.05)
+          hbox.pack(widget)
+          self.widgets.append(widget)
+      self.box.pack(hbox)
+      self.updateMaxSize()
+  
   def addVertical(self, widgets):
-    """Accepts a list of directgui objects which are added to a vertical box, which is then added to the vertical stack.
-    May cause funky layout results.
+      """
+      Accepts a list of directgui objects which are added to a vertical box, which is then added to the vertical stack.
+      May cause funky layout results.
+      """
+      for widget in widgets:
+          widget.setScale(0.05)
+          self.box.pack(widget)
+          self.widgets.append(widget)
+      self.updateMaxSize()
+  
+  def add(self, widgets):
+      """Shortcut function for addVertical"""
+      self.addVertical(widgets)
+  
+  def updateMaxSize(self):
+      """Updates the max canvas size to include all items packed.
+      Window is resized to show all contents."""
+      bottomLeft, topRight = self.box.getTightBounds()
+      self.maxVirtualSize = (topRight[0], -bottomLeft[2])
+      if self.minVirtualSize[0] > self.maxVirtualSize[0]:
+          self.minVirtualSize = (self.maxVirtualSize[0], self.minVirtualSize[1])
+      if self.minVirtualSize[1] > self.maxVirtualSize[1]:
+          self.minVirtualSize = (self.minVirtualSize[0], self.maxVirtualSize[1]+self.headerHeight)
+      self.contentWindow['canvasSize'] = ( 0, self.maxVirtualSize[0], -self.maxVirtualSize[1],  0)
+      self.backgroundColor['frameSize'] = ( 0, self.maxVirtualSize[0], -self.maxVirtualSize[1], 0 )
+      # For CityMania Onlue
+      self.reset()
+      self.center()
+  
+  def reset(self):
+    """Poorly named function that resizes window to fit all contents"""
+    self.resize( Vec3(self.maxVirtualSize[0], 0, -self.maxVirtualSize[1]), Vec3(0,0,0))
+
+  def center(self):
+      """Centers window on screen"""
+      self.setPos(-self.maxVirtualSize[0]/2.0, 0, (self.maxVirtualSize[1]+self.headerHeight)/2.0)
+  
+  def getEntries(self):
+        """Returns the fields for any entires"""
+        entries = []
+        for widget in self.widgets:
+            if isinstance(widget, DirectEntry):
+                entries.append(widget.get())
+        return entries
+
+
+class MessageWindow(DirectWindow):
     """
-    vbox = layout.VBox(parent=self)
-    for widget in widgets:
-      #self.processWidget(widget)
-       vbox.pack(widget)
-       #self.widgets.append(widget)
-    self.contentWindow.pack(vbox)
-
-
-
+    Generates a "simple" dialogue window with text and an ok button to close.
+    A custom button can be passed instead
+    """
+    def __init__(self, text, button=None, **args):
+        DirectWindow.__init__(self, **args)
+        self.initialiseoptions(self)
+        textBox = DirectLabel(text = text, scale=0.05)
+        if not button:
+            button = DirectButton(text = "OK", command = self.destroy, scale=0.05)
+        self.add([textBox, button])
+        self.reset()
+        self.center()
+        
 
 if __name__ == '__main__':
   # a first window
@@ -289,46 +349,37 @@ if __name__ == '__main__':
       titleSize       = 0.1,
       borderSize      = 0.1,
     )
-  windowContent = DirectButton(
-      parent     = window1.getCanvas(),
-      pos        = (.05,0,.05),
-      frameSize  = (0,.9,0,.9),
-      relief     = DGG.FLAT,
-      frameColor = (0,1,0,1),
-    )
+  windowContent = DirectButton(text = "Button1", scale=0.5, relief     = DGG.FLAT, frameColor = (0,1,0,1),)
+  windowContent2 = DirectButton(text = "B2", scale=0.5, relief     = DGG.FLAT, frameColor = (0,1,0,1),)
+  window1.addVertical([windowContent, windowContent2])
   
   # a second window
   window2 = DirectWindow(
       title            = 'window2',
       pos              = ( -.4, .4),
-      maxSize          = (1.5,1.5),
-      minSize          = (.25,.25),
-      curSize          = (1.5,0.5),
       backgroundColor  = (1,0,0,1),
     )
-  windowContent = DirectButton(
-      parent     = window2.getCanvas(),
-      pos        = (.6,0,.6),
-      frameSize  = (-.5,.5,-.5,.5),
-      relief     = DGG.FLAT,
-      frameColor = (0,1,1,1),
-    )
+  windowContent = DirectLabel(text = 'Label1   ', frameColor = (0,1,1,1), scale=0.1)
+  windowContent2 = DirectLabel(text = 'L2', frameColor = (0,1,1,1), scale=0.1)
+  window2.addHorizontal([windowContent, windowContent2])
   
-  # a second window with a close button
+  # a third window with a close button featuring autoresize
   window3 = DirectWindow(
       title='window3',
       pos = ( 0, 0),
       closeButton=True
     )
   windowContent = DirectButton(
-      parent     = window3.getCanvas(),
-      pos        = (.5,0,.5),
-      frameSize  = (-.5,.5,-.5,.5),
+      text = "Press 1 to close me",
       relief     = DGG.FLAT,
       frameColor = (0,1,1,1),
-      scale      = 0.5,
+      scale      = 0.05,
     )
+  window3.add([windowContent])
+  window3.reset()
   
-  #base.accept('1', window3.destroy)
+  base.accept('1', window3.destroy)
   
-  #run()
+  window4 = MessageWindow(title="message", text="testing")
+  
+  run()

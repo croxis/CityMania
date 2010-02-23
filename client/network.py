@@ -36,7 +36,11 @@ class ServerSocket(DirectObject.DirectObject):
         """
         connects with the server
         """
-        self.s.connect((host, 52003))
+        try:
+            self.s.connect((host, 52003))
+        except:
+            messenger.send('disconnected', ['Unable to connect to server.'])
+            return
         self.s.setblocking(0)
         ##self.s.settimeout(1)
         self.peer = self.s.getpeername()
