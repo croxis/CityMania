@@ -47,6 +47,7 @@ import water
 import access
 import environment
 import controllers
+import camera
 from direct.directnotify.DirectNotify import DirectNotify
 notify = DirectNotify().newCategory("main")
 
@@ -95,7 +96,7 @@ class World(DirectObject.DirectObject):
         access.username = name
     
     def setupRig(self, size):
-        camera = gui.Camera(size, self.terrainManager.terrain)
+        cam = camera.Camera(size, self.terrainManager.terrain)
         sky = environment.SkyManager()
         
 
@@ -135,8 +136,6 @@ def main(var = None):
     #audioManager = Audio.AudioManager()
 
     world=World()
-    #camera = gui.Camera()
-    #camera = gui.CameraHandler()
     guiController = gui.GUIController(script)
     guiController.makeMainMenu()
     serverHost = 'localhost'
