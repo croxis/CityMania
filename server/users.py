@@ -54,7 +54,7 @@ class User(object):
             self.permissions[city]
         self.permissions[city][parameter] = flag
     
-    def canUser(self, city, parameter, flag):
+    def canUser(self, city, parameter):
         if city not in self.permissions:
             return False
         if parameter not in self.permissions[city]:
