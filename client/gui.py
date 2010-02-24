@@ -4,12 +4,14 @@ Classes and functions for the user interface
 '''
 #from pandac.PandaModules import *
 from panda3d.core import CollisionTraverser, CollisionHandlerQueue, CollisionNode, CollisionRay, GeomNode
-from panda3d.core import NodePath, TextNode
+from panda3d.core import NodePath, TextNode, PNMImage, StringStream, Texture
 from direct.gui.OnscreenText import OnscreenText
 from direct.showbase import DirectObject
 from direct.gui.DirectGui import *
 from direct.interval.IntervalGlobal import *
 from direct.stdpy.file import *
+
+from panda3d.core import VirtualFileSystem
 
 import sys
 #import yaml
@@ -135,11 +137,12 @@ class Script(object):
     
     def loadText(self):
         # Load database
-        from panda3d.core import VirtualFileSystem
-        from panda3d.core import DSearchPath
-        results = DSearchPath.Results()
         vfs = VirtualFileSystem.getGlobalPtr()
-        stream = vfs.readFile('TXT_UI_Common.yaml', True)
+        #print "Virtual fs" ,vfs.lsAll('/mf')
+        path = vfs.findFile('TXT_UI_Common.yaml', '.')
+        if not path:
+            path = vfs.findFile('TXT_UI_Common.yaml', '/mf')
+        stream = vfs.readFile(path.getFilename(), True)
         textDictionary = yaml.load(stream)
         for key in textDictionary:
             self.database[key] = textDictionary[key]
@@ -403,8 +406,9 @@ class GUIController(DirectObject.DirectObject):
     def disconnected(self, reason):
         render.removeChildren()
         base.aspect2d.removeChildren()
-        message = MessageWindow(title="You have been disconnected :(", text="Reason: %s" %reason)
         self.makeMainMenu()
+        message = MessageWindow(title="You have been disconnected :(", text="Reason: %s" %reason)
+        
 
 
 picker = Picker()

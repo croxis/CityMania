@@ -116,6 +116,7 @@ class Mixin_DirectGuiFix():
 mixin(DirectLabel,Mixin_DirectGuiFix)
 mixin(DirectEntry,Mixin_DirectGuiFix)
 mixin(DirectButton,Mixin_DirectGuiFix)
+mixin(DirectScrolledList, Mixin_DirectGuiFix)
 
 # FIXME: I don't see any point in Box inheriting from DirectFrame
 # anymore and it's starting to get in the way (e.g. Box can't emulate a

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from pandac.PandaModules import TextNode, Vec3
-from direct.gui.DirectGui import DirectFrame,DirectButton,DirectScrolledFrame,DGG,DirectLabel, DirectEntry
+from direct.gui.DirectGui import DirectFrame,DirectButton,DirectScrolledFrame,DGG,DirectLabel, DirectEntry, DirectScrolledList
 import boxes
 import direct.directbase.DirectStart
 
@@ -320,6 +320,28 @@ class DirectWindow( DirectFrame ):
             if isinstance(widget, DirectEntry):
                 entries.append(widget.get())
         return entries
+
+  def addScrolledList(self, items):
+        '''Adds a list of items into a scrolled list'''
+        scrolled_list = DirectScrolledList(
+            decButton_pos= (0.35, 0, 1),
+            decButton_text = "Dec",
+            decButton_borderWidth = (0.005, 0.005),
+            incButton_pos= (0.35, 0, -1),
+            incButton_text = "Inc",
+            incButton_borderWidth = (0.005, 0.005),
+            #frameSize = (0.0, 0.7, -0.05, 0.59),
+            frameColor = (1,0,0,0.5),
+            #pos = (-1, 0, 0),
+            itemFrame_frameSize = (-0.2, 0.2, -0.37, 0.11),
+            itemFrame_pos = (0.35, 0, 0.4),
+            scale = (0.05),
+            parent = (aspect2d)
+            )
+        for widget in items:
+            #widget.setScale(0.05)
+            scrolled_list.addItem(widget)
+        self.add([scrolled_list])
 
 
 class MessageWindow(DirectWindow):
