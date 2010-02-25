@@ -95,16 +95,24 @@ class Camera(DirectObject.DirectObject):
         The distFactor input controls the amount of camera movement.
         For example, inputing 0.9 will set the camera to 90% of it's previous distance.
         '''
-        self.camDist=self.camDist*distFactor
-        point = picker.getMiddle()
+        #self.camDist=self.camDist*distFactor
+        #point = picker.getMiddle()
         # In case we zoom out too far we prevent odd behavior 
-        if point is None: return
+        #if point is None: return
         # Strategic zoom in for now
-        if distFactor < 1:
-            self.target.setX(point[0])
-            self.target.setY(point[1])
-        self.turnCameraAroundPoint(0,0)
+        #if distFactor < 1:
+        #    self.target.setX(point[0])
+        #    self.target.setY(point[1])
+        #self.turnCameraAroundPoint(0,0)
         # Calls turnCameraAroundPoint with 0s for the rotation to reset the camera to the new position.
+        terrainCoords = picker.getCoords()
+        if not terrainCoords: return
+        terrainCoords.setZ(terrainCoords[2]*self.terrain.getRoot().getSz())
+        vector = base.camera.getPos() - terrainCoords
+        newPos = terrainCoords + (vector*distFactor)
+        base.camera.setPos(newPos)
+        self.setTarget()
+        #self.turnCameraAroundPoint(0,0)
     
     def update(self, task):
         #print "Old Camera:", base.win.getPointer(0).getX(), base.win.getPointer(0).getY()
@@ -112,12 +120,9 @@ class Camera(DirectObject.DirectObject):
         if self.isOrbiting:
             # Checks to see if the camera is in orbiting mode. Orbiting mode overrides panning, because it would be problematic if, while
             # orbiting the camera the mouse came close to the screen edge and started panning the camera at the same time.
-            #mpos = base.mouseWatcherNode.getMouse()
-            #self.turnCameraAroundPoint((self.mx-mpos.getX())*100,(self.my-mpos.getY())*100)  
             mousePosition1=[base.win.getPointer(0).getX(),base.win.getPointer(0).getY()]
             delta = [(mousePosition1[0]- self.mousePosition0[0])*0.005, (mousePosition1[1] - self.mousePosition0[1]) * 0.005]
             self.turnCameraAroundPoint(delta[0], delta[1])
-        #elif self.isPanning:
         elif base.mouseWatcherNode.hasMouse():
             # If the mouse is outside the window, we skip
             mousePosition1 = [base.win.getPointer(0).getX(),base.win.getPointer(0).getY()]
@@ -145,6 +150,8 @@ class Camera(DirectObject.DirectObject):
                 angleradiansX1 = base.camera.getH() * (math.pi / 180.0) 
                 delta[1] = (1 - mpos[1] - self.panZoneSize) * (self.camDist / self.panRateDivisor) 
                 moveY = True
+            if moveX or moveY:
+                self.setTarget()
             if moveY:
                 tempX = self.target.getX()+math.sin(angleradiansX1)*delta[1]
                 tempX = self.clamp(tempX, self.panLimitsX.getX(), self.panLimitsX.getY())
@@ -161,7 +168,7 @@ class Camera(DirectObject.DirectObject):
                 tempY = self.clamp(tempY, self.panLimitsY.getX(), self.panLimitsY.getY())
                 self.target.setY(tempY)
                 self.turnCameraAroundPoint(0,0)
-                
+        
         return Task.cont
     
     def panX(self, direction):
@@ -208,7 +215,6 @@ class Camera(DirectObject.DirectObject):
         
         camHpr=base.camera.getHpr()
         # Creates a container for the current HPR of the camera and stores those values.
-        
         newCamHpr.setX(camHpr.getX()+deltaX)
         newCamHpr.setY(self.clamp(camHpr.getY()-deltaY, -85, 20))
         newCamHpr.setZ(camHpr.getZ())
@@ -222,19 +228,17 @@ class Camera(DirectObject.DirectObject):
         angleradiansX = newCamHpr.getX() * (math.pi / 180.0)
         angleradiansY = newCamHpr.getY() * (math.pi / 180.0)
         # Generates values to be used in the math that will calculate the new position of the camera.
-        
         newCamPos.setX(self.camDist*math.sin(angleradiansX)*math.cos(angleradiansY)+self.target.getX())
         newCamPos.setY(-self.camDist*math.cos(angleradiansX)*math.cos(angleradiansY)+self.target.getY())
         newCamPos.setZ(-self.camDist*math.sin(angleradiansY)+self.target.getZ())
-        
         # Check elevation and make sure we are not below terrain or water line
         pos = base.camera.getPos()
         root = self.terrain.getRoot()
         elevation = self.terrain.getElevation(pos[0], pos[1]) * root.getSz()
         # Factor is height we want above terrain
-        factor = 1
-        if elevation < 22 + factor:
-            newCamPos.setZ(61 + factor)
+        factor = 2
+        if base.camera.getPos().getZ() < 22 + factor:
+            newCamPos.setZ(22 + factor)
         elif newCamPos.getZ() < elevation + factor:
             newCamPos.setZ(elevation + factor)            
         
@@ -257,6 +261,7 @@ class Camera(DirectObject.DirectObject):
         # returns the clamped value
     
     def setTarget(self):
+        '''Sets target'''
         target = picker.getCenterCoords()
         if target:
             x, y, z = target
@@ -267,6 +272,12 @@ class Camera(DirectObject.DirectObject):
             self.target.setY(y)
             self.target.setZ(z*100)
             # Stores the new target position values in the target variable. The x and y values are clamped to the pan limits.
+            self.setDist()
+    
+    def setDist(self):
+        '''Sets the camDist variable'''
+        diff = base.camera.getPos() - self.target
+        self.camDist = math.sqrt(diff.getX()**2 + diff.getY()**2 + diff.getZ()**2)
     
     def enterCity(self, ident, city, position, tiles):
         '''Adjust camera parameters to city view.'''
