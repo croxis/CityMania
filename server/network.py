@@ -116,6 +116,9 @@ class Network(engine.Entity, threading.Thread):
         """
         Sends data to a specific client
         """
+        if peer not in self.clients:
+            logger.critical("%s not in client list! Attempting to send: %s" %(peer, data))
+            return
         self.clients[peer].send(data)
     
     def exit(self):

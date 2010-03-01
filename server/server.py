@@ -169,7 +169,7 @@ commandProcessor = CommandProcessor()
 # Set up logging
 import logging
 logger = logging.getLogger('server')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 stream = logging.StreamHandler()
 formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
 stream.setFormatter(formatter)
