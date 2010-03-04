@@ -3,12 +3,12 @@
 Classes responsible for environment such as terrain, lighting, skyboxes, etc.
 '''
 from direct.showbase import DirectObject
-#from panda3d.core import AmbientLight, DirectionalLight, VBase4
+from panda3d.core import AmbientLight, DirectionalLight, VBase4
 # For TerrainManager
-#from panda3d.core import CardMaker, NodePath, GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, Vec4, VBase3D, Texture
-#from panda3d.core import CardMaker, TransparencyAttrib, BitMask32, Plane, Point3, PlaneNode, CullFaceAttrib
+from panda3d.core import NodePath, GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, Vec4, VBase3D, Texture
+from panda3d.core import CardMaker, TransparencyAttrib, BitMask32, Plane, Point3, PlaneNode, CullFaceAttrib
 
-from pandac.PandaModules import AmbientLight, DirectionalLight, VBase4, CardMaker, NodePath, GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, Vec4, VBase3D, Texture, CardMaker, TransparencyAttrib, BitMask32, Plane, Point3, PlaneNode, CullFaceAttrib
+#from pandac.PandaModules import AmbientLight, DirectionalLight, VBase4, CardMaker, NodePath, GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, Vec4, VBase3D, Texture, CardMaker, TransparencyAttrib, BitMask32, Plane, Point3, PlaneNode, CullFaceAttrib
 
 import gui
 import water
@@ -47,10 +47,16 @@ class SkyManager(DirectObject.DirectObject):
 
 class TerrainManager(DirectObject.DirectObject):
     def __init__(self):
+        '''self.terrains =  [Geomipterrain,]
+        self.heightmap  =   master heightmap'''
         self.accept("mouse1", self.lclick)
         self.waterType = 2
         self.water = None
         self.citycolors = {0: VBase3D(1, 1, 1)}
+        
+        self.terrains = []
+        self.heightMap = None
+        
         self.accept("h", self.switchWater)
         
         self.accept('generateRegion', self.generateWorld)
@@ -78,13 +84,39 @@ class TerrainManager(DirectObject.DirectObject):
         self.generateWater(self.waterType)
     
     def generateWorld(self, heightmap, tiles, cities, container):
+        '''Generates, or regenerates, entire region terrain.
+        This should really only be done upon successgful connection to server.
+        1 heightmap px = 5 m
+        1 geomip block is 64x64
+        1 geomipterrain is 2 block by 2 blocks
+        Heightmap must be n + 1, where n is divisible by 128'''
         self.heightmap = heightmap
-        self.terrain = GeoMipTerrain("surface")
-        self.terrain.setHeightfield(self.heightmap)
-        #self.terrain.setFocalPoint(base.camera)
-        self.terrain.setBruteforce(True)
-        self.terrain.setBlockSize(32)
-        self.terrain.generate()
+        self.terrain = NodePath("surface")
+        self.terrain.reparentTo(render)
+        
+        # Breaking master heightmap into 129x129 subimages
+        heightmaps = []
+        xchunks = (self.heightmap.getXSize()-1)/128
+        ychunks = (self.heightmap.getYSize()-1)/128
+        for y in range(0, ychunks):
+            for x in range(0, xchunks):
+                heightmap = PNMImage(129, 129)
+                heightmap.copySubImage(self.heightmap, x*128, y*128)
+                heightmaps.append(heightmap)
+        
+        # Generate GeoMipTerrains
+        node = 0
+        for heightmap in heightmaps:
+            terrain = GeoMipTerrain(str(node))
+            node += 1
+            self.terrain.setHeightfield(heightmap)
+            terrain.setBruteforce(True)
+            terrain.setBlockSize(64)
+            terrain.generate()
+            
+                
+        
+        ### Old code ###
 
         root = self.terrain.getRoot()
         root.reparentTo(render)
