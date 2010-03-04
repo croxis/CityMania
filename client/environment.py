@@ -53,7 +53,7 @@ class TerrainManager(DirectObject.DirectObject):
         self.waterType = 2
         self.water = None
         self.citycolors = {0: VBase3D(1, 1, 1)}
-        
+        self.size = (0,0)
         self.terrains = []
         self.heightMap = None
         
@@ -93,52 +93,147 @@ class TerrainManager(DirectObject.DirectObject):
         self.heightmap = heightmap
         self.terrain = NodePath("surface")
         self.terrain.reparentTo(render)
+        self.size = ((self.heightmap.getXSize()-1)*5, (self.heightmap.getYSize()-1)*5)
+        self.heightmap.write('heightmap.png')
+        
+        # Generate water coordinates
+        self.waterXMin, self.waterXMax, self.waterYMin, self.waterYMax = 0,0,0,0
+        for x in range(0, self.heightmap.getXSize()-1):
+            for y in range(0, self.heightmap.getYSize()-1):
+                # Beach. Estimations from http://www.simtropolis.com/omnibus/index.cfm/Main.SimCity_4.Custom_Content.Custom_Terrains_and_Using_USGS_Data
+                if heightmap.getGrayVal(x,y) < 62:
+                    # Water card dimensions here
+                    # Y axis flipped from texture space to world space
+                    if not self.waterXMin:
+                        self.waterXMin = x*5
+                    if not self.waterYMax:
+                        self.waterYMax = y*5
+                    if y < self.waterYMax:
+                        self.waterYMax = y*5
+                    if x > self.waterXMax:
+                        self.waterXMax = x*5
+                    if y > self.waterYMin:
+                        self.waterYMin = y*5
+        # Transform y coords
+        self.waterYMin = self.size[1] - self.waterYMin
+        self.waterYMax = self.size[1] - self.waterYMax
         
         # Breaking master heightmap into 129x129 subimages
         heightmaps = []
         xchunks = (self.heightmap.getXSize()-1)/128
         ychunks = (self.heightmap.getYSize()-1)/128
+        n = 0
         for y in range(0, ychunks):
             for x in range(0, xchunks):
                 heightmap = PNMImage(129, 129)
-                heightmap.copySubImage(self.heightmap, x*128, y*128)
+                heightmap.copySubImage(self.heightmap, 0, 0, xfrom = x*128, yfrom = y*128)
                 heightmaps.append(heightmap)
+                n += 1
         
         # Generate GeoMipTerrains
         node = 0
         for heightmap in heightmaps:
             terrain = GeoMipTerrain(str(node))
-            node += 1
-            self.terrain.setHeightfield(heightmap)
+            terrain.setHeightfield(heightmap)
             terrain.setBruteforce(True)
             terrain.setBlockSize(64)
             terrain.generate()
-            
-                
+            root = terrain.getRoot()
+            root.reparentTo(self.terrain)
+            root.setSz(100)
+            root.setSx(5)
+            root.setSy(5)
+            print 'Pos:', (node%xchunks*5, (ychunks-1-node/ychunks)*5, 0)
+            root.setPos(node%xchunks*5, (ychunks-1-node/ychunks)*5, 0)
+            messenger.send('makePickable', [root])   
+            node += 1
+            # Set multi texture
+            # Source http://www.panda3d.org/phpbb2/viewtopic.php?t=4536
+            self.generateSurfaceTextures2(terrain)
         
-        ### Old code ###
-
-        root = self.terrain.getRoot()
-        root.reparentTo(render)
-        root.setSz(100)
-        messenger.send('makePickable', [root])   
-        
-        if self.heightmap.getXSize() > self.heightmap.getYSize():
-            self.size = self.heightmap.getXSize()-1
-        else:
-            self.size = self.heightmap.getYSize()-1
+        ### Old code ### 
                 
         # Set multi texture
         # Source http://www.panda3d.org/phpbb2/viewtopic.php?t=4536
-        self.generateSurfaceTextures()
-        self.generateOwnerTexture(tiles, cities)
+        #self.generateOwnerTexture(tiles, cities)
                 
-        self.setSurfaceTextures()
-        self.generateWater(2)
-        taskMgr.add(self.updateTerrain, "updateTerrain")
-        print "Done with terrain generation"
-        messenger.send("finishedTerrainGen", [[self.size, self.size]])
-        self.terrain.getRoot().analyze()
+        #self.setSurfaceTextures()
+        #self.generateWater(2)
+        #taskMgr.add(self.updateTerrain, "updateTerrain")
+        #print "Done with terrain generation"
+        #messenger.send("finishedTerrainGen", [self.size])
+        base.camera.setPos(0, 0, 100)
+        base.camera.setHpr(30,-45,0)
+        #self.terrain.getRoot().analyze()
+    
+    def generateSurfaceTextures2(self, terrain):
+        heightmap = terrain.heightfield()
+        colormap = self.generateColorMap2(terrain)
+        
+        colorTexture = Texture()
+        colorTexture.load(colormap)
+        colorTS = TextureStage('color')
+        colorTS.setSort(0)
+        colorTS.setPriority(1)
+        
+        # Textureize
+        self.grassTexture = loader.loadTexture("Textures/grass.png")
+        self.grassTS = TextureStage('grass')
+        self.grassTS.setSort(1)
+        
+        self.rockTexture = loader.loadTexture("Textures/rock.jpg")
+        self.rockTS = TextureStage('rock')
+        self.rockTS.setSort(2)
+        self.rockTS.setCombineRgb(TextureStage.CMAdd, TextureStage.CSLastSavedResult, TextureStage.COSrcColor, TextureStage.CSTexture, TextureStage.COSrcColor)
+        
+        self.sandTexture = loader.loadTexture("Textures/sand.jpg")
+        self.sandTS = TextureStage('sand')
+        self.sandTS.setSort(3)
+        self.sandTS.setPriority(5)
+        
+        self.snowTexture = loader.loadTexture("Textures/ice.png")
+        self.snowTS = TextureStage('snow')
+        self.snowTS.setSort(4)
+        self.snowTS.setPriority(0)
+        
+        # Grid for city placement and guide and stuff
+        self.gridTexture = loader.loadTexture("Textures/grid.png")
+        self.gridTexture.setWrapU(Texture.WMRepeat)
+        self.gridTexture.setWrapV(Texture.WMRepeat)
+        self.gridTS = TextureStage('grid')
+        self.gridTS.setSort(5)
+        self.gridTS.setPriority(10)
+    
+    def generateColorMap2(self, terrain):
+        ''' Iterate through every pix of color map. This will be very slow so until faster method is developed, use sparingly
+        getXSize returns pixels length starting with 1, subtract 1 for obvious reasons
+        '''
+        print "GenerateColorMap"
+        heightmap = terrain.heightfield()
+        colormap = PNMImage(heightmap.getXSize(), heightmap.getYSize())
+        colormap.addAlpha()
+        slopemap = terrain.makeSlopeImage()
+        
+        for x in range(0, heightmap.getXSize()-1):
+            for y in range(0, colormap.getYSize()-1):
+                # Else if statements used to make sure one channel is used per pixel
+                # Also for some optimization
+                # Snow. We do things funky here as alpha will be 1 already.
+                if heightmap.getGrayVal(x, y) < 200:
+                    colormap.setAlpha(x, y, 0)
+                else:
+                    colormap.setAlpha(x, y, 1)
+                # Beach. Estimations from http://www.simtropolis.com/omnibus/index.cfm/Main.SimCity_4.Custom_Content.Custom_Terrains_and_Using_USGS_Data
+                if heightmap.getGrayVal(x,y) < 62:
+                    colormap.setBlue(x, y, 1)
+                    # Water card dimensions here
+                    # Y axis flipped from texture space to world space
+                # Rock
+                elif slopemap.getGrayVal(x, y) > 170:
+                    colormap.setRed(x, y, 1)
+                else:
+                    colormap.setGreen(x, y, 1)
+        return colormap
     
     def generateColorMap(self):
         ''' Iterate through every pix of color map. This will be very slow so until faster method is developed, use sparingly

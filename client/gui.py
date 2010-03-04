@@ -13,6 +13,12 @@ from direct.stdpy.file import *
 
 from panda3d.core import VirtualFileSystem
 
+#print vfs.ls('.')
+#print '__________'
+#print vfs.ls('/mf')
+#print '__________'
+#print vfs.ls('/')
+
 import sys
 #import yaml
 import glob
@@ -23,7 +29,7 @@ import math
 #from panda3d.core import TextNode
 
 from directWindow import DirectWindow, MessageWindow
-sys.path.append("../..")
+#sys.path.append("../..")
 import CityMania.common.protocol_pb2 as proto
 import CityMania.common.yaml as yaml
 import access
@@ -59,6 +65,7 @@ class Picker(DirectObject.DirectObject):
         self.ray.setFromLens(base.camNode, 0, 0)
         #get collision: picked obj and point
         pickedObj,pickedPoint=self.getCollision(self.queue, nodePath)
+        #print "Picked object:", pickedObj
         return pickedPoint
     
     def getCoords(self):
@@ -69,7 +76,6 @@ class Picker(DirectObject.DirectObject):
         self.ray.setFromLens(base.camNode, mpos.getX(),mpos.getY())
         #get collision: picked obj and point
         pickedObj,pickedPoint=self.getCollision(self.queue)
-        print "Pricked point", pickedPoint
         return pickedPoint
     
     def getMiddle(self):
@@ -259,8 +265,6 @@ class GUIController(DirectObject.DirectObject):
             heightTexture.load(image)
             label = DirectRadioButton(text=mapName, image=heightTexture, variable=m, value=[mapName])
             mapList.append(label)
-        for button in mapList:
-            button.setOthers(mapList)
         self.mapDialog.addScrolledList(mapList)
         okButton = DirectButton(text = self.getText('TXT_UI_OK'), command = self.selectMap, extraArgs=m)
         self.mapDialog.addVertical([okButton])

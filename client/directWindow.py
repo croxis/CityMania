@@ -301,7 +301,7 @@ class DirectWindow( DirectFrame ):
           self.minVirtualSize = (self.minVirtualSize[0], self.maxVirtualSize[1]+self.headerHeight)
       self.contentWindow['canvasSize'] = ( 0, self.maxVirtualSize[0], -self.maxVirtualSize[1],  0)
       self.backgroundColor['frameSize'] = ( 0, self.maxVirtualSize[0], -self.maxVirtualSize[1], 0 )
-      # For CityMania Onlue
+      # For CityMania
       self.reset()
       self.center()
   
@@ -330,18 +330,20 @@ class DirectWindow( DirectFrame ):
             incButton_pos= (0.35, 0, -1),
             incButton_text = "Inc",
             incButton_borderWidth = (0.005, 0.005),
-            #frameSize = (0.0, 0.7, -0.05, 0.59),
+            frameSize = (0.0, 0.7, -0.05, 0.59),
             frameColor = (1,0,0,0.5),
-            #pos = (-1, 0, 0),
+            pos = (-1, 0, 0),
             itemFrame_frameSize = (-0.2, 0.2, -0.37, 0.11),
             itemFrame_pos = (0.35, 0, 0.4),
             scale = (0.05),
             parent = (aspect2d)
             )
+        for button in items:
+            button.setOthers(items)
         for widget in items:
             #widget.setScale(0.05)
             scrolled_list.addItem(widget)
-        self.add([scrolled_list])
+        #self.add([scrolled_list])
 
 
 class MessageWindow(DirectWindow):

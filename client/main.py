@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+print "STARTING"
 title="CityMania"
 #setup config file
 import panda3d
@@ -63,7 +64,7 @@ class World(DirectObject.DirectObject):
         self.accept('setSelfAccess', self.setSelf)
         self.accept("finishedTerrainGen", self.setupRig)
         
-        base.disableMouse()
+        #base.disableMouse()
         
         base.setFrameRateMeter(True)
         self.keys()
@@ -96,7 +97,7 @@ class World(DirectObject.DirectObject):
         access.username = name
     
     def setupRig(self, size):
-        cam = camera.Camera(size, self.terrainManager.terrain)
+        #cam = camera.Camera(size, self.terrainManager.terrain)
         sky = environment.SkyManager()
         
 
@@ -118,34 +119,34 @@ def loadMod(name):
     Loads the designated mod into memory, will require some helper functions in other classes
     """
 
-def main(var = None):
-    # Create the directories
-    #filesystem.home(oo = True)
-    #print "Path:", filesystem.home()
+#def main(var = None):
+# Create the directories
+#filesystem.home(oo = True)
+#print "Path:", filesystem.home()
 
-    #LOG_FILENAME = 'client.log'
-    #logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG,)
-    
-    sys.stdout = Logger()
-    connection = network.ServerSocket()
-    
-    script = gui.Script()
-    #messenger.toggleVerbose()
+#LOG_FILENAME = 'client.log'
+#logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG,)
 
-    #aiVoice = Audio.AIVoice()
-    #audioManager = Audio.AudioManager()
+sys.stdout = Logger()
+connection = network.ServerSocket()
 
-    world=World()
-    guiController = gui.GUIController(script)
-    guiController.makeMainMenu()
-    serverHost = 'localhost'
-    serverPort = 52003
-    reg = region.Region()
-    kmcontroller = controllers.KMController()
-    run()
+script = gui.Script()
+#messenger.toggleVerbose()
 
-if __name__ == '__main__':
-    main()
+#aiVoice = Audio.AIVoice()
+#audioManager = Audio.AudioManager()
+
+world=World()
+guiController = gui.GUIController(script)
+guiController.makeMainMenu()
+serverHost = 'localhost'
+serverPort = 52003
+reg = region.Region()
+kmcontroller = controllers.KMController()
+run()
+
+#if __name__ == '__main__':
+#    main()
 
 #if __name__ == 'main':
 #    main()
