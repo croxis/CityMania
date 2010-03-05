@@ -3,15 +3,16 @@
 Classes responsible for environment such as terrain, lighting, skyboxes, etc.
 '''
 from direct.showbase import DirectObject
-#from panda3d.core import AmbientLight, DirectionalLight, VBase4
+from panda3d.core import AmbientLight, DirectionalLight, VBase4
 # For TerrainManager
-#from panda3d.core import CardMaker, NodePath, GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, Vec4, VBase3D, Texture
-#from panda3d.core import CardMaker, TransparencyAttrib, BitMask32, Plane, Point3, PlaneNode, CullFaceAttrib
+from panda3d.core import CardMaker, NodePath, GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, Vec4, VBase3D, Texture
+from panda3d.core import CardMaker, TransparencyAttrib, BitMask32, Plane, Point3, PlaneNode, CullFaceAttrib
 
-from pandac.PandaModules import AmbientLight, DirectionalLight, VBase4, CardMaker, NodePath, GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, Vec4, VBase3D, Texture, CardMaker, TransparencyAttrib, BitMask32, Plane, Point3, PlaneNode, CullFaceAttrib
+#from pandac.PandaModules import AmbientLight, DirectionalLight, VBase4, CardMaker, NodePath, GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, Vec4, VBase3D, Texture, CardMaker, TransparencyAttrib, BitMask32, Plane, Point3, PlaneNode, CullFaceAttrib
 
 import gui
 import water
+from PagedGeoMipTerrain import PagedGeoMipTerrain
 picker = gui.getPicker()
 
 class Lights:
@@ -79,11 +80,12 @@ class TerrainManager(DirectObject.DirectObject):
     
     def generateWorld(self, heightmap, tiles, cities, container):
         self.heightmap = heightmap
-        self.terrain = GeoMipTerrain("surface")
+        self.terrain = PagedGeoMipTerrain("surface")
+        #self.terrain = GeoMipTerrain("surface")
         self.terrain.setHeightfield(self.heightmap)
         #self.terrain.setFocalPoint(base.camera)
         self.terrain.setBruteforce(True)
-        self.terrain.setBlockSize(32)
+        self.terrain.setBlockSize(64)
         self.terrain.generate()
 
         root = self.terrain.getRoot()
@@ -117,6 +119,7 @@ class TerrainManager(DirectObject.DirectObject):
         colormap = PNMImage(self.heightmap.getXSize(), self.heightmap.getYSize())
         colormap.addAlpha()
         slopemap = self.terrain.makeSlopeImage()
+        slopemap.write('slopemap.png')
         self.waterXMin, self.waterXMax, self.waterYMin, self.waterYMax = 0,0,0,0
         
         for x in range(0, self.heightmap.getXSize()-1):
