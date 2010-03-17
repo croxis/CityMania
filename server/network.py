@@ -45,11 +45,13 @@ class ClientSocket(engine.Entity, threading.Thread):
         the citymania end tag "[!]" is added to signify the end of the message
         This way the client can accept larger file transfers
         """
-        #print data.SerializeToString()+"[!]"
         self.sendLock.acquire()
         try:
             logger.debug("Sending %s: %s" %(self.peer, data))
             self.s.sendall(data.SerializeToString()+"[!]")
+        except socket.timeout (value, message):
+            logger.warning(message)
+            messenger.send('logout', [self.peer])
         except:
             logger.warning("Object is not a protocol buffer object: %s" %data)
         self.sendLock.release()
