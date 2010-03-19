@@ -99,6 +99,7 @@ class Mixin_DirectGuiFix():
         # the values into the coordinate space of the parent.
         # FIXME: This is not the correct way to translate between
         # coordinate spaces!
+        #print self, self.getBounds()
         l,r,b,t = self.getBounds()
         l *= self.getScale().getX()
         l += self.getPos().getX()

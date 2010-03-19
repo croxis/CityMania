@@ -2,13 +2,13 @@
 '''environment.py
 Classes responsible for environment such as terrain, lighting, skyboxes, etc.
 '''
+import random
+
 from direct.showbase import DirectObject
 from panda3d.core import AmbientLight, DirectionalLight, VBase4
 # For TerrainManager
-from panda3d.core import CardMaker, NodePath, GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, Vec4, VBase3D, Texture
+from panda3d.core import NodePath, GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, Vec4, VBase3D, Texture
 from panda3d.core import CardMaker, TransparencyAttrib, BitMask32, Plane, Point3, PlaneNode, CullFaceAttrib
-
-#from pandac.PandaModules import AmbientLight, DirectionalLight, VBase4, CardMaker, NodePath, GeomNode, GeoMipTerrain,  PNMImage, StringStream, TextureStage, Vec3, Vec4, VBase3D, Texture, CardMaker, TransparencyAttrib, BitMask32, Plane, Point3, PlaneNode, CullFaceAttrib
 
 import gui
 import water
@@ -90,53 +90,72 @@ class TerrainManager(DirectObject.DirectObject):
 
         root = self.terrain.getRoot()
         root.reparentTo(render)
-        root.setSz(100)
+        #root.setSz(100)
+        self.terrain.setSz(100)
         messenger.send('makePickable', [root])   
         
         if self.heightmap.getXSize() > self.heightmap.getYSize():
             self.size = self.heightmap.getXSize()-1
         else:
             self.size = self.heightmap.getYSize()-1
+        self.xsize = self.heightmap.getXSize()-1
+        self.ysize = self.heightmap.getYSize()-1
                 
         # Set multi texture
         # Source http://www.panda3d.org/phpbb2/viewtopic.php?t=4536
         self.generateSurfaceTextures()
+        self.generateWaterMap()
         self.generateOwnerTexture(tiles, cities)
-                
-        self.setSurfaceTextures()
-        self.generateWater(2)
-        taskMgr.add(self.updateTerrain, "updateTerrain")
-        print "Done with terrain generation"
-        messenger.send("finishedTerrainGen", [[self.size, self.size]])
-        self.terrain.getRoot().analyze()
-    
-    def generateColorMap(self):
-        ''' Iterate through every pix of color map. This will be very slow so until faster method is developed, use sparingly
-        getXSize returns pixels length starting with 1, subtract 1 for obvious reasons
-        We also slip in checking for the water card size, which should only change when the color map does
-        '''
-        print "GenerateColorMap"
-        colormap = PNMImage(self.heightmap.getXSize(), self.heightmap.getYSize())
+        #self.terrain.makeTextureMap()
+        colormap = PNMImage(heightmap.getXSize()-1, heightmap.getYSize()-1)
         colormap.addAlpha()
         slopemap = self.terrain.makeSlopeImage()
-        slopemap.write('slopemap.png')
-        self.waterXMin, self.waterXMax, self.waterYMin, self.waterYMax = 0,0,0,0
-        
-        for x in range(0, self.heightmap.getXSize()-1):
-            for y in range(0, colormap.getYSize()-1):
+        for x in range(0, colormap.getXSize()):
+            for y in range(0, colormap.getYSize()):
                 # Else if statements used to make sure one channel is used per pixel
                 # Also for some optimization
                 # Snow. We do things funky here as alpha will be 1 already.
-                if self.heightmap.getGrayVal(x, y) < 200:
+                if heightmap.getGrayVal(x, y) < 200:
                     colormap.setAlpha(x, y, 0)
                 else:
                     colormap.setAlpha(x, y, 1)
                 # Beach. Estimations from http://www.simtropolis.com/omnibus/index.cfm/Main.SimCity_4.Custom_Content.Custom_Terrains_and_Using_USGS_Data
-                if self.heightmap.getGrayVal(x,y) < 62:
+                if heightmap.getGrayVal(x,y) < 62:
                     colormap.setBlue(x, y, 1)
+                # Rock
+                elif slopemap.getGrayVal(x, y) > 170:
+                    colormap.setRed(x, y, 1)
+                else:
+                    colormap.setGreen(x, y, 1)
+        self.colorTexture = Texture()
+        self.colorTexture.load(colormap)
+        self.colorTS = TextureStage('color')
+        self.colorTS.setSort(0)
+        self.colorTS.setPriority(1)
+            
+        self.setSurfaceTextures()
+        self.generateWater(2)
+        taskMgr.add(self.updateTerrain, "updateTerrain")
+        print "Done with terrain generation"
+        messenger.send("finishedTerrainGen", [[self.xsize, self.ysize]])
+        self.terrain.getRoot().analyze()
+    
+    def generateWaterMap(self):
+        ''' Iterate through every pix of color map. This will be very slow so until faster method is developed, use sparingly
+        getXSize returns pixels length starting with 1, subtract 1 for obvious reasons
+        We also slip in checking for the water card size, which should only change when the color map does
+        '''
+        print "GenerateWaterMap"
+        self.waterXMin, self.waterXMax, self.waterYMin, self.waterYMax = -1,0,0,0
+        for x in range(0, self.heightmap.getXSize()-1):
+            for y in range(0, self.heightmap.getYSize()-1):
+                # Else if statements used to make sure one channel is used per pixel
+                # Also for some optimization
+                # Snow. We do things funky here as alpha will be 1 already.
+                if self.heightmap.getGrayVal(x,y) < 62:
                     # Water card dimensions here
                     # Y axis flipped from texture space to world space
-                    if not self.waterXMin:
+                    if self.waterXMin == -1 or x < self.waterXMin:
                         self.waterXMin = x
                     if not self.waterYMax:
                         self.waterYMax = y
@@ -146,15 +165,9 @@ class TerrainManager(DirectObject.DirectObject):
                         self.waterXMax = x
                     if y > self.waterYMin:
                         self.waterYMin = y
-                # Rock
-                elif slopemap.getGrayVal(x, y) > 170:
-                    colormap.setRed(x, y, 1)
-                else:
-                    colormap.setGreen(x, y, 1)
         # Transform y coords
-        self.waterYMin = self.size - self.waterYMin
-        self.waterYMax = self.size - self.waterYMax
-        return colormap
+        self.waterYMin = self.size-64 - self.waterYMin
+        self.waterYMax = self.size-64 - self.waterYMax
     
     def generateOwnerTexture(self, tiles, cities):
         '''Generates a simple colored texture to be applied to the city info region overlay.
@@ -163,18 +176,18 @@ class TerrainManager(DirectObject.DirectObject):
         
         Also creates and sends a citylabels dict for the region view
         '''
-        self.citymap = PNMImage(self.size, self.size)
+        self.citymap = PNMImage(self.xsize, self.ysize)
         citylabels = cities
         scratch = {}
-        import random
+        
         # Setup for city labels
         for ident in cities:
             scratch[ident] = []
         
         # conversion for y axis
         ycon = []
-        s = self.size - 1
-        for y in range(self.size):
+        s = self.ysize - 1
+        for y in range(self.ysize):
             ycon.append(s)
             s -= 1
         for ident, city in cities.items():
@@ -200,14 +213,6 @@ class TerrainManager(DirectObject.DirectObject):
         messenger.send("updateCityLabels", [citylabels, self.terrain])
     
     def generateSurfaceTextures(self):
-        colormap = self.generateColorMap()
-        
-        self.colorTexture = Texture()
-        self.colorTexture.load(colormap)
-        self.colorTS = TextureStage('color')
-        self.colorTS.setSort(0)
-        self.colorTS.setPriority(1)
-        
         # Textureize
         self.grassTexture = loader.loadTexture("Textures/grass.png")
         self.grassTS = TextureStage('grass')
@@ -281,15 +286,15 @@ class TerrainManager(DirectObject.DirectObject):
         position = picker.getMouseCell()
         if position:
             # Check to make sure we do not go out of bounds
-            if position[0] < 16:
-                position = (16, position[1])
-            elif position[0] > self.size-16:
-                position = (self.size-16, position[1])
-            if position[1] < 16:
-                position = (position[0], 16)
-            elif position [1] > self.size-16:
-                position = (position[0], self.size-16)                
-            root.setTexOffset(self.tileTS, -(position[0]-16)/32, -(position[1]-16)/32)
+            if position[0] < 32:
+                position = (32, position[1])
+            elif position[0] > self.xsize-32:
+                position = (self.xsize-32, position[1])
+            if position[1] < 32:
+                position = (position[0], 32)
+            elif position [1] > self.ysize-32:
+                position = (position[0], self.size-32)                
+            root.setTexOffset(self.tileTS, -(position[0]-32)/64, -(position[1]-32)/64)
         return task.cont
     
     def regionViewFound(self):
@@ -302,11 +307,10 @@ class TerrainManager(DirectObject.DirectObject):
         tileTexture.setWrapV(Texture.WMClamp)
         self.tileTS = TextureStage('tile')
         self.tileTS.setSort(6)
-        #self.tileTS.setMode(TextureStage.MBlend)
         self.tileTS.setMode(TextureStage.MDecal)
         #self.tileTS.setColor(Vec4(1,0,1,1))
         root.setTexture(self.tileTS, tileTexture)
-        root.setTexScale(self.tileTS, self.size/32, self.size/32)
+        root.setTexScale(self.tileTS, self.terrain.xchunks, self.terrain.ychunks)
         self.acceptOnce("mouse1", self.regionViewFound2)
         self.acceptOnce("escape", self.cancelRegionViewFound)
     
@@ -317,7 +321,8 @@ class TerrainManager(DirectObject.DirectObject):
         root = self.terrain.getRoot()
         root_position = root.getTexOffset(self.tileTS)
         # We offset the position of the texture, so we will now put the origin of the new city not on mouse cursor but the "bottom left" of it. Just need to add 32 to get other edge
-        position = [int(abs(root_position[0]*32)), int(abs(root_position[1]*32))]
+        position = [int(abs(root_position[0]*64)), int(abs(root_position[1]*64))]
+        print "Position:", position
         self.cancelRegionViewFound()
         messenger.send("found_city_name", [position])
     
@@ -333,7 +338,8 @@ class TerrainManager(DirectObject.DirectObject):
         self.ownerview = False
         root = self.terrain.getRoot()
         root.clearTexture()
-        root.setTexture( self.colorTS, self.colorTexture ) 
+        #self.terrain.setTextureMap()
+        root.setTexture( self.colorTS, self.colorTexture )
         root.setTexture( self.grassTS, self.grassTexture )
         root.setTexScale(self.grassTS, self.size/8, self.size/8) 
         root.setTexture( self.rockTS, self.rockTexture ) 
@@ -343,9 +349,8 @@ class TerrainManager(DirectObject.DirectObject):
         root.setTexture( self.snowTS, self.snowTexture ) 
         root.setTexScale(self.snowTS, self.size/8, self.size/8) 
         root.setTexture( self.gridTS, self.gridTexture ) 
-        root.setTexScale(self.gridTS, self.size, self.size)
-        
-        root.setShaderInput('size', self.size, self.size, self.size, self.size)
+        root.setTexScale(self.gridTS, self.xsize, self.ysize)
+        root.setShaderInput('size', self.xsize, self.ysize, self.size, self.size)
         root.setShader(loader.loadShader('Shaders/terraintexture.sha'))
     
     def setOwnerTextures(self):
@@ -358,7 +363,7 @@ class TerrainManager(DirectObject.DirectObject):
         cityTS = TextureStage('citymap')
         cityTS.setSort(0)
         root.setTexture( self.gridTS, self.gridTexture ) 
-        root.setTexScale(self.gridTS, self.size, self.size)
+        root.setTexScale(self.gridTS, self.terrain.xchunks, self.terrain.ychunks)
         root.setTexture(cityTS, cityTexture, 1)
     
     def updateRegion(self, heightmap, tiles, cities):

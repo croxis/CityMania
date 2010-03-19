@@ -42,7 +42,7 @@ class DirectWindow( DirectFrame ):
   def __init__( self,
                 pos              = ( -.5, .5),
                 title            = 'Title',
-                curSize          = ( 0.5, 0.5),
+                curSize          = (1, 1),
                 maxSize          = ( 1, 1 ),
                 minSize          = ( .5, .5 ),
                 backgroundColor = ( 0, 0, 1, .6),
@@ -51,8 +51,13 @@ class DirectWindow( DirectFrame ):
                 borderSize       = 0.04,
                 titleSize        = 0.06,
                 closeButton      = False,
+                windowParent     = aspect2d,
+                preserve         = True,
+                preserveWhole      = True, 
               ):
-    
+    self.preserve = preserve
+    self.preserveWhole = preserveWhole
+    self.windowParent = windowParent
     self.windowPos = pos
     DirectFrame.__init__( self,
         parent       = aspect2d,
@@ -127,7 +132,7 @@ class DirectWindow( DirectFrame ):
     self.contentWindow = DirectScrolledFrame(
         parent                                  = self,
         pos                                     = ( 0, 0, -self.headerHeight ),
-        canvasSize                              = ( 0, self.maxVirtualSize[0], -self.maxVirtualSize[1],  0),
+        canvasSize                              = ( 0, self.maxVirtualSize[0], 0, self.maxVirtualSize[1] ),
         frameColor                              = ( 0, 0, 0, 0), # defines the background color of the resize-button
         relief                                  = DGG.FLAT,
         borderWidth                             = (0, 0),
@@ -170,16 +175,17 @@ class DirectWindow( DirectFrame ):
     # background color
     self.backgroundColor = DirectFrame(
         parent       = self.contentWindow.getCanvas(),
-        frameSize    = ( 0, self.maxVirtualSize[0], -self.maxVirtualSize[1], 0 ),
+        frameSize    = ( 0, self.maxVirtualSize[0], 0, self.maxVirtualSize[1] ),
         frameColor   = backgroundColor,
         relief       = DGG.FLAT,
         borderWidth  = ( .01, .01),
       )
     self.backgroundColor.setTransparency(True)
-    
+
     # Add a box
     self.box = boxes.VBox(parent = self.getCanvas())
-    
+
+   
     # is needed for some nicer visuals of the resize button (background)
     self.windowResizeBackground = DirectButton(
         parent       = self,
@@ -225,9 +231,28 @@ class DirectWindow( DirectFrame ):
     self.accept( 'mouse1-up', self.stopWindowDrag )
   def stopWindowDrag( self, param=None ):
     # this is called 2 times (bug), so make sure it's not already parented to aspect2d
-    if self.getParent() != aspect2d:
-      self.wrtReparentTo( aspect2d )
-  
+    if self.getParent() != self.windowParent:
+      self.wrtReparentTo( self.windowParent )
+    if self.preserve:
+        if self.preserveWhole:
+            if self.getZ() > 1:
+                self.setZ(1)
+            elif self.getZ() < -1 - self.getHeight():
+                self.setZ(-1 - self.getHeight())
+            if self.getX() > base.a2dRight - self.getWidth():
+                self.setX(base.a2dRight - self.getWidth())
+            elif self.getX() < base.a2dLeft:
+                self.setX(base.a2dLeft)
+        else:
+            if self.getZ() > 1:
+                self.setZ(1)
+            elif self.getZ() < -1 + self.headerHeight:
+                self.setZ(-1 + self.headerHeight)
+            if self.getX() > base.a2dRight - self.headerHeight:
+                self.setX(base.a2dRight - self.headerHeight)
+            elif self.getX() < base.a2dLeft + self.headerHeight - self.getWidth():
+                self.setX(base.a2dLeft + self.headerHeight - self.getWidth())
+    #else: #Window moved beyond reach. Destroy window?
   # resize functions
   def resize( self, mPos, offset ):
     mXPos = max( min( mPos.getX(), self.maxVirtualSize[0] ), self.minVirtualSize[0])
@@ -261,8 +286,7 @@ class DirectWindow( DirectFrame ):
   def stopResizeDrag( self, param ):
     taskMgr.remove( self.taskName )
     # get the window to the front
-    self.wrtReparentTo( aspect2d )
-
+    self.wrtReparentTo( self.windowParent )
   def addHorizontal(self, widgets):
       """
       Accepts a list of directgui objects which are added to a horizontal box, which is then added to the vertical stack.
@@ -307,7 +331,7 @@ class DirectWindow( DirectFrame ):
   
   def reset(self):
     """Poorly named function that resizes window to fit all contents"""
-    self.resize( Vec3(self.maxVirtualSize[0], 0, -self.maxVirtualSize[1]), Vec3(0,0,0))
+    self.resize( Vec3(self.maxVirtualSize[0], 0, -self.maxVirtualSize[1]-self.headerHeight), Vec3(0,0,0))
 
   def center(self):
       """Centers window on screen"""
@@ -321,26 +345,29 @@ class DirectWindow( DirectFrame ):
                 entries.append(widget.get())
         return entries
 
-  def addScrolledList(self, items):
+  def addScrolledList(self, items, numItemsVisible = 4, itemHeight = 1):
         '''Adds a list of items into a scrolled list'''
         scrolled_list = DirectScrolledList(
-            decButton_pos= (0.35, 0, 1),
-            decButton_text = "Dec",
+            decButton_pos= (0.35, 0, 5),
+            decButton_text = "Up",
             decButton_borderWidth = (0.005, 0.005),
-            incButton_pos= (0.35, 0, -1),
-            incButton_text = "Inc",
+            
+            incButton_pos= (0.35, 0, -5),
+            incButton_text = "Down",
             incButton_borderWidth = (0.005, 0.005),
-            #frameSize = (0.0, 0.7, -0.05, 0.59),
-            frameColor = (1,0,0,0.5),
-            #pos = (-1, 0, 0),
-            itemFrame_frameSize = (-0.2, 0.2, -0.37, 0.11),
+            
+            frameSize = (-5, 5, -5, 5),
+            frameColor = (1,0,1,0.5),
+            pos = (-1, 0, 0),
+            items = items,
+            numItemsVisible = numItemsVisible,
+            forceHeight = itemHeight,
+            itemFrame_frameSize = (-5, 5, -5, 5),
             itemFrame_pos = (0.35, 0, 0.4),
             scale = (0.05),
-            parent = (aspect2d)
+            #parent = (aspect2d),
             )
-        for widget in items:
-            #widget.setScale(0.05)
-            scrolled_list.addItem(widget)
+        scrolled_list.updateFrameStyle()
         self.add([scrolled_list])
 
 

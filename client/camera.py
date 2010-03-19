@@ -24,7 +24,7 @@ class Camera(DirectObject.DirectObject):
         base.disableMouse()
         #base.camLens.setFov(50)
         #base.camera.setPos(-center[0]*2,-center[1]*2,5)
-        base.camera.setPos(size[0]/2, size[1]/2, 100)
+        base.camera.setPos(size[0]/2.0, size[1]/2.0, 130)
         base.camera.setHpr(30,-45,0)
         self.isometric = isometric
         self.terrain = terrain
@@ -234,7 +234,8 @@ class Camera(DirectObject.DirectObject):
         # Check elevation and make sure we are not below terrain or water line
         pos = base.camera.getPos()
         root = self.terrain.getRoot()
-        elevation = self.terrain.getElevation(pos[0], pos[1]) * root.getSz()
+        #elevation = self.terrain.getElevation(pos[0], pos[1]) * root.getSz()
+        elevation = self.terrain.getElevation(pos[0]/5, pos[1]/5) * self.terrain.getSz()
         # Factor is height we want above terrain
         factor = 2
         if base.camera.getPos().getZ() < 22 + factor:
@@ -270,7 +271,7 @@ class Camera(DirectObject.DirectObject):
             self.target.setX(x)
             y = self.clamp(y, self.panLimitsY.getX(), self.panLimitsY.getY())
             self.target.setY(y)
-            self.target.setZ(z*100)
+            self.target.setZ(z)
             # Stores the new target position values in the target variable. The x and y values are clamped to the pan limits.
             self.setDist()
     

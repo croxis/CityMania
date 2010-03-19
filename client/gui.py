@@ -69,7 +69,6 @@ class Picker(DirectObject.DirectObject):
         self.ray.setFromLens(base.camNode, mpos.getX(),mpos.getY())
         #get collision: picked obj and point
         pickedObj,pickedPoint=self.getCollision(self.queue)
-        print "Pricked point", pickedPoint
         return pickedPoint
     
     def getMiddle(self):

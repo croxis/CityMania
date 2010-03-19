@@ -118,8 +118,8 @@ class Region(engine.Entity):
         '''Checks to make sure city location is valid. 
         If so we establish city!
         '''
-        for x in range(0, 32):
-            for y in range(0,32):
+        for x in range(0, 64):
+            for y in range(0,64):
                 tile = self.getTile(info.positionx+x, info.positiony+y)
                 if tile.cityid:
                     container = proto.Container()
@@ -147,8 +147,8 @@ class Region(engine.Entity):
         newcity = city.City(info.name, cityid, mayor = user)
         self.cities[cityid] = newcity
         updated_tiles = []
-        for y in range(0, 32):
-            for x in range(0,32):
+        for y in range(0, 64):
+            for x in range(0, 64):
                 tile = self.getTile(info.positionx+x, info.positiony+y)
                 tile.cityid = cityid
                 updated_tiles.append(tile)

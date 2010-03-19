@@ -42,7 +42,6 @@ class ServerSocket(DirectObject.DirectObject):
             messenger.send('disconnected', ['Unable to connect to server.'])
             return
         self.s.setblocking(0)
-        ##self.s.settimeout(1)
         self.peer = self.s.getpeername()
         
         container = proto.Container()
@@ -63,7 +62,7 @@ class ServerSocket(DirectObject.DirectObject):
         try:
             inputready,outputready,exceptready = select.select([self.s], [self.s] ,[]) 
         except:
-            print "Oh crap2!"
+            raise
             return Task.done
         if inputready:
             d = self.s.recv(4096)
