@@ -218,9 +218,9 @@ class GUIController(DirectObject.DirectObject):
     def loginMP(self):
         self.mainMenu.destroy()
         self.window = DirectWindow(title = self.getText("TXT_UI_LOGINTITLE"))
-        hostEntry = DirectEntry(initialText="croxis.dyndns.org")
-        userNameEntry = DirectEntry(initialText = self.getText('TXT_MAYOR_NAME'))
-        userPasswordEntry = DirectEntry(initialText="Password", obscured=True)
+        hostEntry = DirectEntry(initialText="croxis.dyndns.org", suppressKeys = True)
+        userNameEntry = DirectEntry(initialText = self.getText('TXT_MAYOR_NAME'),suppressKeys = True)
+        userPasswordEntry = DirectEntry(initialText="Password", obscured=True,suppressKeys = True)
         okButton = DirectButton(text = self.getText('TXT_UI_OK'), command = self.login)
         closeButton = DirectButton(text='Back', command=self.makeMainMenu)
         self.window.addVertical([hostEntry,userNameEntry,userPasswordEntry])
@@ -315,7 +315,7 @@ class GUIController(DirectObject.DirectObject):
     def foundCityName(self, position):
         self.text.destroy()
         self.name_city_window = DirectWindow(title = "name_city")
-        cityNameEntry = DirectEntry(initialText = "city_name")
+        cityNameEntry = DirectEntry(initialText = "city_name", suppressKeys = True)
         okButton = DirectButton(text = self.getText('TXT_UI_OK'), command = self.foundCity, extraArgs=[position])
         self.name_city_window.addVertical([cityNameEntry, okButton])
     
