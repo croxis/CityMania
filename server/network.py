@@ -15,10 +15,11 @@ class ClientSocket(engine.Entity, threading.Thread):
         Overide to threading for client socket
         """
         self.s = clientsock
+        self.s.setblocking(0)
         self.peer = self.s.getpeername()
         logger.info("Connection created with: %(peer)s"  %{'peer': self.peer})
         self.accept("exit", self.exit)
-        self.sendCache = []
+        self.sendCache = ''
         self.sendLock = threading.Lock()
         threading.Thread.__init__(self)
         
@@ -27,18 +28,46 @@ class ClientSocket(engine.Entity, threading.Thread):
         while self.running:
             try:
                 data = self.s.recv(4096)
-                messenger.send("gotData", [self.peer, data])
+                if not len(data): # a disconnect (socket.close() by client)
+                    messenger.send('logout', [self.peer])
+                else:
+                    messenger.send("gotData", [self.peer, data])
             except socket.timeout:
                 continue
             # Normally we'll inform the client why it is being disconnected
             # But if the socket is foobar, well, duh.
             except:  # some error or connection reset by peer
-                messenger.send('logout', [self.peer])
-            if not len(data): # a disconnect (socket.close() by client)
-                messenger.send('logout', [self.peer])
+                pass
+                #raise
+                #messenger.send('logout', [self.peer])
+            self.sendData()
             time.sleep(0.1)
     
     def send(self, data):
+        self.sendLock.acquire()
+        try:
+            self.sendCache += data.SerializeToString()+"[!]"
+        except:
+            logger.warning("Object is not a protocol buffer object: %s" %data)
+        self.sendLock.release()
+        logger.debug("New Cache: "+ self.sendCache)
+    
+    def sendData(self):
+        self.sendLock.acquire()
+        if self.sendCache:
+            try:
+                data = self.sendCache.split('[!]')[0] + '[!]'
+                logger.debug("Sending %s: %s" %(self.peer, data))
+                bytes = self.s.send(data)
+                self.sendCache = self.sendCache[bytes:]
+            except socket.timeout, message:
+                logger.warning(message)
+                messenger.send('logout', [self.peer])
+            except:
+                logger.warning("Warning: Unknown error")
+        self.sendLock.release()
+    
+    def sendOld(self, data):
         """
         sends data to client
         data needs to be a Protocol Buffer object
@@ -49,11 +78,11 @@ class ClientSocket(engine.Entity, threading.Thread):
         try:
             logger.debug("Sending %s: %s" %(self.peer, data))
             self.s.sendall(data.SerializeToString()+"[!]")
-        except socket.timeout (value, message):
+        except socket.timeout, message:
             logger.warning(message)
             messenger.send('logout', [self.peer])
         except:
-            logger.warning("Object is not a protocol buffer object: %s" %data)
+            logger.warning("Warning: Unknown errpr")
         self.sendLock.release()
         
     def exit(self):
