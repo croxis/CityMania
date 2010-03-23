@@ -95,28 +95,19 @@ class Camera(DirectObject.DirectObject):
         The distFactor input controls the amount of camera movement.
         For example, inputing 0.9 will set the camera to 90% of it's previous distance.
         '''
-        #self.camDist=self.camDist*distFactor
-        #point = picker.getMiddle()
-        # In case we zoom out too far we prevent odd behavior 
-        #if point is None: return
-        # Strategic zoom in for now
-        #if distFactor < 1:
-        #    self.target.setX(point[0])
-        #    self.target.setY(point[1])
-        #self.turnCameraAroundPoint(0,0)
-        # Calls turnCameraAroundPoint with 0s for the rotation to reset the camera to the new position.
         terrainCoords = picker.getCoords()
         if not terrainCoords: return
         terrainCoords.setZ(terrainCoords[2]*self.terrain.getRoot().getSz())
         vector = base.camera.getPos() - terrainCoords
+        # Make sure we don't zoom out too far for a performance hit
+        # TODO: Make this user defined in performance settings
+        if (vector*distFactor)[2] > 200: return
         newPos = terrainCoords + (vector*distFactor)
         base.camera.setPos(newPos)
         self.setTarget()
         #self.turnCameraAroundPoint(0,0)
     
     def update(self, task):
-        #print "Old Camera:", base.win.getPointer(0).getX(), base.win.getPointer(0).getY()
-        #print "New camera:", base.mouseWatcherNode.getMouse()
         if self.isOrbiting:
             # Checks to see if the camera is in orbiting mode. Orbiting mode overrides panning, because it would be problematic if, while
             # orbiting the camera the mouse came close to the screen edge and started panning the camera at the same time.
@@ -168,7 +159,6 @@ class Camera(DirectObject.DirectObject):
                 tempY = self.clamp(tempY, self.panLimitsY.getX(), self.panLimitsY.getY())
                 self.target.setY(tempY)
                 self.turnCameraAroundPoint(0,0)
-        
         return Task.cont
     
     def panX(self, direction):
@@ -299,6 +289,6 @@ class Camera(DirectObject.DirectObject):
                 maxY = tile.coords[1]
         self.panLimitsX = Vec2(minX, maxX)
         self.panLimitsY = Vec2(minY, maxY)
-        base.camera.setPos((minX+maxX)/2-10, (minY+maxY)/2-10, 70)
+        base.camera.setPos((minX+maxX)/2-10, (minY+maxY)/2-10, 200)
         base.camera.setHpr(30,-45,0)
         self.setTarget()

@@ -4,7 +4,7 @@ title="CityMania"
 import panda3d
 from pandac.PandaModules import loadPrcFileData
 loadPrcFileData( '', 'fullscreen 0')
-loadPrcFileData( '', 'win-size 800 600' )
+loadPrcFileData( '', 'win-size 1024 768' )
 loadPrcFileData( '', 'win-origin 450 90' )
 loadPrcFileData( '', 'frame-rate-meter-scale 0.035' )
 loadPrcFileData( '', 'frame-rate-meter-side-margin 0.1' )

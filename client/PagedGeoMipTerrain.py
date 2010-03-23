@@ -3,8 +3,10 @@ Hacked together by croxis 2010
 BSD licence'''
 
 from panda3d.core import NodePath, PNMImage, GeoMipTerrain, Texture, TextureStage
-
+from panda3d.core import Vec2
 from panda3d.core import GeomVertexReader, GeomVertexWriter
+
+import math
 
 class PagedGeoMipTerrain(object):
     '''Terrain using GeoMipTerrains from a heightfield. Paged in and out of render tree based if in view fullstrum.
@@ -61,7 +63,6 @@ class PagedGeoMipTerrain(object):
             root.reparentTo(self.root)
             root.setPos(n%self.xchunks*factor, (y)*factor, 0)
             
-            
             # In order to texture span properly we need to reiterate through every vertex
             # and redefine the uv coordinates based on our size, not the subGeoMipTerrain's
             root = terrain.getRoot()
@@ -85,9 +86,23 @@ class PagedGeoMipTerrain(object):
     
     def getBlockFromPos(self, x, y):
         '''Gets the coordinates of the block at the specific position.'''
+        if x < 0: x=0
+        if y < 0: y=0
+        if x > self.xsize - 1: x = self.xsize - 1
+        if y > self.ysize - 1: y = self.ysize - 1
+        factor = self.chunkSize * self.blockSize
+        x = math.floor(x/factor)
+        y = math.floor(y/factor)
+        return Vec2(x, y)
     
     def getBlockNodePath(self, x, y):
         '''Returns NodePath of the specified block'''
+        # Divide by chunksize to get terrain responsible
+        xchunk = x/self.chunkSize
+        ychunk = y/self.chunkSize
+        terrain = self.terrains[int(ychunk*self.xchunks + xchunk)]
+        nodePath = terrain.getBlockNodePath(x-(xchunk*self.chunkSize), y-(ychunk*self.chunkSize))
+        return nodePath
     
     def getChunk(self, x, y):
         '''Returns the GeoMipTerrain at the specificed position'''
@@ -109,16 +124,18 @@ class PagedGeoMipTerrain(object):
         # Determine which geomip holds the terrain
         row = y/(factor)
         col = x/(factor)
-        chunk = -row*self.ychunks - col
-        try:
-            terrain = self.terrains[int(chunk)]
-        except:
-            print "x, y, Row, col, chunk:", x, y, row, col, chunk, len(self.terrains)
-            raise
+        #chunk = -row*self.ychunks - col
+        chunk = self.getBlockFromPos(x, y)
+        xchunk = chunk[0]/self.chunkSize
+        ychunk = chunk[1]/self.chunkSize
+        terrain = self.terrains[int(ychunk*self.xchunks + xchunk)]
+        #terrain = self.terrains[int(chunk)]
+        #terrain = self.terrains[int(row*self.xchunks + col)]
         # Convert to xy of chunk
         chunkx = x - col*factor
         chunky = y - row*factor
-        return terrain.getElevation(chunkx, chunky)
+        elevation = terrain.getElevation(chunkx, chunky)
+        return elevation
     
     def getFocalPoint(self, x, y):
         '''Returns focal point as a node path'''

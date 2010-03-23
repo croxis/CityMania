@@ -52,8 +52,7 @@ class TerrainManager(DirectObject.DirectObject):
         self.waterType = 2
         self.water = None
         self.citycolors = {0: VBase3D(1, 1, 1)}
-        self.accept("h", self.switchWater)
-        
+    
         self.accept('generateRegion', self.generateWorld)
         self.accept("regionView_normal", self.setSurfaceTextures)
         self.accept("regionView_owners", self.setOwnerTextures)
@@ -68,6 +67,11 @@ class TerrainManager(DirectObject.DirectObject):
     def lclick(self):
         cell = picker.getMouseCell()
         print "Cell:", cell
+        blockCoords = self.terrain.getBlockFromPos(cell[0], cell[1])
+        block = self.terrain.getBlockNodePath(blockCoords[0], blockCoords[1])
+        print "Block coords:", blockCoords
+        print "NodePath:", block
+        print "Elevation:", self.terrain.getElevation(cell[0], cell[1])
         if not self.view:
             messenger.send("clickForCity", [cell])
     
@@ -139,6 +143,7 @@ class TerrainManager(DirectObject.DirectObject):
         print "Done with terrain generation"
         messenger.send("finishedTerrainGen", [[self.xsize, self.ysize]])
         self.terrain.getRoot().analyze()
+        self.accept("h", self.switchWater)
     
     def generateWaterMap(self):
         ''' Iterate through every pix of color map. This will be very slow so until faster method is developed, use sparingly
@@ -146,7 +151,7 @@ class TerrainManager(DirectObject.DirectObject):
         We also slip in checking for the water card size, which should only change when the color map does
         '''
         print "GenerateWaterMap"
-        self.waterXMin, self.waterXMax, self.waterYMin, self.waterYMax = -1,0,0,0
+        self.waterXMin, self.waterXMax, self.waterYMin, self.waterYMax = -1,0,-1,0
         for x in range(0, self.heightmap.getXSize()-1):
             for y in range(0, self.heightmap.getYSize()-1):
                 # Else if statements used to make sure one channel is used per pixel
@@ -208,8 +213,10 @@ class TerrainManager(DirectObject.DirectObject):
                 n += 1
             xavg = xsum/n
             yavg = ysum/n
+            print "Elevation:", self.terrain.getElevation(xavg, yavg)
             z = self.terrain.getElevation(xavg, yavg)*100
-            citylabels[ident]["position"] = (xavg, yavg, z+20)
+            citylabels[ident]["position"] = (xavg, yavg, z+15)
+            print "Citylabels:", citylabels
         messenger.send("updateCityLabels", [citylabels, self.terrain])
     
     def generateSurfaceTextures(self):
@@ -244,8 +251,11 @@ class TerrainManager(DirectObject.DirectObject):
     def enterCity(self, ident, city, position, tiles):
         '''Identifies which terrain blocks city belogs to and disables those that are not
         A lot of uneeded for loops in here. Will need to find a better way later.'''
-        root = self.terrain.getRoot()
-        children = root.getChildren()
+        #root = self.terrain.getRoot()
+        children = []
+        for terrain in self.terrain.terrains:
+            root = terrain.getRoot()
+            children += root.getChildren()
         keepBlocks = []
         # Reset water dimentions
         self.waterXMin = 0
@@ -258,7 +268,6 @@ class TerrainManager(DirectObject.DirectObject):
             block = self.terrain.getBlockNodePath(blockCoords[0], blockCoords[1])
             if block not in keepBlocks:
                 keepBlocks.append(block)
-        
             if self.heightmap.getGrayVal(tile.coords[0], self.size-tile.coords[1]) < 62:
                 # Water card dimensions here
                 # Y axis flipped from texture space to world space
@@ -274,7 +283,6 @@ class TerrainManager(DirectObject.DirectObject):
                     self.waterXMin = tile.coords[0]
                 if tile.coords[1] < self.waterYMin:
                     self.waterYMin = tile.coords[1]
-        
         for child in children:
             if child not in keepBlocks:
                 child.detachNode()
@@ -322,7 +330,6 @@ class TerrainManager(DirectObject.DirectObject):
         root_position = root.getTexOffset(self.tileTS)
         # We offset the position of the texture, so we will now put the origin of the new city not on mouse cursor but the "bottom left" of it. Just need to add 32 to get other edge
         position = [int(abs(root_position[0]*64)), int(abs(root_position[1]*64))]
-        print "Position:", position
         self.cancelRegionViewFound()
         messenger.send("found_city_name", [position])
     
