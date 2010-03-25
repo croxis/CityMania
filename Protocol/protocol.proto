@@ -19,6 +19,7 @@ message Container {
     optional int32 requestGameState = 104; //0: Region, Any other value is cityid. This determines what is sent to client
     optional int32 requestUnfoundCity = 105; //0: Region, Any other value is cityid.
     optional int32 requestEnterCity = 106;
+    optional bool requestExitCity = 107;
     
     // Server --> Client responses, usually a bool, 200-299
     optional NewCityResponse newCityResponse = 200;

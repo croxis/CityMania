@@ -210,6 +210,7 @@ class GUIController(DirectObject.DirectObject):
         self.mainMenu.addVertical([login, closeButton])
         self.mainMenu.reset()
         self.mainMenu.center()
+        message = MessageWindow(text="Your city has been founded! Awesome!")
 
     def newGame(self):
         self.mainMenu.destroy()
@@ -277,7 +278,21 @@ class GUIController(DirectObject.DirectObject):
         children = self.cityLabels.getChildren()
         for child in children:
             child.removeNode()
-        text = OnscreenText(text = "Welcome to " + city['name'], pos=(0, 0.75), scale=0.07)
+        #text = OnscreenText(text = "Welcome to " + city['name'], pos=(0, 0.75), scale=0.07)
+        self.cityWindow = DirectWindow(title = city['name'])
+        returnRegion = DirectButton(text = "Exit City", command=self.returnRegion)
+        exitGame = DirectButton(text='Exit Game', command = self.exitGame)
+        self.cityWindow.add([returnRegion, exitGame])
+    
+    def returnRegion(self):
+        self.cityWindow.destroy()
+        container = proto.Container()
+        container.requestExitCity = True
+        messenger.send("sendData", [container])
+        messenger.send('regenerateRegion')
+    
+    def exitGame(self):
+        messenger.send('exit')
         
     def regionGUI(self, size=[0,0]):
         '''Generates GUI for region view interface'''
@@ -382,6 +397,8 @@ class GUIController(DirectObject.DirectObject):
         container = proto.Container()
         container.requestEnterCity = ident
         messenger.send("sendData", [container])
+    
+    #def exitCity(self):
         
     def confirmUnfoundCity(self, ident, cityWindow):
         window = DirectWindow(title = self.getText("TXT_TITLE_COFIRM_UNFOUND"))

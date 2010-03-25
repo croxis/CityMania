@@ -12,6 +12,7 @@ from panda3d.core import CardMaker, TransparencyAttrib, BitMask32, Plane, Point3
 
 import gui
 import water
+import vfs
 from PagedGeoMipTerrain import PagedGeoMipTerrain
 picker = gui.getPicker()
 
@@ -54,6 +55,7 @@ class TerrainManager(DirectObject.DirectObject):
         self.citycolors = {0: VBase3D(1, 1, 1)}
     
         self.accept('generateRegion', self.generateWorld)
+        self.accept('regenerateRegion', self.regenerateWorld)
         self.accept("regionView_normal", self.setSurfaceTextures)
         self.accept("regionView_owners", self.setOwnerTextures)
         self.accept("regionView_foundNew", self.regionViewFound)
@@ -144,6 +146,23 @@ class TerrainManager(DirectObject.DirectObject):
         messenger.send("finishedTerrainGen", [[self.xsize, self.ysize]])
         self.terrain.getRoot().analyze()
         self.accept("h", self.switchWater)
+    
+    def regenerateWorld(self):
+        '''Regenerates world, often upon city exit.'''
+        self.terrain.generate()
+        root = self.terrain.getRoot()
+        root.reparentTo(render)
+        self.terrain.setSz(100)
+        messenger.send('makePickable', [root])   
+        # Set multi texture
+        # Source http://www.panda3d.org/phpbb2/viewtopic.php?t=4536
+        #self.generateSurfaceTextures()
+        self.generateWaterMap()
+        
+        self.setSurfaceTextures()
+        self.generateWater(2)
+        print "Done with terrain regeneration"
+        messenger.send("finishedTerrainGen", [[self.xsize, self.ysize]])
     
     def generateWaterMap(self):
         ''' Iterate through every pix of color map. This will be very slow so until faster method is developed, use sparingly

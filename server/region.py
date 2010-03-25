@@ -24,6 +24,7 @@ class Region(engine.Entity):
         self.accept("sendGameState", self.sendGameState)
         self.accept("requestUnfoundCity", self.unfoundCity)
         self.accept("requestEnterCity", self.checkEnterCity)
+        self.accept('requestExitCity', self.checkExitCity)
         self.name = "Region"
         # Dict to use cityid as quick lookup
         self.cities = {}
@@ -199,6 +200,8 @@ class Region(engine.Entity):
     
     def checkEnterCity(self, peer, ident):
         '''Checks if user can enter city and if so, what permissions.'''
+        # TODO: Check if city is active, if not send tiles to be simulated
+        # TODO: Flag city as active
         userName = users.getNameFromPeer(peer)
         city = self.cities[ident]
         container = proto.Container()
@@ -209,6 +212,10 @@ class Region(engine.Entity):
         else:
             container.response = "You lack permission to enter city."
         messenger.send("sendData", [peer, container])
+    
+    def checkExitCity(self, peer):
+        '''Removes user from active city list and, if empty, deactive city tiles from simulation'''
+        pass
     
     def updateTile(self, container, tile):
         t = container.updatedTiles.add()

@@ -31,7 +31,8 @@ from direct.showbase import DirectObject
 from direct.interval.IntervalGlobal import *
 from direct.fsm import FSM
 from direct.gui.DirectGui import *
-from direct.task.Task import Task    
+from direct.task.Task import Task
+from direct.stdpy.file import *
 
 #import python modules
 import sys, subprocess, math
@@ -41,7 +42,7 @@ sys.path.append("../..")
 import gui
 import network
 from CityMania.common.tile import Tile
-#from tile import Tile
+import vfs
 import region
 import water
 import access
@@ -103,10 +104,13 @@ class World(DirectObject.DirectObject):
 class Logger(object):
     def __init__(self):
         self.terminal = sys.stdout
-        self.log = open("client.raw", "w")
+        self.log = open(vfs.getHome() + "Logs/client.raw", "w")
+        #print vfs.vfs.ls('.')
+        #self.log = open('Logs/client.raw', 'w')
         notify.info('Log file initiated')
 
     def write(self, message):
+        #return
         self.terminal.write(message)
         self.log.write(message)  
         
@@ -125,14 +129,14 @@ def main(var = None):
 
     #LOG_FILENAME = 'client.log'
     #logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG,)
-    
+    vfs.createVFS()
     sys.stdout = Logger()
+    
     connection = network.ServerSocket()
     
     script = gui.Script()
     #messenger.toggleVerbose()
 
-    #aiVoice = Audio.AIVoice()
     #audioManager = Audio.AudioManager()
 
     world=World()

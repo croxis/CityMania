@@ -289,6 +289,6 @@ class Camera(DirectObject.DirectObject):
                 maxY = tile.coords[1]
         self.panLimitsX = Vec2(minX, maxX)
         self.panLimitsY = Vec2(minY, maxY)
-        base.camera.setPos((minX+maxX)/2-10, (minY+maxY)/2-10, 200)
+        base.camera.setPos((minX+maxX)/2-10, (minY+maxY)/2-10, 150)
         base.camera.setHpr(30,-45,0)
         self.setTarget()

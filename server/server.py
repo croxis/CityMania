@@ -126,6 +126,8 @@ class CommandProcessor(engine.Entity):
             messenger.send("requestUnfoundCity", [peer, container.requestUnfoundCity])
         elif container.HasField("requestEnterCity"):
             messenger.send("requestEnterCity", [peer, container.requestEnterCity])
+        elif container.HasField('requestExitCity'):
+            messenger.send('requestExitCity', [peer,])
     
     def login(self, peer, login):
         """

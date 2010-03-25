@@ -33,7 +33,7 @@ class PagedGeoMipTerrain(object):
         factor = self.blockSize*self.chunkSize
         #print "Factor:", factor
         for terrain in self.terrains:
-            terrain.getRoot().destroy()
+            terrain.getRoot().removeNode()
         self.terrains = []
         # Breaking master heightmap into subimages
         heightmaps = []

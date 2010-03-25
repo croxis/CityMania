@@ -51,6 +51,7 @@ class DirectWindow( DirectFrame ):
                 borderSize       = 0.04,
                 titleSize        = 0.06,
                 closeButton      = False,
+                resizeButton    = True,
                 windowParent     = aspect2d,
                 preserve         = True,
                 preserveWhole      = True, 
@@ -184,7 +185,6 @@ class DirectWindow( DirectFrame ):
 
     # Add a box
     self.box = boxes.VBox(parent = self.getCanvas())
-
    
     # is needed for some nicer visuals of the resize button (background)
     self.windowResizeBackground = DirectButton(
@@ -196,18 +196,21 @@ class DirectWindow( DirectFrame ):
         frameColor   = backgroundColor,
       )
     # the resize button of the window
-    self.windowResize = DirectButton(
-        parent       = self,
-        frameSize    = ( -.5, .5, -.5, .5 ),
-        borderWidth  = ( 0, 0 ),
-        scale        = ( self.resizeSize, 1, self.resizeSize ),
-        relief       = DGG.FLAT,
-        frameTexture = DEFAULT_RESIZE_GEOM,
-        frameColor   = borderColor,
-      )
-    self.windowResize.setTransparency(True)
-    self.windowResize.bind(DGG.B1PRESS,self.startResizeDrag)
-    self.windowResize.bind(DGG.B1RELEASE,self.stopResizeDrag)
+    if resizeButton:
+        self.windowResize = DirectButton(
+            parent       = self,
+            frameSize    = ( -.5, .5, -.5, .5 ),
+            borderWidth  = ( 0, 0 ),
+            scale        = ( self.resizeSize, 1, self.resizeSize ),
+            relief       = DGG.FLAT,
+            frameTexture = DEFAULT_RESIZE_GEOM,
+            frameColor   = borderColor,
+          )
+        self.windowResize.setTransparency(True)
+        self.windowResize.bind(DGG.B1PRESS,self.startResizeDrag)
+        self.windowResize.bind(DGG.B1RELEASE,self.stopResizeDrag)
+    else:
+        self.windowResize = DirectFrame()
     
     # offset then clicking on the resize button from the mouse to the resizebutton
     # position, required to calculate the position / scaling
@@ -377,7 +380,7 @@ class MessageWindow(DirectWindow):
     A custom button can be passed instead
     """
     def __init__(self, text, button=None, **args):
-        DirectWindow.__init__(self, **args)
+        DirectWindow.__init__(self, resizeButton = False, **args)
         self.initialiseoptions(self)
         textBox = DirectLabel(text = text, scale=0.05)
         if not button:
